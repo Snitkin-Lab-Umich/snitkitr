@@ -742,6 +742,8 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
     annots = cbind(get_info_from_annotations(snpmat_code), rows_with_multiple_annots_log, 
                    rows_with_mult_var_allele_log, rows_with_overlapping_genes_log, 
                    split_rows_flag)
+    
+    annots$maj = major_alleles
 
   }else{
   
@@ -764,6 +766,9 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
 
     }
     
+  # RAW ROWNAMES 
+  raw_rownames = row.names(snpmat_code)
+  
   # SPLIT MATRICES
   snpmat_code_split_list = split_rows_with_multiple_annots(snpmat_code)
   snpmat_allele_split_list = split_rows_with_multiple_annots(snpmat_allele)
@@ -780,10 +785,15 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
     alleles = alleles[split_rows_flag,]
   }
   
+  major_alleles = major_alleles[split_rows_flag]
+  
+  # EXPAND RAW ROW NAMES 
+  raw_rownames = raw_rownames[split_rows_flag]
+  
   # GET ANNOTATIONS
   annots = cbind(get_info_from_annotations(snpmat_code), rows_with_multiple_annots_log, 
                  rows_with_mult_var_allele_log, rows_with_overlapping_genes_log, 
-                 split_rows_flag)
+                 split_rows_flag,maj=major_alleles, raw_rownames = raw_rownames)
   
   # CHANGE SNPMAT CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
   snpmat_code = remove_alt_allele_code_from_split_rows(snpmat_code, 
@@ -794,7 +804,7 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
   
   }
   
-  annots$maj = major_alleles
+  #annots$maj = major_alleles
   
   if(return_binary_matrix){
     if(ref_to_anc){
