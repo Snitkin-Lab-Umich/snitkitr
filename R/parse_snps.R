@@ -2,7 +2,7 @@
 # SUB FUNCTIONS
 #-----------------------------------------------------------------------------
 
-source('../../prewas/R/reference_alleles.R')
+source('/nfs/esnitkin/Github/prewas/R/reference_alleles.R')
 
 #-----------------------------------------------------------------------------
 # remove_rows_with_bugs
