@@ -2,6 +2,8 @@
 # SUB FUNCTIONS
 #-----------------------------------------------------------------------------
 
+source('../../prewas/R/reference_alleles.R')
+
 #-----------------------------------------------------------------------------
 # remove_rows_with_bugs
 #-----------------------------------------------------------------------------
@@ -668,7 +670,7 @@ remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
 #'
 #' @examples
 
-parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_multi_annots = FALSE, return_binary_matrix = FALSE){
+parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_multi_annots = FALSE, return_binary_matrix = FALSE, ref_to_anc = T){
   
   if(is.null(tree) & return_binary_matrix){
     stop('Tree file required when returning a binary matrix.')
@@ -715,11 +717,19 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
     # FIND ANCESTRAL STATE OF EACH ALLELE  
     #-----------------------------------------------------------------------------
     
+    major_alleles = get_major_alleles(snpmat_allele)
+    
     if(return_binary_matrix){
       # REROOT TREE
       tree = root_tree_og(tree)
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
-      anc_alleles = get_anc_alleles(tree, snpmat_allele)
+      if(ref_to_anc){
+        alleles = get_anc_alleles(tree, snpmat_allele)
+      }else{
+        # REFERENCE TO MAJOR ALLELE
+        alleles = major_alleles
+      }
+      
     }
     
     split_rows_flag = 1:nrow(snpmat_allele)
@@ -739,11 +749,19 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
     # FIND ANCESTRAL STATE OF EACH ALLELE  
     #-----------------------------------------------------------------------------
     
+    major_alleles = get_major_alleles(snpmat_allele)
+    
     if(return_binary_matrix){
       # REROOT TREE
       tree = root_tree_og(tree)
-      # GET ANCESTRAL ALLELE FOR EACH VARIANT
-      anc_alleles = get_anc_alleles(tree, snpmat_allele)
+      if(ref_to_anc){
+        # GET ANCESTRAL ALLELE FOR EACH VARIANT
+        alleles = get_anc_alleles(tree, snpmat_allele)
+      }else{
+        # REFERENCE TO MAJOR ALLELE
+        alleles = major_alleles
+      }
+
     }
     
   # SPLIT MATRICES
@@ -759,7 +777,7 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
   split_rows_flag = snpmat_code_split_list[[4]]
   
   if(return_binary_matrix){
-    anc_alleles = anc_alleles[split_rows_flag,]
+    alleles = alleles[split_rows_flag,]
   }
   
   # GET ANNOTATIONS
@@ -776,11 +794,15 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
   
   }
   
+  annots$maj = major_alleles
+  
   if(return_binary_matrix){
-    # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
-    annots$anc = anc_alleles[,1]
-    annots$anc_prob = anc_alleles[,2]
-    
+    if(ref_to_anc){
+      # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
+      annots$anc = alleles[,1]
+      annots$anc_prob = alleles[,2]
+    }
+
     # remove sites with unknown ancestor
     snpmats = remove_unknown_anc(snpmat_code, snpmat_allele, annots)
     snpmat_code = snpmats$snpmat_code
@@ -795,7 +817,7 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
                   rowSums(snpmat_bin == -4) > 0)
     snpmat_bin = snpmat_bin[to_keep,]
     snpmat_bin[snpmat_bin == 3] = 1
-    snpmat_bin[snpmat_bin == -1] = NA
+    snpmat_bin[snpmat_bin == -1] = 0
     
     annots_bin = annots[to_keep,]
     
