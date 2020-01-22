@@ -2,8 +2,8 @@
 # SUB FUNCTIONS
 #-----------------------------------------------------------------------------
 
-#source('/nfs/esnitkin/Github/prewas/R/reference_alleles.R')
-source('/nfs/esnitkin/Zena/prewas/R/reference_alleles.R', chdir = TRUE)
+source('/nfs/esnitkin/Zena/prewas/R/reference_alleles.R')
+
 #-----------------------------------------------------------------------------
 # remove_rows_with_bugs
 #-----------------------------------------------------------------------------
@@ -15,59 +15,59 @@ source('/nfs/esnitkin/Zena/prewas/R/reference_alleles.R', chdir = TRUE)
 #' annotated genome instead of CHR_END), 4) no strand or locus tag information or 5) rows
 #' annotated with "None". Eventually can get rid of this when all the bugs are fixed, 
 #' or can keep as a sanity check to make sure we aren't seeing these bugs in the 
-#' row annotation. You should run snpmat_code and snpmat_allele through this function separately 
+#' row annotation. You should run indelmat_code and indelmat_allele through this function separately 
 #' and should expect the same rows to be removed. 
 #' 
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes, 
+#' @param indelmat - data.frame where the rows are variants, the columns are genomes, 
 #' and the row.names are annotations 
 #'
-#' @return returns a snpmat (class = data.frame) with rows with bugs in the 
-#' annotation removed. Also writes a file called YEAR_MONTH_DATE_rows_removed_from_SNPMATNAME_due_to_bugs.txt
+#' @return returns a indelmat (class = data.frame) with rows with bugs in the 
+#' annotation removed. Also writes a file called YEAR_MONTH_DATE_rows_removed_from_indelmatNAME_due_to_bugs.txt
 #' logging the row names of the removed rows. 
 #' 
 #' @export
 #'
 #' @examples
 
-remove_rows_with_bugs <- function(snpmat){
+remove_rows_with_bugs <- function(indelmat){
   library(magrittr)
   library(Biostrings)
   library(stringr)
   
   # Intialize a filename to log the removed rows 
-  filename = paste0(Sys.Date(), '_rows_removed_from_', deparse(substitute(snpmat)), 'due_to_bugs.txt')
+  filename = paste0(Sys.Date(), '_rows_removed_from_', deparse(substitute(indelmat)), 'due_to_bugs.txt')
   
   # 1. Remove rows with warnings in the row annotation 
-  rows_with_warnings = grep('WARNING', row.names(snpmat))
-  write(row.names(snpmat)[rows_with_warnings], file = filename, append = TRUE)
+  rows_with_warnings = grep('WARNING', row.names(indelmat))
+  write(row.names(indelmat)[rows_with_warnings], file = filename, append = TRUE)
   if (length(rows_with_warnings) > 0){
-    snpmat = snpmat[-rows_with_warnings,]
+    indelmat = indelmat[-rows_with_warnings,]
   }
   
   # 2. Remove rows with the incorrect number of pipes in the row annotation  
   # number of | 
-  num_pipes = str_count(row.names(snpmat), '\\|')
+  num_pipes = str_count(row.names(indelmat), '\\|')
   table(num_pipes) # remove not intervals of 9 
-
-  num_semicolon = str_count(row.names(snpmat), ';')
+  
+  num_semicolon = str_count(row.names(indelmat), ';')
   table(num_semicolon)
   
-  write(row.names(snpmat)[(num_pipes/(num_semicolon-1))%%9 != 0], file = filename, append = TRUE)
+  write(row.names(indelmat)[(num_pipes/(num_semicolon-1))%%9 != 0], file = filename, append = TRUE)
   
   # only keep rows with correct number of pipes 
-  snpmat = snpmat[(num_pipes/(num_semicolon-1))%%9 == 0,] # must be a multiple of 9 
+  indelmat = indelmat[(num_pipes/(num_semicolon-1))%%9 == 0,] # must be a multiple of 9 
   
   # 3. Remove rows that still have 'CHR_END' in the row annotation  
-  rows_with_chr_end = grep('CHR_END', row.names(snpmat))
-  write(row.names(snpmat)[rows_with_chr_end], file = filename, append = TRUE)
+  rows_with_chr_end = grep('CHR_END', row.names(indelmat))
+  write(row.names(indelmat)[rows_with_chr_end], file = filename, append = TRUE)
   
   if (length(rows_with_chr_end) > 0){
-    snpmat = snpmat[-rows_with_chr_end,]
+    indelmat = indelmat[-rows_with_chr_end,]
   }
   
   # 4. Remove rows with not enough locus tag information - have to wait for Ali 
   # to convert all reported gene symbols to locus_tags 
-  # split_annotations <- strsplit(row.names(snpmat), ";")
+  # split_annotations <- strsplit(row.names(indelmat), ";")
   # sapply(split_annotations, function(split){
   #   annot = split[1]
   #   locus_tag = gsub('^.+locus_tag=','',annot) %>% gsub(' Strand .*$','',.)
@@ -75,26 +75,26 @@ remove_rows_with_bugs <- function(snpmat){
   
   #5. Remove rows with no strand information or locus tag information in the 
   # row annotations 
-  locus_tag = unname(sapply(row.names(snpmat), function(row){
+  locus_tag = unname(sapply(row.names(indelmat), function(row){
     gsub('^.+locus_tag=','',row) %>% gsub(' Strand .*$','',.)
   }))
   no_locus_tag_listed = grep('NULL', locus_tag)
   
-  no_strand_info_listed = grep('No Strand Information found', row.names(snpmat))
+  no_strand_info_listed = grep('No Strand Information found', row.names(indelmat))
   
   remove_bc_lack_of_info = union(no_locus_tag_listed, no_strand_info_listed)
-  write(row.names(snpmat)[remove_bc_lack_of_info], file = filename, append = TRUE)
+  write(row.names(indelmat)[remove_bc_lack_of_info], file = filename, append = TRUE)
   if (length(remove_bc_lack_of_info) > 0){
-    snpmat = snpmat[-remove_bc_lack_of_info,]
+    indelmat = indelmat[-remove_bc_lack_of_info,]
   }
   
   #6. Remove rows with "None" annotation 
-  remove_bc_none_annotation = grep('None', row.names(snpmat))
-  write(row.names(snpmat)[remove_bc_none_annotation], file = filename, append = TRUE)
+  remove_bc_none_annotation = grep('None', row.names(indelmat))
+  write(row.names(indelmat)[remove_bc_none_annotation], file = filename, append = TRUE)
   if (length(remove_bc_none_annotation) > 0){
-    snpmat = snpmat[-remove_bc_none_annotation,]
+    indelmat = indelmat[-remove_bc_none_annotation,]
   }
-  return(snpmat)
+  return(indelmat)
 }#end remove_rows_with_bugs
 
 #-----------------------------------------------------------------------------
@@ -105,16 +105,16 @@ remove_rows_with_bugs <- function(snpmat){
 #' @description Removes rows that have no variants (the same allele in every 
 #' sample +/- N and dash) or rows that are completely masked (all Ns). 
 #' 
-#' @param snpmat_code - data.frame where the rows are variants (numeric description 
+#' @param indelmat_code - data.frame where the rows are variants (numeric description 
 #' variants: numbers ranging from -4 to 3), the columns are genomes, and the 
 #' row.names are annotations 
-#' @param snpmat_allele - data.frame where the rows are variants (character description 
+#' @param indelmat_allele - data.frame where the rows are variants (character description 
 #' variants: A,C,T,G,N,-), the columns are genomes, and the row.names are annotations
 #'
 #' @return Returns a list with the following elements (in order):
-#' 1. snpmat_code (class = data.frame) with non-variant rows removed. All rows have at least 
+#' 1. indelmat_code (class = data.frame) with non-variant rows removed. All rows have at least 
 #' one sample with a variant.  
-#' 2. snpmat_allele (class = data.frame) with non-variant rows removed. All rows have at least 
+#' 2. indelmat_allele (class = data.frame) with non-variant rows removed. All rows have at least 
 #' one sample with a variant.  
 #' 1 and 2 should be the same dimensions and have the same row names. 
 #' Also writes a file called YEAR_MONTH_DATE_rows_removed_because_no_variants
@@ -123,18 +123,18 @@ remove_rows_with_bugs <- function(snpmat){
 #'
 #' @examples
 
-remove_rows_with_no_variants_or_completely_masked <- function(snpmat_code, snpmat_allele){
-  rows_with_one_allele_or_all_Ns_or_dashes = apply(snpmat_allele, 1, function(row){
+remove_rows_with_no_variants_or_completely_masked <- function(indelmat_code, indelmat_allele){
+  rows_with_one_allele_or_all_Ns_or_dashes = apply(indelmat_allele, 1, function(row){
     length(unique(row)) == 1
   })
   
   file = paste0(Sys.Date(), '_rows_removed_because_no_variants')
-  write(x = row.names(snpmat_code)[rows_with_one_allele_or_all_Ns_or_dashes], file = file)
+  write(x = row.names(indelmat_code)[rows_with_one_allele_or_all_Ns_or_dashes], file = file)
   
-  snpmat_code_rows_removed = snpmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
-  snpmat_allele_rows_removed = snpmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  indelmat_code_rows_removed = indelmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  indelmat_allele_rows_removed = indelmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
   
-  return(list(snpmat_code_rows_removed, snpmat_allele_rows_removed))
+  return(list(indelmat_code_rows_removed, indelmat_allele_rows_removed))
 }# end remove_rows_with_no_variants_or_completely_masked
 
 #-----------------------------------------------------------------------------
@@ -150,46 +150,46 @@ remove_rows_with_no_variants_or_completely_masked <- function(snpmat_code, snpma
 #' as biallelic sites and each snp in a gene that overlaps with another gene will
 #' be represented on a single line). The contents of the data.frame is replicated -- 
 #' that is, the contents of the replicated rows are NOT changed. You should run 
-#' snpmat_code and snpmat_allele through this function separately and should expect 
+#' indelmat_code and indelmat_allele through this function separately and should expect 
 #' the data.frames to have the same dimensions and same duplicated rows. 
 #' 
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes, 
+#' @param indelmat - data.frame where the rows are variants, the columns are genomes, 
 #' and the row.names are annotations 
 #'
 #' @return Returns a list with the following elements (in order): 
 #' 1. rows_with_multiple_annots_log - a logical vector with length of 
-#' nrow(snpmat_added) indicating which rows once had multiple annotations (that is,
+#' nrow(indelmat_added) indicating which rows once had multiple annotations (that is,
 #' were split from one row into multiple rows)
 #' 2. rows_with_mult_var_allele_log -  a logical vector with length of 
-#' nrow(snpmat_added) indicating which rows once had multiple annotations in the
+#' nrow(indelmat_added) indicating which rows once had multiple annotations in the
 #' form of  multiallelic sites (that is, were split from multiallelic sites to 
 #' biallelic sites)
 #' 3. rows_with_overlapping_genes_log -> -  a logical vector with length of 
-#' nrow(snpmat_added) indicating which rows once had multiple annotations in the
+#' nrow(indelmat_added) indicating which rows once had multiple annotations in the
 #' form of overlapping genes (that is, were split from a SNP in multiple genes
 #' to each gene being represented on a single line)
 #' 4. split_rows_flag - an integer vector indicating which rows were split from
-#' from a row with multiple annotations (For example if snpmat had 4 rows: 1, 2, 3, 4
+#' from a row with multiple annotations (For example if indelmat had 4 rows: 1, 2, 3, 4
 #' with row 2 having 3 annotations and row 4 having 2 annotations, the vector would
 #' be 1 2 2 2 3 4 4). 
-#' 5. snpmat_added - a data.frame where the rows are variants, the columns are genomes, 
+#' 5. indelmat_added - a data.frame where the rows are variants, the columns are genomes, 
 #' and the row.names are SPLIT annotations (each overlapping gene and multiallelic site
 #' represented as a single line). 
 #' @export
 #'
 #' @examples
 
-split_rows_with_multiple_annots <- function(snpmat){
+split_rows_with_multiple_annots <- function(indelmat){
   
-  num_dividers <- sapply(1:nrow(snpmat), function(x) lengths(regmatches(row.names(snpmat)[x], gregexpr(";[A,C,G,T]", row.names(snpmat)[x]))))
+  num_dividers <- sapply(1:nrow(indelmat), function(x) lengths(regmatches(row.names(indelmat)[x], gregexpr(";[A,C,G,T]", row.names(indelmat)[x]))))
   
-  rows_with_multiple_annotations <- c(1:nrow(snpmat))[num_dividers >= 1 & str_count(row.names(snpmat), '\\|') > 9]
+  rows_with_multiple_annotations <- c(1:nrow(indelmat))[num_dividers >= 1 & str_count(row.names(indelmat), '\\|') > 9]
   
   # Get rows with multallelic sites
-  rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(snpmat))
-
+  rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(indelmat))
+  
   # Get SNVs present in overlapping genes 
-  split_annotations <- strsplit(row.names(snpmat)[rows_with_multiple_annotations], ";")  
+  split_annotations <- strsplit(row.names(indelmat)[rows_with_multiple_annotations], ";")  
   
   num_genes_per_site = sapply(split_annotations, function(annots){
     unique(sapply(2:length(annots), function(i){
@@ -199,30 +199,30 @@ split_rows_with_multiple_annots <- function(snpmat){
   rows_with_overlapping_genes = rows_with_multiple_annotations[sapply(num_genes_per_site, length) > 1]
   
   # Duplicate rows with multiallelic sites 
-  row_indices = 1:nrow(snpmat)
+  row_indices = 1:nrow(indelmat)
   
-  snpmat_added = snpmat[rep(row_indices, num_dividers),]
+  indelmat_added = indelmat[rep(row_indices, num_dividers),]
   
   # When rows are duplicated .1, .2, .3, etc are added to the end 
   # (depending on how many times they were duplicated) 
   # Remove to make the duplicated rows have the exact same name 
-  #names_of_rows = row.names(snpmat_added) %>% gsub(';\\.[0-9].*$', ';', .)
+  #names_of_rows = row.names(indelmat_added) %>% gsub(';\\.[0-9].*$', ';', .)
   
   split_rows_flag = rep(row_indices, num_dividers)
-    
-    #as.numeric(factor(names_of_rows, levels = unique(names_of_rows))) # could be because multiple annotations, could be because different variants 
+  
+  #as.numeric(factor(names_of_rows, levels = unique(names_of_rows))) # could be because multiple annotations, could be because different variants 
   
   # print(rep(row_indices, num_dividers)[5990:6010])
   # print(split_rows_flag[5990:6010])
-  # print(rownames(snpmat)[5952])
+  # print(rownames(indelmat)[5952])
   
   dup = unique(split_rows_flag[duplicated(split_rows_flag)]) # rows that were duplicated
   
-  split_annotations <- strsplit(row.names(snpmat_added)[split_rows_flag %in% dup], ";")
-
+  split_annotations <- strsplit(row.names(indelmat_added)[split_rows_flag %in% dup], ";")
+  
   
   # FIX ANNOTS OF SNP MAT ADDED - RELIES ON THE .1, .2, .3, ... etc flag 
-  row.names(snpmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
+  row.names(indelmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
     if(length(r) == 3){
       paste(r[1], r[2], sep = ';')
     }else if(length(r) > 3 & length(str_split(r[length(r)], '')[[1]]) > 2){
@@ -236,9 +236,9 @@ split_rows_with_multiple_annots <- function(snpmat){
   rows_with_multiple_annots_log = split_rows_flag %in% rows_with_multiple_annotations
   rows_with_mult_var_allele_log = split_rows_flag %in% rows_with_multi_allelic_sites
   rows_with_overlapping_genes_log = split_rows_flag %in% rows_with_overlapping_genes
-
+  
   # FIX ANNOTS OF SNP MAT ADDED - ROWS WITH MULT VAR ALLELE
-  row.names(snpmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(snpmat_added)[rows_with_mult_var_allele_log], function(r){
+  row.names(indelmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(indelmat_added)[rows_with_mult_var_allele_log], function(r){
     if(grepl('> [A,C,T,G],[A,C,T,G].*functional', r)){
       var =  gsub('^.*Strand Information:','',r) %>% gsub('\\|.*$', '', .) %>% substr(.,nchar(.),nchar(.))
       gsub('> [A,C,T,G],[A,C,T,G].*functional', paste('>', var, 'functional'), r)
@@ -251,7 +251,7 @@ split_rows_with_multiple_annots <- function(snpmat){
               rows_with_mult_var_allele_log,
               rows_with_overlapping_genes_log, 
               split_rows_flag,
-              snpmat_added))
+              indelmat_added))
   
   
 } # end split_rows_with_multiple_annots
@@ -266,10 +266,10 @@ split_rows_with_multiple_annots <- function(snpmat){
 #' Useful especially as we are testing this function and the functionality to deal
 #' with sites with multiple annotations is not ready. 
 #' 
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes, 
+#' @param indelmat - data.frame where the rows are variants, the columns are genomes, 
 #' and the row.names are annotations
 #'
-#' @return Returns a snpmat (class = data.frame) with all rows with multiple annotations
+#' @return Returns a indelmat (class = data.frame) with all rows with multiple annotations
 #' removed. Also writes a file called YEAR_MONTH_DATE_rows_with_multiple_annots_removed
 #' indicating which rows were removed. 
 #' 
@@ -277,22 +277,22 @@ split_rows_with_multiple_annots <- function(snpmat){
 #'
 #' @examples
 
-remove_rows_with_multiple_annots <- function(snpmat){
+remove_rows_with_multiple_annots <- function(indelmat){
   # IDENTIFY ROWS WITH MULTIPLE ANNOTATIONS 
-  num_dividers <- sapply(1:nrow(snpmat), function(x) lengths(regmatches(row.names(snpmat)[x], gregexpr(";[A,C,G,T]", row.names(snpmat)[x]))))
-  rows_with_multiple_annotations <- c(1:nrow(snpmat))[num_dividers >= 2 & str_count(row.names(snpmat), '\\|') > 9]
+  num_dividers <- sapply(1:nrow(indelmat), function(x) lengths(regmatches(row.names(indelmat)[x], gregexpr(";[A,C,G,T]", row.names(indelmat)[x]))))
+  rows_with_multiple_annotations <- c(1:nrow(indelmat))[num_dividers >= 2 & str_count(row.names(indelmat), '\\|') > 9]
   
   # SAVE TO LOG FILE 
   log_file = paste0(Sys.Date(), '_rows_with_multiple_annots_removed')
   write('The following rows with multiple annotations were removed:', log_file)
-  write(row.names(snpmat)[rows_with_multiple_annotations], log_file, append = TRUE)
+  write(row.names(indelmat)[rows_with_multiple_annotations], log_file, append = TRUE)
   
   # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
   if(length(rows_with_multiple_annotations)>0){
-    snpmat = snpmat[-rows_with_multiple_annotations,]
+    indelmat = indelmat[-rows_with_multiple_annotations,]
   }
   
-  return(snpmat)
+  return(indelmat)
 } # end remove_rows_with_multiple_annots
 
 #-----------------------------------------------------------------------------
@@ -301,10 +301,10 @@ remove_rows_with_multiple_annots <- function(snpmat){
 
 #' get_info_from_annotations
 #' @description Parse annotations from row names. 
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes, 
+#' @param indelmat - data.frame where the rows are variants, the columns are genomes, 
 #' and the row.names are annotations
 #'
-#' @return data.frame of length nrow(snpmat) containing the following columns: 
+#' @return data.frame of length nrow(indelmat) containing the following columns: 
 #' label - string indicating "Coding SNP or Non-Coding SNP"
 #' pos - position of variant in the reference genome 
 #' phage -  the word NULL or the word PHAGE
@@ -333,51 +333,51 @@ remove_rows_with_multiple_annots <- function(snpmat){
 #'
 #' @examples
 
-get_info_from_annotations <- function(snpmat){
+get_info_from_annotations <- function(indelmat){
   library(magrittr)
   library(Biostrings)
   library(stringr)
   
   # GET REF AND VAR ALLELE, STRAND 
-  label = rep(NA, nrow(snpmat))
+  label = rep(NA, nrow(indelmat))
   
-  pos = rep(NA, nrow(snpmat))
+  pos = rep(NA, nrow(indelmat))
   
-  phage = rep(NA, nrow(snpmat))
-  repeated_region = rep(NA, nrow(snpmat))
-  masked= rep(NA, nrow(snpmat))
+  phage = rep(NA, nrow(indelmat))
+  repeated_region = rep(NA, nrow(indelmat))
+  masked= rep(NA, nrow(indelmat))
   
-  locus_tag = rep(NA, nrow(snpmat))
+  locus_tag = rep(NA, nrow(indelmat))
   
-  strand_info = rep(NA, nrow(snpmat)) 
+  strand_info = rep(NA, nrow(indelmat)) 
   
-  ref = rep(NA, nrow(snpmat))
-  var = rep(NA, nrow(snpmat))
+  ref = rep(NA, nrow(indelmat))
+  var = rep(NA, nrow(indelmat))
   
-  aa_change = rep(NA, nrow(snpmat))
+  aa_change = rep(NA, nrow(indelmat))
   
-  variant_type = rep(NA, nrow(snpmat)) 
+  variant_type = rep(NA, nrow(indelmat)) 
   
-  snpeff_impact = rep(NA, nrow(snpmat)) 
+  snpeff_impact = rep(NA, nrow(indelmat)) 
   
-  nuc_pos_in_gene =  rep(NA, nrow(snpmat))
-  aa_pos_in_gene = rep(NA, nrow(snpmat))
+  nuc_pos_in_gene =  rep(NA, nrow(indelmat))
+  aa_pos_in_gene = rep(NA, nrow(indelmat))
   
-  gene_length_in_bp = rep(NA, nrow(snpmat))
+  gene_length_in_bp = rep(NA, nrow(indelmat))
   
-  annotation_1 = rep(NA, nrow(snpmat))
-  annotation_2 = rep(NA, nrow(snpmat))
+  annotation_1 = rep(NA, nrow(indelmat))
+  annotation_2 = rep(NA, nrow(indelmat))
   
-  strand = rep(NA, nrow(snpmat))
+  strand = rep(NA, nrow(indelmat))
   
-  ig_gene1 = rep(NA, nrow(snpmat))
-  ig_gene2 = rep(NA, nrow(snpmat))
-  intergenic = rep(NA, nrow(snpmat))
+  ig_gene1 = rep(NA, nrow(indelmat))
+  ig_gene2 = rep(NA, nrow(indelmat))
+  intergenic = rep(NA, nrow(indelmat))
   
   
-  for (i in 1:nrow(snpmat)){
-   
-    row = row.names(snpmat)[i]
+  for (i in 1:nrow(indelmat)){
+    
+    row = row.names(indelmat)[i]
     
     split_row = unlist(str_split(row, pattern = '[|]'))
     
@@ -405,25 +405,9 @@ get_info_from_annotations <- function(snpmat){
     # LOCUS TAG (OR GENE SYMBOL UNTIL ERROR IS FIXED)
     locus_tag[i] = split_row[4]
     
-    # REF AND VAR - in terms of the positive strand 
-    var_1 = substr(split_row[1], nchar(split_row[1]), nchar(split_row[1]))
-    var_2 = substr(split_row[5], nchar(split_row[5]), nchar(split_row[5]))
-    
-    var[i] = var_1
-    
-    ref_temp = substr(split_row[5], nchar(split_row[5])-2, nchar(split_row[5])-2)
-    
-    if(var_1 != var_2){
-      ref[i] = as.character(complement(DNAString(ref_temp)))
-      strand[i] = '-'
-    }else{
-      ref[i] = ref_temp
-      strand[i] = '+'
-    }
-    
-    # AMINO ACID CHANGE 
-    aa_change[i] = split_row[6]
-    
+    # STRAND INFORMATION
+    strand[i] = gsub('.*=|;.*','',split_row[1])
+
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE 
     nuc_pos_in_gene[i] = (str_split(split_row[7], '/') %>% unlist())[1]
     gene_length_in_bp[i] = (str_split(split_row[7], '/') %>% unlist())[2]
@@ -449,7 +433,7 @@ get_info_from_annotations <- function(snpmat){
   annotations = data.frame(label, pos, phage, repeated_region, masked, locus_tag, strand_info, strand,
                            ref, var, aa_change, variant_type, snpeff_impact, nuc_pos_in_gene, 
                            aa_pos_in_gene, gene_length_in_bp, annotation_1, annotation_2, 
-                           ig_gene1, ig_gene2, intergenic)
+                           ig_gene1, ig_gene2, intergenic,full_annots=rownames(indelmat))
   return(annotations)
 }# end get_info_from_annotations
 
@@ -461,25 +445,25 @@ get_info_from_annotations <- function(snpmat){
 #' @description Input the split matrix where rows that once had multiple annotations on 
 #' single line are now represented on multiple lines. For the sites that once were 
 #' multiallelic sites and are now represented as biallelic, thus function will 
-#' change the contents of snpmat_code such that the alternative allele(s) are 0. 
+#' change the contents of indelmat_code such that the alternative allele(s) are 0. 
 #' For example, T -> G, C is split into two lines: T -> G and T -> C. In the code matrix, 
 #' turn the codes correspoding to the allele C in the row T -> G to 0 and the codes
 #' corresponding to the allele G in the row T -> C to 0. 
 #' 
-#' @param snpmat_code_split - data.frame where the rows are variants (numeric description 
+#' @param indelmat_code_split - data.frame where the rows are variants (numeric description 
 #' variants: numbers ranging from -4 to 3), the columns are genomes, 
 #' and the row.names are annotations, and each line has a single annotation 
-#' @param snpmat_allele_split - data.frame where the rows are variants (character description 
+#' @param indelmat_allele_split - data.frame where the rows are variants (character description 
 #' variants: A,C,T,G,N,-), the columns are genomes, and the row.names are annotations, 
 #' and each line has a single annotation 
-#' @param ref - character vector length nrow(snpmat_code_split) = nrow(snpmat_allele_split) indicating
+#' @param ref - character vector length nrow(indelmat_code_split) = nrow(indelmat_allele_split) indicating
 #' the reference allele in terms of the positive strand 
-#' @param var - character vector length nrow(snpmat_code_split) = nrow(snpmat_allele_split) indicating
+#' @param var - character vector length nrow(indelmat_code_split) = nrow(indelmat_allele_split) indicating
 #' the variant allele in terms of the positive strand 
-#' @param rows_with_mult_var_allele_log - logical vector length nrow(snpmat_code_split) = nrow(snpmat_allele_split)
+#' @param rows_with_mult_var_allele_log - logical vector length nrow(indelmat_code_split) = nrow(indelmat_allele_split)
 #' indicating which rows are multiallelic sites 
 #'
-#' @return - snpmat_code - data.frame where the rows are variants (numeric description 
+#' @return - indelmat_code - data.frame where the rows are variants (numeric description 
 #' variants: numbers ranging from -4 to 3), the columns are genomes, 
 #' and the row.names are annotations, and each line has a single annotation where 
 #' the alternative/minor allele in a biallelic-represrentation of a multiallelic site is now 0  
@@ -487,7 +471,7 @@ get_info_from_annotations <- function(snpmat){
 #'
 #' @examples
 
-remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_allele_split, ref, var, rows_with_mult_var_allele_log){
+remove_alt_allele_code_from_split_rows <- function(indelmat_code_split, indelmat_allele_split, ref, var, rows_with_mult_var_allele_log){
   
   # UPDATE CODE MATRIX: 
   index_mult_var = (1:length(rows_with_mult_var_allele_log))[rows_with_mult_var_allele_log]
@@ -503,11 +487,11 @@ remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_all
     # T > C:   T C G N -; 0 1 0 0 0 
     # T > G:   T C G N -; 0 0 1 0 0 
     
-    snpmat_code_split[i,!(as.character(snpmat_allele_split[i,]) %in% c(as.character(var[i]), as.character(ref[i]), 'N', '-'))] = 0
+    indelmat_code_split[i,!(as.character(indelmat_allele_split[i,]) %in% c(as.character(var[i]), as.character(ref[i]), 'N', '-'))] = 0
     
   }
   
-  return(snpmat_code_split)
+  return(indelmat_code_split)
   
 } # end remove_alt_allele_code_from_split_rows
 
@@ -601,7 +585,7 @@ get_anc_alleles = function(tree,mat){
 
 #' Load matrix from path if needed
 #'
-#' @param mat - loaded in data.frame of snpmat or character string of a path to a snpmat
+#' @param mat - loaded in data.frame of indelmat or character string of a path to a indelmat
 #' @description Loads variant matrix from path if not already loaded
 #'
 #' @return variant matrix
@@ -611,11 +595,11 @@ get_anc_alleles = function(tree,mat){
 load_if_path = function(mat){
   if(is.character(mat)){
     mat = read.table(mat,
-               header = TRUE,
-               stringsAsFactors = FALSE,
-               sep = "\t",
-               quote = "", 
-               row.names = 1)
+                     header = TRUE,
+                     stringsAsFactors = FALSE,
+                     sep = "\t",
+                     quote = "", 
+                     row.names = 1)
   }
   return(mat)
 }
@@ -623,21 +607,21 @@ load_if_path = function(mat){
 #' Remove unknown ancestral states
 #' @description Remove rows from variant matrix where the ancestral state is unknown (- or N)
 #'
-#' @param snpmat_code
-#' @param snpmat_allele
+#' @param indelmat_code
+#' @param indelmat_allele
 #' @param annots
 #'
 #' @return
 #' @export
 #'
 #' @examples
-remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
+remove_unknown_anc = function(indelmat_code, indelmat_allele, annots){
   unknown = annots$anc %in% c('-','N')
-  removed = rownames(snpmat_code)[unknown]
+  removed = rownames(indelmat_code)[unknown]
   filename = paste0(Sys.Date(), '_rows_removed_because_unknown_ancestral_state.txt')
   write.table(removed,file=filename,sep='\n',quote=F,row.names=F,col.names=F)
-  return(list(snpmat_code=snpmat_code[!unknown,],
-              snpmat_allele=snpmat_allele[!unknown,],
+  return(list(indelmat_code=indelmat_code[!unknown,],
+              indelmat_allele=indelmat_allele[!unknown,],
               annots=annots[!unknown,]))
 }
 
@@ -645,7 +629,7 @@ remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
 # MAIN FUNCTION
 #-----------------------------------------------------------------------------
 
-#' parse_snps
+#' parse_indels
 #' @description Input matrices generated from internal (Ali's) variant calling pipeline. 
 #' Always returns parsed annotation info. In addition, you have the option to: 
 #' 1. split rows with multiple annotations (snps in overlapping genes, multiallelic snps)
@@ -653,9 +637,9 @@ remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
 #' 3. Simplify the code matrix - which contains numbers from -4 to 3 indicating 
 #' different information about the variants - to a binary matrix indicating 
 #' simple presence/absence of a SNP at that site. 
-#' @param snpmat_code - loaded data.frame or path to the snpmat_code file generated
+#' @param indelmat_code - loaded data.frame or path to the indelmat_code file generated
 #' from internal variant calling pipeline 
-#' @param snpmat_allele - loaded data.frame or path to the snpmat_allele file generated
+#' @param indelmat_allele - loaded data.frame or path to the indelmat_allele file generated
 #' from internal variant calling pipeline 
 #' @param tree - optional: path to tree file or loaded in tree (class = phylo)
 #' @param og - optional: character string of the name of the outgroup (has to match what 
@@ -670,38 +654,38 @@ remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
 #'
 #' @examples
 
-parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_multi_annots = FALSE, return_binary_matrix = FALSE, ref_to_anc = T){
+parse_indels <- function(indelmat_code, indelmat_allele, tree=NULL, og = NULL, remove_multi_annots = FALSE, return_binary_matrix = FALSE, ref_to_anc = T){
   
-  if(is.null(tree) & return_binary_matrix & ref_to_anc){
+  if(is.null(tree) & return_binary_matrix){
     stop('Tree file required when returning a binary matrix.')
   }
   
   #-----------------------------------------------------------------------------
-  # READ IN SNPMAT CODE AND SNPMAT ALLELE 
+  # READ IN indelmat CODE AND indelmat ALLELE 
   #-----------------------------------------------------------------------------
   
-  snpmat_code <- load_if_path(snpmat_code)
+  indelmat_code <- load_if_path(indelmat_code)
   
-  snpmat_allele <- load_if_path(snpmat_allele)
+  indelmat_allele <- load_if_path(indelmat_allele)
   
   # add semicolons to the end of the row names that don't have semicolons
-  row.names(snpmat_code)[!grepl(';$', row.names(snpmat_code))] = paste0(row.names(snpmat_code)[!grepl(';$', row.names(snpmat_code))], ';')
-  row.names(snpmat_allele)[!grepl(';$', row.names(snpmat_allele))] = paste0(row.names(snpmat_allele)[!grepl(';$', row.names(snpmat_allele))], ';')
+  row.names(indelmat_code)[!grepl(';$', row.names(indelmat_code))] = paste0(row.names(indelmat_code)[!grepl(';$', row.names(indelmat_code))], ';')
+  row.names(indelmat_allele)[!grepl(';$', row.names(indelmat_allele))] = paste0(row.names(indelmat_allele)[!grepl(';$', row.names(indelmat_allele))], ';')
   
   
   
   #-----------------------------------------------------------------------------
   # REMOVE BUGS 
   #-----------------------------------------------------------------------------
-  snpmat_code = remove_rows_with_bugs(snpmat_code)
-  snpmat_allele = remove_rows_with_bugs(snpmat_allele)
+  indelmat_code = remove_rows_with_bugs(indelmat_code)
+  indelmat_allele = remove_rows_with_bugs(indelmat_allele)
   
   #-----------------------------------------------------------------------------
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED  
   #-----------------------------------------------------------------------------
-  snpmats = remove_rows_with_no_variants_or_completely_masked(snpmat_code, snpmat_allele)
-  snpmat_code = snpmats[[1]]
-  snpmat_allele = snpmats[[2]]
+  indelmats = remove_rows_with_no_variants_or_completely_masked(indelmat_code, indelmat_allele)
+  indelmat_code = indelmats[[1]]
+  indelmat_allele = indelmats[[2]]
   
   #-----------------------------------------------------------------------------
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH  
@@ -710,140 +694,130 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
   #-----------------------------------------------------------------------------
   if(remove_multi_annots){
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
-    snpmat_code = remove_rows_with_multiple_annots(snpmat_code)
-    snpmat_allele = remove_rows_with_multiple_annots(snpmat_allele)
+    indelmat_code = remove_rows_with_multiple_annots(indelmat_code)
+    indelmat_allele = remove_rows_with_multiple_annots(indelmat_allele)
     
     #-----------------------------------------------------------------------------
     # FIND ANCESTRAL STATE OF EACH ALLELE  
     #-----------------------------------------------------------------------------
-    
-    major_alleles = get_major_alleles(data.matrix(snpmat_allele))
     
     if(return_binary_matrix){
       # REROOT TREE
       tree = root_tree_og(tree)
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
       if(ref_to_anc){
-        alleles = get_anc_alleles(tree, snpmat_allele)
+        alleles = get_anc_alleles(tree, indelmat_allele)
       }else{
         # REFERENCE TO MAJOR ALLELE
-        alleles = major_alleles
+        alleles = get_major_alleles(data.matrix(indelmat_allele))
+      }
+      
+    }
+  
+    
+    split_rows_flag = 1:nrow(indelmat_allele)
+    
+    rows_with_multiple_annots_log = rep(FALSE, nrow(indelmat_allele))
+    rows_with_mult_var_allele_log = rep(FALSE, nrow(indelmat_allele))
+    rows_with_overlapping_genes_log = rep(FALSE, nrow(indelmat_allele))
+    
+    # GET ANNOTATIONS
+    annots = cbind(get_info_from_annotations(indelmat_code), rows_with_multiple_annots_log, 
+                   rows_with_mult_var_allele_log, rows_with_overlapping_genes_log, 
+                   split_rows_flag)
+    
+  }else{
+    
+    #-----------------------------------------------------------------------------
+    # FIND ANCESTRAL STATE OF EACH ALLELE  
+    #-----------------------------------------------------------------------------
+    
+    if(return_binary_matrix){
+      # REROOT TREE
+      tree = root_tree_og(tree)
+      if(ref_to_anc){
+        # GET ANCESTRAL ALLELE FOR EACH VARIANT
+        alleles = get_anc_alleles(tree, indelmat_allele)
+      }else{
+        # REFERENCE TO MAJOR ALLELE
+        alleles = get_major_alleles(indelmat_allele)
       }
       
     }
     
-    split_rows_flag = 1:nrow(snpmat_allele)
+    # SPLIT MATRICES
+    indelmat_code_split_list = split_rows_with_multiple_annots(indelmat_code)
+    indelmat_allele_split_list = split_rows_with_multiple_annots(indelmat_allele)
     
-    rows_with_multiple_annots_log = rep(FALSE, nrow(snpmat_allele))
-    rows_with_mult_var_allele_log = rep(FALSE, nrow(snpmat_allele))
-    rows_with_overlapping_genes_log = rep(FALSE, nrow(snpmat_allele))
+    indelmat_code = indelmat_code_split_list[[5]]
+    indelmat_allele = indelmat_allele_split_list[[5]]
+    
+    rows_with_multiple_annots_log = indelmat_code_split_list[[1]]
+    rows_with_mult_var_allele_log = indelmat_code_split_list[[2]]
+    rows_with_overlapping_genes_log = indelmat_code_split_list[[3]]
+    split_rows_flag = indelmat_code_split_list[[4]]
+    
+    if(return_binary_matrix){
+      alleles = alleles[split_rows_flag,]
+    }
     
     # GET ANNOTATIONS
-    annots = cbind(get_info_from_annotations(snpmat_code), rows_with_multiple_annots_log, 
+    annots = cbind(get_info_from_annotations(indelmat_code), rows_with_multiple_annots_log, 
                    rows_with_mult_var_allele_log, rows_with_overlapping_genes_log, 
                    split_rows_flag)
     
-    annots$maj = major_alleles
-
-  }else{
-      #-----------------------------------------------------------------------------
-    # FIND ANCESTRAL STATE OF EACH ALLELE  
-    #-----------------------------------------------------------------------------
+    # CHANGE indelmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
+    indelmat_code = remove_alt_allele_code_from_split_rows(indelmat_code, 
+                                                         indelmat_allele, 
+                                                         annots$ref, 
+                                                         annots$var, 
+                                                         rows_with_mult_var_allele_log)
     
-    major_alleles = get_major_alleles(snpmat_allele)
-    
-    if(return_binary_matrix){
-      if(ref_to_anc){
-        # REROOT TREE
-        tree = root_tree_og(tree)
-        
-        # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles = get_anc_alleles(tree, snpmat_allele)
-        
-      }else{
-        # REFERENCE TO MAJOR ALLELE
-        alleles = major_alleles
-      }
-
-    }
-    
-  # RAW ROWNAMES 
-  raw_rownames = row.names(snpmat_code)
-  
-  # SPLIT MATRICES
-  snpmat_code_split_list = split_rows_with_multiple_annots(snpmat_code)
-  snpmat_allele_split_list = split_rows_with_multiple_annots(snpmat_allele)
-
-  snpmat_code = snpmat_code_split_list[[5]]
-  snpmat_allele = snpmat_allele_split_list[[5]]
-  
-  rows_with_multiple_annots_log = snpmat_code_split_list[[1]]
-  rows_with_mult_var_allele_log = snpmat_code_split_list[[2]]
-  rows_with_overlapping_genes_log = snpmat_code_split_list[[3]]
-  split_rows_flag = snpmat_code_split_list[[4]]
-  
-  if(return_binary_matrix){
-    alleles = alleles[split_rows_flag,]
   }
-  
-  major_alleles = major_alleles[split_rows_flag]
-  
-  # EXPAND RAW ROW NAMES 
-  raw_rownames = raw_rownames[split_rows_flag]
-  
-  # GET ANNOTATIONS
-  annots = cbind(get_info_from_annotations(snpmat_code), rows_with_multiple_annots_log, 
-                 rows_with_mult_var_allele_log, rows_with_overlapping_genes_log, 
-                 split_rows_flag,maj=major_alleles, raw_rownames = raw_rownames)
-  
-  # CHANGE SNPMAT CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-  snpmat_code = remove_alt_allele_code_from_split_rows(snpmat_code, 
-                                         snpmat_allele, 
-                                         annots$ref, 
-                                         annots$var, 
-                                         rows_with_mult_var_allele_log)
-  
-  }
-  
-  #annots$maj = major_alleles
   
   if(return_binary_matrix){
     if(ref_to_anc){
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
       annots$anc = alleles[,1]
       annots$anc_prob = alleles[,2]
-      
-      # remove sites with unknown ancestor
-      snpmats = remove_unknown_anc(snpmat_code, snpmat_allele, annots)
-      snpmat_code = snpmats$snpmat_code
-      snpmat_allele = snpmats$snpmat_allele
-      annots = snpmats$annots
-      
-      # MAKE BINARY MATRIX
-      snpmat_bin = snpmat_code
-      to_keep = !(rowSums(snpmat_bin ==  2) > 0 |
-                    rowSums(snpmat_bin == -2) > 0 | 
-                    rowSums(snpmat_bin == -3) > 0 |
-                    rowSums(snpmat_bin == -4) > 0)
-      snpmat_bin = snpmat_bin[to_keep,]
-      snpmat_bin[snpmat_bin == 3] = 1
-      snpmat_bin[snpmat_bin == -1] = 0
-      
-      annots_bin = annots[to_keep,]
-      
-      snpmat_bin_reref = data.frame(t(sapply(1:nrow(snpmat_bin), function(x){
+    }else{
+      annots$maj = alleles
+    }
+    
+    # remove sites with unknown ancestor
+    if(ref_to_anc){
+      indelmats = remove_unknown_anc(indelmat_code, indelmat_allele, annots)
+      indelmat_code = indelmats$indelmat_code
+      indelmat_allele = indelmats$indelmat_allele
+      annots = indelmats$annots
+    }
+    
+    # MAKE BINARY MATRIX
+    indelmat_bin = indelmat_code
+    to_keep = !(rowSums(indelmat_bin ==  2) > 0 |
+                  rowSums(indelmat_bin == -2) > 0 | 
+                  rowSums(indelmat_bin == -3) > 0 |
+                  rowSums(indelmat_bin == -4) > 0)
+    indelmat_bin = indelmat_bin[to_keep,]
+    indelmat_bin[indelmat_bin == 3] = 1
+    indelmat_bin[indelmat_bin == -1] = NA
+    
+    annots_bin = annots[to_keep,]
+    
+    if(ref_to_anc){
+      indelmat_bin_reref = data.frame(t(sapply(1:nrow(indelmat_bin), function(x){
         if(annots_bin$ref[x] == annots_bin$anc[x]){
-          unlist(snpmat_bin[x,])
+          unlist(indelmat_bin[x,])
         }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
-          unlist(as.numeric(!snpmat_bin[x,]))
+          unlist(as.numeric(!indelmat_bin[x,]))
         }else if(annots_bin$var[x] == annots_bin$anc[x]){
-          unlist(snpmat_bin[x,])
+          unlist(indelmat_bin[x,])
         }else{
-          unlist(rep(NA,ncol(snpmat_bin)))
+          unlist(rep(NA,ncol(indelmat_bin)))
         }
       })))
       
-      reref = sapply(1:nrow(snpmat_bin), function(x){
+      reref = sapply(1:nrow(indelmat_bin), function(x){
         if(annots_bin$ref[x] == annots_bin$anc[x]){
           'no'
         }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
@@ -855,53 +829,24 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
         }
       })
     }else{
-
- 
-    
-    
-    # MAKE BINARY MATRIX
-    snpmat_bin = snpmat_code
-    to_keep = !(rowSums(snpmat_bin ==  2) > 0 |
-                  rowSums(snpmat_bin == -2) > 0 | 
-                  rowSums(snpmat_bin == -3) > 0 |
-                  rowSums(snpmat_bin == -4) > 0)
-    snpmat_bin = snpmat_bin[to_keep,]
-    snpmat_bin[snpmat_bin == 3] = 1
-    snpmat_bin[snpmat_bin == -1] = 0
-    
-    annots_bin = annots[to_keep,]
-
-    snpmat_bin_reref = data.frame(t(sapply(1:nrow(snpmat_bin), function(x){
-      if(annots_bin$ref[x] == annots_bin$maj[x]){
-        unlist(snpmat_bin[x,])
-      }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
-        unlist(as.numeric(!snpmat_bin[x,]))
-      }else if(annots_bin$var[x] == annots_bin$maj[x]){
-        unlist(snpmat_bin[x,])
-      }else{
-        unlist(rep(NA,ncol(snpmat_bin)))
-      }
-    })))
-    
-    reref = sapply(1:nrow(snpmat_bin), function(x){
-      if(annots_bin$ref[x] == annots_bin$maj[x]){
-        'no'
-      }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
-        'yes'
-      }else if(annots_bin$var[x] == annots_bin$maj[x]){
-        'no'
-      }else{
-        'complicated'
-      }
-    })
+      #indelmat_bin = indelmat_allele[to_keep,]
+      names_indelmat_bin = names(indelmat_bin)
+      indelmat_bin_reref = data.frame(t(sapply(1:nrow(indelmat_bin), function(x){
+        if(sum(indelmat_bin[x,]==1,na.rm=T) > sum(indelmat_bin[x,]==0,na.rm=T)){
+          return(as.numeric(indelmat_bin[x,]==0))
+        }
+        return(as.numeric(indelmat_bin[x,]))
+      })))
+      names(indelmat_bin_reref) = names_indelmat_bin
+      reref = rep(NA,nrow(indelmat_bin))
     }
-    
-    return(list(code=list(mat=snpmat_code,annots=annots),
-                allele=list(mat=snpmat_allele,annots=annots),
-                bin=list(mat=snpmat_bin_reref,annots=cbind(annots_bin,reref=reref))))
+ 
+    return(list(code=list(mat=indelmat_code,annots=annots),
+                allele=list(mat=indelmat_allele,annots=annots),
+                bin=list(mat=indelmat_bin_reref,annots=cbind(annots_bin,reref=reref))))
   }
   
   
-  return(list(code=list(mat=snpmat_code, annots=annots), 
-              allele=list(mat=snpmat_allele, annots=annots)))
+  return(list(code=list(mat=indelmat_code, annots=annots), 
+              allele=list(mat=indelmat_allele, annots=annots)))
 }# end parse_snps
