@@ -896,12 +896,15 @@ parse_snps <- function(snpmat_code, snpmat_allele, tree=NULL, og = NULL, remove_
     })
     }
     
-    return(list(code=list(mat=snpmat_code,annots=annots),
-                allele=list(mat=snpmat_allele,annots=annots),
-                bin=list(mat=snpmat_bin_reref,annots=cbind(annots_bin,reref=reref))))
+    parsed = list(code=list(mat=snpmat_code,annots=annots),
+         allele=list(mat=snpmat_allele,annots=annots),
+         bin=list(mat=snpmat_bin_reref,annots=cbind(annots_bin,reref=reref)))
+    save(parsed, file = 'SNP_parsed.RData')
+    return(parsed)
   }
   
-  
-  return(list(code=list(mat=snpmat_code, annots=annots), 
-              allele=list(mat=snpmat_allele, annots=annots)))
+  parsed = list(code=list(mat=snpmat_code, annots=annots), 
+       allele=list(mat=snpmat_allele, annots=annots))
+  save(parsed, file = 'SNP_parsed.RData')
+  return(parsed)
 }# end parse_snps
