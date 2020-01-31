@@ -1,11 +1,4 @@
-#-----------------------------------------------------------------------------
-# SUB FUNCTIONS
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-# get_info_from_annotations
-#-----------------------------------------------------------------------------
-
-#' get_info_from_annotations
+#' Grab information from each annotation
 #' @description Parse annotations from row names.
 #' @param snpmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
@@ -158,53 +151,6 @@ get_info_from_annotations <- function(snpmat){
                            ig_gene1, ig_gene2, intergenic)
   return(annotations)
 }# end get_info_from_annotations
-
-
-#' Load matrix from path if needed
-#'
-#' @param mat - loaded in data.frame of snpmat or character string of a path to a snpmat
-#' @description Loads variant matrix from path if not already loaded
-#'
-#' @return variant matrix
-#' @export
-#'
-#' @examples
-load_if_path = function(mat){
-  if(is.character(mat)){
-    mat = read.table(mat,
-               header = TRUE,
-               stringsAsFactors = FALSE,
-               sep = "\t",
-               quote = "",
-               row.names = 1)
-  }
-  return(mat)
-}
-
-#' Remove unknown ancestral states
-#' @description Remove rows from variant matrix where the ancestral state is unknown (- or N)
-#'
-#' @param snpmat_code
-#' @param snpmat_allele
-#' @param annots
-#'
-#' @return
-#' @export
-#'
-#' @examples
-remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
-  unknown = annots$anc %in% c('-','N')
-  removed = rownames(snpmat_code)[unknown]
-  filename = paste0(Sys.Date(), '_rows_removed_because_unknown_ancestral_state.txt')
-  write.table(removed,file=filename,sep='\n',quote=F,row.names=F,col.names=F)
-  return(list(snpmat_code=snpmat_code[!unknown,],
-              snpmat_allele=snpmat_allele[!unknown,],
-              annots=annots[!unknown,]))
-}
-
-#-----------------------------------------------------------------------------
-# MAIN FUNCTION
-#-----------------------------------------------------------------------------
 
 #' parse_snps
 #' @description Input matrices generated from internal (Ali's) variant calling pipeline.

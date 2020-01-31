@@ -1,11 +1,4 @@
-#-----------------------------------------------------------------------------
-# SUB FUNCTIONS
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-# get_info_from_annotations
-#-----------------------------------------------------------------------------
-
-#' get_info_from_annotations
+#' Grab information from each annotation
 #' @description Parse annotations from row names.
 #' @param indelmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
@@ -51,7 +44,7 @@ get_info_from_annotations <- function(indelmat){
 
   phage = rep(NA, nrow(indelmat))
   repeated_region = rep(NA, nrow(indelmat))
-  masked= rep(NA, nrow(indelmat))
+  masked = rep(NA, nrow(indelmat))
 
   locus_tag = rep(NA, nrow(indelmat))
 
@@ -81,7 +74,7 @@ get_info_from_annotations <- function(indelmat){
   intergenic = rep(NA, nrow(indelmat))
 
 
-  for (i in 1:nrow(indelmat)){
+  for (i in 1:nrow(indelmat)) {
 
     row = row.names(indelmat)[i]
 
@@ -124,7 +117,7 @@ get_info_from_annotations <- function(indelmat){
     annotation_2[i] = split_row[10]
 
     # INTERGENIC REGIONS
-    if(variant_type[i] == 'intergenic_region'){
+    if(variant_type[i] == 'intergenic_region') {
       ig_gene1[i] = (str_split(split_row[4], '-') %>% unlist())[1]
       ig_gene2[i] = (str_split(split_row[4], '-') %>% unlist())[2]
       intergenic[i] = TRUE
@@ -139,55 +132,9 @@ get_info_from_annotations <- function(indelmat){
   annotations = data.frame(label, pos, phage, repeated_region, masked, locus_tag, strand_info, strand,
                            ref, var, aa_change, variant_type, snpeff_impact, nuc_pos_in_gene,
                            aa_pos_in_gene, gene_length_in_bp, annotation_1, annotation_2,
-                           ig_gene1, ig_gene2, intergenic,full_annots=rownames(indelmat))
+                           ig_gene1, ig_gene2, intergenic,full_annots = rownames(indelmat))
   return(annotations)
 }# end get_info_from_annotations
-
-#' Load matrix from path if needed
-#'
-#' @param mat - loaded in data.frame of indelmat or character string of a path to a indelmat
-#' @description Loads variant matrix from path if not already loaded
-#'
-#' @return variant matrix
-#' @export
-#'
-#' @examples
-load_if_path = function(mat){
-  if(is.character(mat)){
-    mat = read.table(mat,
-                     header = TRUE,
-                     stringsAsFactors = FALSE,
-                     sep = "\t",
-                     quote = "",
-                     row.names = 1)
-  }
-  return(mat)
-}
-
-#' Remove unknown ancestral states
-#' @description Remove rows from variant matrix where the ancestral state is unknown (- or N)
-#'
-#' @param indelmat_code
-#' @param indelmat_allele
-#' @param annots
-#'
-#' @return
-#' @export
-#'
-#' @examples
-remove_unknown_anc = function(indelmat_code, indelmat_allele, annots){
-  unknown = annots$anc %in% c('-','N')
-  removed = rownames(indelmat_code)[unknown]
-  filename = paste0(Sys.Date(), '_rows_removed_because_unknown_ancestral_state.txt')
-  write.table(removed,file=filename,sep='\n',quote=F,row.names=F,col.names=F)
-  return(list(indelmat_code=indelmat_code[!unknown,],
-              indelmat_allele=indelmat_allele[!unknown,],
-              annots=annots[!unknown,]))
-}
-
-#-----------------------------------------------------------------------------
-# MAIN FUNCTION
-#-----------------------------------------------------------------------------
 
 #' parse_indels
 #' @description Input matrices generated from internal (Ali's) variant calling pipeline.
