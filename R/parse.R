@@ -16,9 +16,7 @@
 #' logging the row names of the removed rows.
 #'
 #' @export
-#'
-#' @examples
-
+#' @noRd
 remove_rows_with_bugs <- function(varmat){
   library(magrittr)
   library(Biostrings)
