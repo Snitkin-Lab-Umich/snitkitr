@@ -251,3 +251,56 @@ remove_rows_with_multiple_annots <- function(snpmat){
 
   return(snpmat)
 }
+
+#' Update code matrix such that alternative alleles are 0s
+#' @description Input the split matrix where rows that once had multiple
+#'   annotations on single line are now represented on multiple lines. For the
+#'   sites that once were multiallelic sites and are now represented as
+#'   biallelic, thus function will change the contents of snpmat_code such that
+#'   the alternative allele(s) are 0. For example, T -> G, C is split into two
+#'   lines: T -> G and T -> C. In the code matrix, turn the codes correspoding
+#'   to the allele C in the row T -> G to 0 and the codes corresponding to the
+#'   allele G in the row T -> C to 0.
+#'
+#' @param snpmat_code_split - data.frame where the rows are variants (numeric
+#'   description variants: numbers ranging from -4 to 3), the columns are
+#'   genomes, and the row.names are annotations, and each line has a single
+#'   annotation
+#' @param snpmat_allele_split - data.frame where the rows are variants
+#'   (character description variants: A,C,T,G,N,-), the columns are genomes, and
+#'   the row.names are annotations, and each line has a single annotation
+#' @param ref - character vector length nrow(snpmat_code_split) =
+#'   nrow(snpmat_allele_split) indicating the reference allele in terms of the
+#'   positive strand
+#' @param var - character vector length nrow(snpmat_code_split) =
+#'   nrow(snpmat_allele_split) indicating the variant allele in terms of the
+#'   positive strand
+#' @param rows_with_mult_var_allele_log - logical vector length
+#'   nrow(snpmat_code_split) = nrow(snpmat_allele_split) indicating which rows
+#'   are multiallelic sites
+#'
+#' @return - snpmat_code - data.frame where the rows are variants (numeric
+#'   description variants: numbers ranging from -4 to 3), the columns are
+#'   genomes, and the row.names are annotations, and each line has a single
+#'   annotation where the alternative/minor allele in a
+#'   biallelic-represrentation of a multiallelic site is now 0
+#' @export
+remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_allele_split, ref, var, rows_with_mult_var_allele_log){
+
+  # UPDATE CODE MATRIX:
+  index_mult_var = (1:length(rows_with_mult_var_allele_log))[rows_with_mult_var_allele_log]
+
+  for (i in index_mult_var) {
+    # CHANGE THE ALT ALLELE TO 0 IN BIALLELIC REPRESENTATION OF MULTIALLELIC POSITION
+    # CHANGE !REF, !VAR, !N, or !-  TO 0
+    # T > C,G
+    # T > C:   T C G N -; 0 1 1 0 0
+    # T > G:   T C G N -; 0 1 1 0 0
+    # INTO
+    # T > C:   T C G N -; 0 1 0 0 0
+    # T > G:   T C G N -; 0 0 1 0 0
+
+    snpmat_code_split[i,!(as.character(snpmat_allele_split[i,]) %in% c(as.character(var[i]), as.character(ref[i]), 'N', '-'))] = 0
+  }
+  return(snpmat_code_split)
+}
