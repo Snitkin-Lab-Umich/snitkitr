@@ -89,33 +89,33 @@ remove_rows_with_bugs <- function(varmat){
 #' @description Removes rows that have no variants (the same allele in every
 #' sample +/- N and dash) or rows that are completely masked (all Ns).
 #'
-#' @param snpmat_code - data.frame where the rows are variants (numeric description
+#' @param varmat_code - data.frame where the rows are variants (numeric description
 #' variants: numbers ranging from -4 to 3), the columns are genomes, and the
 #' row.names are annotations
-#' @param snpmat_allele - data.frame where the rows are variants (character description
+#' @param varmat_allele - data.frame where the rows are variants (character description
 #' variants: A,C,T,G,N,-), the columns are genomes, and the row.names are annotations
 #'
 #' @return Returns a list with the following elements (in order):
-#' 1. snpmat_code (class = data.frame) with non-variant rows removed. All rows have at least
+#' 1. varmat_code (class = data.frame) with non-variant rows removed. All rows have at least
 #' one sample with a variant.
-#' 2. snpmat_allele (class = data.frame) with non-variant rows removed. All rows have at least
+#' 2. varmat_allele (class = data.frame) with non-variant rows removed. All rows have at least
 #' one sample with a variant.
 #' 1 and 2 should be the same dimensions and have the same row names.
 #' Also writes a file called YEAR_MONTH_DATE_rows_removed_because_no_variants
 #' logging the row names of the removed rows.
 #' @export
-remove_rows_with_no_variants_or_completely_masked <- function(snpmat_code, snpmat_allele){
-  rows_with_one_allele_or_all_Ns_or_dashes = apply(snpmat_allele, 1, function(row){
+remove_rows_with_no_variants_or_completely_masked <- function(varmat_code, varmat_allele){
+  rows_with_one_allele_or_all_Ns_or_dashes = apply(varmat_allele, 1, function(row){
     length(unique(row)) == 1
   })
 
   file = paste0(Sys.Date(), '_rows_removed_because_no_variants')
-  write(x = row.names(snpmat_code)[rows_with_one_allele_or_all_Ns_or_dashes], file = file)
+  write(x = row.names(varmat_code)[rows_with_one_allele_or_all_Ns_or_dashes], file = file)
 
-  snpmat_code_rows_removed = snpmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
-  snpmat_allele_rows_removed = snpmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  varmat_code_rows_removed = varmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  varmat_allele_rows_removed = varmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
 
-  return(list(snpmat_code_rows_removed, snpmat_allele_rows_removed))
+  return(list(varmat_code_rows_removed, varmat_allele_rows_removed))
 }
 
 #' Split rows that have multiple annotations
@@ -127,44 +127,44 @@ remove_rows_with_no_variants_or_completely_masked <- function(snpmat_code, snpma
 #' as biallelic sites and each snp in a gene that overlaps with another gene will
 #' be represented on a single line). The contents of the data.frame is replicated --
 #' that is, the contents of the replicated rows are NOT changed. You should run
-#' snpmat_code and snpmat_allele through this function separately and should expect
+#' varmat_code and varmat_allele through this function separately and should expect
 #' the data.frames to have the same dimensions and same duplicated rows.
 #'
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes,
+#' @param varmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
 #'
 #' @return Returns a list with the following elements (in order):
 #' 1. rows_with_multiple_annots_log - a logical vector with length of
-#' nrow(snpmat_added) indicating which rows once had multiple annotations (that is,
+#' nrow(varmat_added) indicating which rows once had multiple annotations (that is,
 #' were split from one row into multiple rows)
 #' 2. rows_with_mult_var_allele_log -  a logical vector with length of
-#' nrow(snpmat_added) indicating which rows once had multiple annotations in the
+#' nrow(varmat_added) indicating which rows once had multiple annotations in the
 #' form of  multiallelic sites (that is, were split from multiallelic sites to
 #' biallelic sites)
 #' 3. rows_with_overlapping_genes_log -> -  a logical vector with length of
-#' nrow(snpmat_added) indicating which rows once had multiple annotations in the
+#' nrow(varmat_added) indicating which rows once had multiple annotations in the
 #' form of overlapping genes (that is, were split from a SNP in multiple genes
 #' to each gene being represented on a single line)
 #' 4. split_rows_flag - an integer vector indicating which rows were split from
-#' from a row with multiple annotations (For example if snpmat had 4 rows: 1, 2, 3, 4
+#' from a row with multiple annotations (For example if varmat had 4 rows: 1, 2, 3, 4
 #' with row 2 having 3 annotations and row 4 having 2 annotations, the vector would
 #' be 1 2 2 2 3 4 4).
-#' 5. snpmat_added - a data.frame where the rows are variants, the columns are genomes,
+#' 5. varmat_added - a data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are SPLIT annotations (each overlapping gene and multiallelic site
 #' represented as a single line).
 #' @export
 #'
-split_rows_with_multiple_annots <- function(snpmat){
+split_rows_with_multiple_annots <- function(varmat){
 
-  num_dividers <- sapply(1:nrow(snpmat), function(x) lengths(regmatches(row.names(snpmat)[x], gregexpr(";[A,C,G,T]", row.names(snpmat)[x]))))
+  num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
 
-  rows_with_multiple_annotations <- c(1:nrow(snpmat))[num_dividers >= 1 & str_count(row.names(snpmat), '\\|') > 9]
+  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 1 & str_count(row.names(varmat), '\\|') > 9]
 
   # Get rows with multallelic sites
-  rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(snpmat))
+  rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(varmat))
 
   # Get SNVs present in overlapping genes
-  split_annotations <- strsplit(row.names(snpmat)[rows_with_multiple_annotations], ";")
+  split_annotations <- strsplit(row.names(varmat)[rows_with_multiple_annotations], ";")
 
   num_genes_per_site = sapply(split_annotations, function(annots){
     unique(sapply(2:length(annots), function(i){
@@ -174,23 +174,23 @@ split_rows_with_multiple_annots <- function(snpmat){
   rows_with_overlapping_genes = rows_with_multiple_annotations[sapply(num_genes_per_site, length) > 1]
 
   # Duplicate rows with multiallelic sites
-  row_indices = 1:nrow(snpmat)
+  row_indices = 1:nrow(varmat)
 
-  snpmat_added = snpmat[rep(row_indices, num_dividers),]
+  varmat_added = varmat[rep(row_indices, num_dividers),]
 
   # When rows are duplicated .1, .2, .3, etc are added to the end
   # (depending on how many times they were duplicated)
   # Remove to make the duplicated rows have the exact same name
-  #names_of_rows = row.names(snpmat_added) %>% gsub(';\\.[0-9].*$', ';', .)
+  #names_of_rows = row.names(varmat_added) %>% gsub(';\\.[0-9].*$', ';', .)
 
   split_rows_flag = rep(row_indices, num_dividers)
 
   dup = unique(split_rows_flag[duplicated(split_rows_flag)]) # rows that were duplicated
 
-  split_annotations <- strsplit(row.names(snpmat_added)[split_rows_flag %in% dup], ";")
+  split_annotations <- strsplit(row.names(varmat_added)[split_rows_flag %in% dup], ";")
 
   # FIX ANNOTS OF SNP MAT ADDED - RELIES ON THE .1, .2, .3, ... etc flag
-  row.names(snpmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
+  row.names(varmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
     if (length(r) == 3) {
       paste(r[1], r[2], sep = ';')
     } else if (length(r) > 3 & length(str_split(r[length(r)], '')[[1]]) > 2) {
@@ -206,7 +206,7 @@ split_rows_with_multiple_annots <- function(snpmat){
   rows_with_overlapping_genes_log = split_rows_flag %in% rows_with_overlapping_genes
 
   # FIX ANNOTS OF SNP MAT ADDED - ROWS WITH MULT VAR ALLELE
-  row.names(snpmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(snpmat_added)[rows_with_mult_var_allele_log], function(r){
+  row.names(varmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
     if (grepl('> [A,C,T,G],[A,C,T,G].*functional=', r)) {
       var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% substr(.,nchar(.),nchar(.))
       gsub('> [A,C,T,G],[A,C,T,G].*functional=', paste('>', var, 'functional='), r)
@@ -217,7 +217,7 @@ split_rows_with_multiple_annots <- function(snpmat){
               rows_with_mult_var_allele_log,
               rows_with_overlapping_genes_log,
               split_rows_flag,
-              snpmat_added))
+              varmat_added))
 }
 
 #' Remove any rows with multiple annotations
@@ -226,66 +226,66 @@ split_rows_with_multiple_annots <- function(snpmat){
 #' Useful especially as we are testing this function and the functionality to deal
 #' with sites with multiple annotations is not ready.
 #'
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes,
+#' @param varmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
 #'
-#' @return Returns a snpmat (class = data.frame) with all rows with multiple annotations
+#' @return Returns a varmat (class = data.frame) with all rows with multiple annotations
 #' removed. Also writes a file called YEAR_MONTH_DATE_rows_with_multiple_annots_removed
 #' indicating which rows were removed.
 #'
 #' @export
-remove_rows_with_multiple_annots <- function(snpmat){
+remove_rows_with_multiple_annots <- function(varmat){
   # IDENTIFY ROWS WITH MULTIPLE ANNOTATIONS
-  num_dividers <- sapply(1:nrow(snpmat), function(x) lengths(regmatches(row.names(snpmat)[x], gregexpr(";[A,C,G,T]", row.names(snpmat)[x]))))
-  rows_with_multiple_annotations <- c(1:nrow(snpmat))[num_dividers >= 2 & str_count(row.names(snpmat), '\\|') > 9]
+  num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
+  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 2 & str_count(row.names(varmat), '\\|') > 9]
 
   # SAVE TO LOG FILE
   log_file = paste0(Sys.Date(), '_rows_with_multiple_annots_removed')
   write('The following rows with multiple annotations were removed:', log_file)
-  write(row.names(snpmat)[rows_with_multiple_annotations], log_file, append = TRUE)
+  write(row.names(varmat)[rows_with_multiple_annotations], log_file, append = TRUE)
 
   # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
   if (length(rows_with_multiple_annotations) > 0) {
-    snpmat = snpmat[-rows_with_multiple_annotations,]
+    varmat = varmat[-rows_with_multiple_annotations,]
   }
 
-  return(snpmat)
+  return(varmat)
 }
 
 #' Update code matrix such that alternative alleles are 0s
 #' @description Input the split matrix where rows that once had multiple
 #'   annotations on single line are now represented on multiple lines. For the
 #'   sites that once were multiallelic sites and are now represented as
-#'   biallelic, thus function will change the contents of snpmat_code such that
+#'   biallelic, thus function will change the contents of varmat_code such that
 #'   the alternative allele(s) are 0. For example, T -> G, C is split into two
 #'   lines: T -> G and T -> C. In the code matrix, turn the codes correspoding
 #'   to the allele C in the row T -> G to 0 and the codes corresponding to the
 #'   allele G in the row T -> C to 0.
 #'
-#' @param snpmat_code_split - data.frame where the rows are variants (numeric
+#' @param varmat_code_split - data.frame where the rows are variants (numeric
 #'   description variants: numbers ranging from -4 to 3), the columns are
 #'   genomes, and the row.names are annotations, and each line has a single
 #'   annotation
-#' @param snpmat_allele_split - data.frame where the rows are variants
+#' @param varmat_allele_split - data.frame where the rows are variants
 #'   (character description variants: A,C,T,G,N,-), the columns are genomes, and
 #'   the row.names are annotations, and each line has a single annotation
-#' @param ref - character vector length nrow(snpmat_code_split) =
-#'   nrow(snpmat_allele_split) indicating the reference allele in terms of the
+#' @param ref - character vector length nrow(varmat_code_split) =
+#'   nrow(varmat_allele_split) indicating the reference allele in terms of the
 #'   positive strand
-#' @param var - character vector length nrow(snpmat_code_split) =
-#'   nrow(snpmat_allele_split) indicating the variant allele in terms of the
+#' @param var - character vector length nrow(varmat_code_split) =
+#'   nrow(varmat_allele_split) indicating the variant allele in terms of the
 #'   positive strand
 #' @param rows_with_mult_var_allele_log - logical vector length
-#'   nrow(snpmat_code_split) = nrow(snpmat_allele_split) indicating which rows
+#'   nrow(varmat_code_split) = nrow(varmat_allele_split) indicating which rows
 #'   are multiallelic sites
 #'
-#' @return - snpmat_code - data.frame where the rows are variants (numeric
+#' @return - varmat_code - data.frame where the rows are variants (numeric
 #'   description variants: numbers ranging from -4 to 3), the columns are
 #'   genomes, and the row.names are annotations, and each line has a single
 #'   annotation where the alternative/minor allele in a
 #'   biallelic-represrentation of a multiallelic site is now 0
 #' @export
-remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_allele_split, ref, var, rows_with_mult_var_allele_log){
+remove_alt_allele_code_from_split_rows <- function(varmat_code_split, varmat_allele_split, ref, var, rows_with_mult_var_allele_log){
 
   # UPDATE CODE MATRIX:
   index_mult_var = (1:length(rows_with_mult_var_allele_log))[rows_with_mult_var_allele_log]
@@ -300,9 +300,9 @@ remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_all
     # T > C:   T C G N -; 0 1 0 0 0
     # T > G:   T C G N -; 0 0 1 0 0
 
-    snpmat_code_split[i,!(as.character(snpmat_allele_split[i,]) %in% c(as.character(var[i]), as.character(ref[i]), 'N', '-'))] = 0
+    varmat_code_split[i,!(as.character(varmat_allele_split[i,]) %in% c(as.character(var[i]), as.character(ref[i]), 'N', '-'))] = 0
   }
-  return(snpmat_code_split)
+  return(varmat_code_split)
 }
 
 #' Root tree on outgroup
@@ -385,7 +385,7 @@ get_anc_alleles = function(tree,mat){
 
 #' Load matrix from path if needed
 #'
-#' @param mat - loaded in data.frame of snpmat or character string of a path to a snpmat
+#' @param mat - loaded in data.frame of varmat or character string of a path to a varmat
 #' @description Loads variant matrix from path if not already loaded
 #'
 #' @return variant matrix
@@ -405,15 +405,15 @@ load_if_path = function(mat){
 #' Remove unknown ancestral states
 #' @description Remove rows from variant matrix where the ancestral state is unknown (- or N)
 #'
-#' @param snpmat_code
-#' @param snpmat_allele
+#' @param varmat_code
+#' @param varmat_allele
 #' @param annots
 #'
 #' @return
 #' @export
-remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
+remove_unknown_anc = function(varmat_code, varmat_allele, annots){
   unknown = annots$anc %in% c('-', 'N')
-  removed = rownames(snpmat_code)[unknown]
+  removed = rownames(varmat_code)[unknown]
   filename = paste0(Sys.Date(), '_rows_removed_because_unknown_ancestral_state.txt')
   write.table(removed,
               file = filename,
@@ -421,8 +421,8 @@ remove_unknown_anc = function(snpmat_code, snpmat_allele, annots){
               quote = FALSE,
               row.names = FALSE,
               col.names = FALSE)
-  return(list(snpmat_code = snpmat_code[!unknown, ],
-              snpmat_allele = snpmat_allele[!unknown, ],
+  return(list(varmat_code = varmat_code[!unknown, ],
+              varmat_allele = varmat_allele[!unknown, ],
               annots = annots[!unknown, ]))
 }
 

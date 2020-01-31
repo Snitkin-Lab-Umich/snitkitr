@@ -32,52 +32,20 @@
 #'
 #' @examples
 
-get_info_from_annotations <- function(indelmat){
+get_indel_info_from_annotations <- function(indelmat){
   library(magrittr)
   library(Biostrings)
   library(stringr)
 
   # GET REF AND VAR ALLELE, STRAND
-  label = rep(NA, nrow(indelmat))
-
-  pos = rep(NA, nrow(indelmat))
-
-  phage = rep(NA, nrow(indelmat))
-  repeated_region = rep(NA, nrow(indelmat))
-  masked = rep(NA, nrow(indelmat))
-
-  locus_tag = rep(NA, nrow(indelmat))
-
-  strand_info = rep(NA, nrow(indelmat))
-
-  ref = rep(NA, nrow(indelmat))
-  var = rep(NA, nrow(indelmat))
-
-  aa_change = rep(NA, nrow(indelmat))
-
-  variant_type = rep(NA, nrow(indelmat))
-
-  snpeff_impact = rep(NA, nrow(indelmat))
-
-  nuc_pos_in_gene =  rep(NA, nrow(indelmat))
-  aa_pos_in_gene = rep(NA, nrow(indelmat))
-
-  gene_length_in_bp = rep(NA, nrow(indelmat))
-
-  annotation_1 = rep(NA, nrow(indelmat))
-  annotation_2 = rep(NA, nrow(indelmat))
-
-  strand = rep(NA, nrow(indelmat))
-
-  ig_gene1 = rep(NA, nrow(indelmat))
-  ig_gene2 = rep(NA, nrow(indelmat))
-  intergenic = rep(NA, nrow(indelmat))
-
+  label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
+    strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-
+    nuc_pos_in_gene <- aa_pos_in_gene <-  gene_length_in_bp <- annotation_1 <-
+    annotation_2 <- strand <- ig_gene1 <- ig_gene2 <- intergenic <-
+    rep(NA, nrow(indelmat))
 
   for (i in 1:nrow(indelmat)) {
-
     row = row.names(indelmat)[i]
-
     split_row = unlist(str_split(row, pattern = '[|]'))
 
     # Coding SNP, Non coding SNP - for checking
@@ -134,7 +102,7 @@ get_info_from_annotations <- function(indelmat){
                            aa_pos_in_gene, gene_length_in_bp, annotation_1, annotation_2,
                            ig_gene1, ig_gene2, intergenic,full_annots = rownames(indelmat))
   return(annotations)
-}# end get_info_from_annotations
+}# end get_indel_info_from_annotations
 
 #' parse_indels
 #' @description Input matrices generated from internal (Ali's) variant calling pipeline.
@@ -229,7 +197,7 @@ parse_indels <- function(indelmat_code, indelmat_allele, tree=NULL, og = NULL, r
     rows_with_overlapping_genes_log = rep(FALSE, nrow(indelmat_allele))
 
     # GET ANNOTATIONS
-    annots = cbind(get_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
+    annots = cbind(get_indel_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log, rows_with_overlapping_genes_log,
                    split_rows_flag)
 
@@ -269,7 +237,7 @@ parse_indels <- function(indelmat_code, indelmat_allele, tree=NULL, og = NULL, r
     }
 
     # GET ANNOTATIONS
-    annots = cbind(get_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
+    annots = cbind(get_indel_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log, rows_with_overlapping_genes_log,
                    split_rows_flag)
 
