@@ -78,7 +78,7 @@ get_snp_info_from_annotations <- function(varmat){
     ref_temp = substr(split_row[5], nchar(split_row[5]) - 2, nchar(split_row[5]) - 2)
 
     if (var_1 != var_2) {
-      ref[i] = as.character(complement(DNAString(ref_temp)))
+      ref[i] = as.character(Biostrings::complement(Biostrings::DNAString(ref_temp)))
       strand[i] = '-'
     } else {
       ref[i] = ref_temp
