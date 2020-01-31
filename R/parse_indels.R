@@ -239,9 +239,9 @@ split_rows_with_multiple_annots <- function(indelmat){
   
   # FIX ANNOTS OF SNP MAT ADDED - ROWS WITH MULT VAR ALLELE
   row.names(indelmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(indelmat_added)[rows_with_mult_var_allele_log], function(r){
-    if(grepl('> [A,C,T,G],[A,C,T,G].*functional', r)){
+    if(grepl('> [A,C,T,G],[A,C,T,G].*functional=', r)){
       var =  gsub('^.*Strand Information:','',r) %>% gsub('\\|.*$', '', .) %>% substr(.,nchar(.),nchar(.))
-      gsub('> [A,C,T,G],[A,C,T,G].*functional', paste('>', var, 'functional'), r)
+      gsub('> [A,C,T,G],[A,C,T,G].*functional=', paste('>', var, 'functional='), r)
     }
   })
   
