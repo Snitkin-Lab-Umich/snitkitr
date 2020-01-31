@@ -1,10 +1,10 @@
 Package: snitkitr
-Title: What the Package Does (one line, title case)
+Title: Functions Commonly Used in the Snitkin Lab
 Version: 0.0.0.9000
 Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: Parse SNP and in/del matrices produced by the lab variant calling pipeline. 
 Depends: R (>= 3.5.0)
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
