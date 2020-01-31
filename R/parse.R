@@ -339,7 +339,7 @@ root_tree_og = function(tree, outgroup = NULL){
 #'
 #' @examples
 get_anc_alleles = function(tree,mat){
-  plan(multiprocess) # future.apply thing
+  future::plan(future::multiprocess)
 
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
     stop('Some samples in tree are not in allele matrix.')

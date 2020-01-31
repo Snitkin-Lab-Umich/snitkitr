@@ -15,4 +15,5 @@ Imports:
     future.apply,
     magrittr,
     Biostrings,
-    stringr
+    stringr,
+    future
