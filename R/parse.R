@@ -164,7 +164,7 @@ split_rows_with_multiple_annots <- function(varmat){
 
   num_genes_per_site = sapply(split_annotations, function(annots){
     unique(sapply(2:length(annots), function(i){
-      unlist(str_split(annots[i], '[|]'))[4]
+      unlist(stringr::str_split(annots[i], '[|]'))[4]
     }))
   })
   rows_with_overlapping_genes = rows_with_multiple_annotations[sapply(num_genes_per_site, length) > 1]
@@ -189,7 +189,7 @@ split_rows_with_multiple_annots <- function(varmat){
   row.names(varmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
     if (length(r) == 3) {
       paste(r[1], r[2], sep = ';')
-    } else if (length(r) > 3 & length(str_split(r[length(r)], '')[[1]]) > 2) {
+    } else if (length(r) > 3 & length(stringr::str_split(r[length(r)], '')[[1]]) > 2) {
       paste(r[1], r[2], sep = ';')
     } else {
       index = as.numeric(gsub('\\.','',r[length(r)]))

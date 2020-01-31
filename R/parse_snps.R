@@ -39,7 +39,7 @@ get_snp_info_from_annotations <- function(varmat){
 
   for (i in 1:nrow(varmat)) {
     row = row.names(varmat)[i]
-    split_row = unlist(str_split(row, pattern = '[|]'))
+    split_row = unlist(stringr::str_split(row, pattern = '[|]'))
 
     # Coding SNP, Non coding SNP - for checking
     label[i] = gsub(' at [1-9].*$','', split_row[1])
@@ -50,7 +50,7 @@ get_snp_info_from_annotations <- function(varmat){
     # PHAGE, REPEAT, MASK
     functional_temp = gsub('^.*functional=','',  split_row[1]) %>%
       gsub(' locus_tag.*$','',.) %>%
-      str_split(., '_') %>%
+      stringr::str_split(., '_') %>%
       unlist
     phage[i] = functional_temp[1]
     repeated_region[i] = functional_temp[2]
@@ -89,9 +89,9 @@ get_snp_info_from_annotations <- function(varmat){
     aa_change[i] = split_row[6]
 
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE
-    nuc_pos_in_gene[i] = (str_split(split_row[7], '/') %>% unlist())[1]
-    gene_length_in_bp[i] = (str_split(split_row[7], '/') %>% unlist())[2]
-    aa_pos_in_gene[i] = (str_split(split_row[8], '/') %>% unlist())[1]
+    nuc_pos_in_gene[i] = (stringr::str_split(split_row[7], '/') %>% unlist())[1]
+    gene_length_in_bp[i] = (stringr::str_split(split_row[7], '/') %>% unlist())[2]
+    aa_pos_in_gene[i] = (stringr::str_split(split_row[8], '/') %>% unlist())[1]
 
     # ANNOTATIONS
     annotation_1[i] = split_row[9]
@@ -99,8 +99,8 @@ get_snp_info_from_annotations <- function(varmat){
 
     # INTERGENIC REGIONS
     if (variant_type[i] == 'intergenic_region') {
-      ig_gene1[i] = (str_split(split_row[4], '-') %>% unlist())[1]
-      ig_gene2[i] = (str_split(split_row[4], '-') %>% unlist())[2]
+      ig_gene1[i] = (stringr::str_split(split_row[4], '-') %>% unlist())[1]
+      ig_gene2[i] = (stringr::str_split(split_row[4], '-') %>% unlist())[2]
       intergenic[i] = TRUE
     }else{
       ig_gene1[i] = ''
