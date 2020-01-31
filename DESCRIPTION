@@ -12,4 +12,7 @@ Suggests:
 Imports: 
     ape,
     phytools,
-    future.apply
+    future.apply,
+    magrittr,
+    Biostrings,
+    stringr

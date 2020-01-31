@@ -30,10 +30,6 @@
 #'
 #' @export
 get_snp_info_from_annotations <- function(snpmat){
-  library(magrittr)
-  library(Biostrings)
-  library(stringr)
-
   # GET REF AND VAR ALLELE, STRAND
   label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
     strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-

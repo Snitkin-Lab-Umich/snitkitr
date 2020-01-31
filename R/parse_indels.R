@@ -29,14 +29,7 @@
 #' intergenic - logical indicating if the variant is in an intergenic region
 #'
 #' @export
-#'
-#' @examples
-
 get_indel_info_from_annotations <- function(indelmat){
-  library(magrittr)
-  library(Biostrings)
-  library(stringr)
-
   # GET REF AND VAR ALLELE, STRAND
   label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
     strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-

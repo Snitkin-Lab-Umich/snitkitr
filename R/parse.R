@@ -18,10 +18,6 @@
 #' @export
 #' @noRd
 remove_rows_with_bugs <- function(varmat){
-  library(magrittr)
-  library(Biostrings)
-  library(stringr)
-
   # Intialize a filename to log the removed rows
   filename = paste0(Sys.Date(), '_rows_removed_from_', deparse(substitute(varmat)), 'due_to_bugs.txt')
 
