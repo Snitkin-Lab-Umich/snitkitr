@@ -304,3 +304,80 @@ remove_alt_allele_code_from_split_rows <- function(snpmat_code_split, snpmat_all
   }
   return(snpmat_code_split)
 }
+
+#' Root tree on outgroup
+#' @description Root tree based on outgroup. If outgroup is null and the tree
+#'   isn't rooted, midpoint root tree. If tree is rooted, return tree as is.
+#'
+#' @param tree phylogenetic tree or file path of tree
+#' @param outgroup tip name of outgroup in phylogeny. If NULL, midpoint root if
+#'   not rooted
+#'
+#' @return rooted tree without outgroup
+#' @export
+root_tree_og = function(tree, outgroup = NULL){
+  if (is.character(tree)) {
+    # LOAD IN TREE
+    tree = ape::read.tree(tree)
+  }
+  # IF NO OUTGROUP AND TREE IS UNROOTED
+  if (is.null(outgroup) & !ape::is.rooted(tree)) {
+    # MIDPOINT ROOT TREE
+    tree = phytools::midpoint.root(tree)
+  } else if (!is.null(outgroup)) {
+    # ROOT TREE ON OUTGROUP
+    tree = ape::root(tree, outgroup)
+    tree = ape::drop.tip(tree, outgroup)
+  }
+  return(tree)
+}
+
+#' Get ancestral state of alleles
+#' @description Rereference alleles based on rooted tree
+#'
+#' @param tree rooted tree
+#' @param mat allele matrix (rows are variants, columns are samples)
+#'
+#' @return matrix of most likely ancestral allele for each row in allele matrix and probability that that is the ancestral state
+#' @export
+#'
+#' @examples
+get_anc_alleles = function(tree,mat){
+  plan(multiprocess) # future.apply thing
+
+  if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
+    stop('Some samples in tree are not in allele matrix.')
+  }
+
+  if (sum(!(colnames(mat) %in% tree$tip.label)) > 0) {
+    stop('Some samples in allele matrix are not in tree.')
+  }
+
+  if (!ape::is.rooted(tree)) {
+    stop('Tree must be rooted.')
+  }
+
+  # ORDER MATRIX TO MATCH TREE TIP LABELS
+  mat = mat[ ,tree$tip.label]
+
+  if (sum(tree$edge.length == 0) > 0) {
+    warning('All zero branch lengths changed to small non-zero number to be able to perform ancestral reconstruction.')
+    # Change any edge lengths that are zero to a very small number (so ancestral reconstruction doesn't break)
+    tree$edge.length[tree$edge.length == 0] = min(tree$edge.length[tree$edge.length > 0]) / 1000
+  }
+
+  # Get ancestral state of root; 1st column = var absent (0), 2nd column = var present (1)
+  ar_all = t(future.apply::future_apply(mat, 1, function(tip_states){
+    tip_state = unique(tip_states)
+    if (length(tip_state) > 1) {
+      ar = ape::ace(x = tip_states,phy = tree, type = 'discrete')
+      states = ar$lik.anc[1, ]
+      tip_state = names(states)[which.max(states)]
+      prob = states[which.max(states)]
+      c(tip_state, prob)
+    } else {
+      c(tip_states, 1)
+    }
+  }))
+  return(ar_all)
+}

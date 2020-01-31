@@ -9,3 +9,7 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat
+Imports: 
+    ape,
+    phytools,
+    future.apply
