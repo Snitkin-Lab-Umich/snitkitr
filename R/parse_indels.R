@@ -1,9 +1,9 @@
 #' Grab information from each annotation
 #' @description Parse annotations from row names.
-#' @param indelmat - data.frame where the rows are variants, the columns are genomes,
+#' @param varmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
 #'
-#' @return data.frame of length nrow(indelmat) containing the following columns:
+#' @return data.frame of length nrow(varmat) containing the following columns:
 #' label - string indicating "Coding SNP or Non-Coding SNP"
 #' pos - position of variant in the reference genome
 #' phage -  the word NULL or the word PHAGE
@@ -29,16 +29,16 @@
 #' intergenic - logical indicating if the variant is in an intergenic region
 #'
 #' @export
-get_indel_info_from_annotations <- function(indelmat){
+get_indel_info_from_annotations <- function(varmat){
   # GET REF AND VAR ALLELE, STRAND
   label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
     strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-
     nuc_pos_in_gene <- aa_pos_in_gene <-  gene_length_in_bp <- annotation_1 <-
     annotation_2 <- strand <- ig_gene1 <- ig_gene2 <- intergenic <-
-    rep(NA, nrow(indelmat))
+    rep(NA, nrow(varmat))
 
-  for (i in 1:nrow(indelmat)) {
-    row = row.names(indelmat)[i]
+  for (i in 1:nrow(varmat)) {
+    row = row.names(varmat)[i]
     split_row = unlist(str_split(row, pattern = '[|]'))
 
     # Coding SNP, Non coding SNP - for checking
@@ -48,13 +48,17 @@ get_indel_info_from_annotations <- function(indelmat){
     pos[i] = gsub('^.*at ','', split_row[1]) %>% gsub(' > [A,C,T,G].*$', '', .)
 
     # PHAGE, REPEAT, MASK
-    functional_temp = gsub('^.*functional=','',  split_row[1]) %>% gsub(' locus_tag.*$','',.) %>% str_split(., '_') %>% unlist
+    functional_temp = gsub('^.*functional=','',  split_row[1]) %>%
+      gsub(' locus_tag.*$','',.) %>%
+      str_split(., '_') %>%
+      unlist
     phage[i] = functional_temp[1]
     repeated_region[i] = functional_temp[2]
     masked[i] = functional_temp[3]
 
     # STRAND INFO
-    strand_info[i] = gsub('^.*Strand Information: ','',split_row[1]) %>% gsub(';.*$','',.)
+    strand_info[i] = gsub('^.*Strand Information: ','',split_row[1]) %>%
+      gsub(';.*$','',.)
 
     # VARIANT TYPE
     variant_type[i] = split_row[2]
@@ -78,7 +82,7 @@ get_indel_info_from_annotations <- function(indelmat){
     annotation_2[i] = split_row[10]
 
     # INTERGENIC REGIONS
-    if(variant_type[i] == 'intergenic_region') {
+    if (variant_type[i] == 'intergenic_region') {
       ig_gene1[i] = (str_split(split_row[4], '-') %>% unlist())[1]
       ig_gene2[i] = (str_split(split_row[4], '-') %>% unlist())[2]
       intergenic[i] = TRUE
@@ -90,231 +94,238 @@ get_indel_info_from_annotations <- function(indelmat){
 
   }
 
-  annotations = data.frame(label, pos, phage, repeated_region, masked, locus_tag, strand_info, strand,
-                           ref, var, aa_change, variant_type, snpeff_impact, nuc_pos_in_gene,
-                           aa_pos_in_gene, gene_length_in_bp, annotation_1, annotation_2,
-                           ig_gene1, ig_gene2, intergenic,full_annots = rownames(indelmat))
+  annotations = data.frame(label,
+                           pos,
+                           phage,
+                           repeated_region,
+                           masked,
+                           locus_tag,
+                           strand_info,
+                           strand,
+                           ref,
+                           var,
+                           aa_change,
+                           variant_type,
+                           snpeff_impact,
+                           nuc_pos_in_gene,
+                           aa_pos_in_gene,
+                           gene_length_in_bp,
+                           annotation_1,
+                           annotation_2,
+                           ig_gene1,
+                           ig_gene2,
+                           intergenic,
+                           full_annots = rownames(varmat))
   return(annotations)
-}# end get_indel_info_from_annotations
+}
 
 #' parse_indels
-#' @description Input matrices generated from internal (Ali's) variant calling pipeline.
-#' Always returns parsed annotation info. In addition, you have the option to:
-#' 1. split rows with multiple annotations (snps in overlapping genes, multiallelic snps)
-#' 2. Re-reference to the ancestral allele at that position (instead of to the reference genome)
-#' 3. Simplify the code matrix - which contains numbers from -4 to 3 indicating
-#' different information about the variants - to a binary matrix indicating
-#' simple presence/absence of a SNP at that site.
-#' @param indelmat_code - loaded data.frame or path to the indelmat_code file generated
-#' from internal variant calling pipeline
-#' @param indelmat_allele - loaded data.frame or path to the indelmat_allele file generated
-#' from internal variant calling pipeline
+#' @description Input matrices generated from internal (Ali's) variant calling
+#'   pipeline. Always returns parsed annotation info. In addition, you have the
+#'   option to: 1. split rows with multiple annotations (snps in overlapping
+#'   genes, multiallelic snps) 2. Re-reference to the ancestral allele at that
+#'   position (instead of to the reference genome) 3. Simplify the code matrix -
+#'   which contains numbers from -4 to 3 indicating different information about
+#'   the variants - to a binary matrix indicating simple presence/absence of a
+#'   SNP at that site.
+#' @param varmat_code - loaded data.frame or path to the varmat_code file
+#'   generated from internal variant calling pipeline
+#' @param varmat_allele - loaded data.frame or path to the varmat_allele file
+#'   generated from internal variant calling pipeline
 #' @param tree - optional: path to tree file or loaded in tree (class = phylo)
-#' @param og - optional: character string of the name of the outgroup (has to match what
-#' it is called in the tree)
-#' @param remove_multi_annots - logical flag indicating if you want to remove rows
-#' with multiple annotations - alternative is to split rows with mutliple annotations (default = FALSE)
-#' @param return_binary_matrix - logical flag indicating if you want to return a binary matrix (default = FALSE)
+#' @param og - optional: character string of the name of the outgroup (has to
+#'   match what it is called in the tree)
+#' @param remove_multi_annots - logical flag indicating if you want to remove
+#'   rows with multiple annotations - alternative is to split rows with mutliple
+#'   annotations (default = FALSE)
+#' @param return_binary_matrix - logical flag indicating if you want to return a
+#'   binary matrix (default = FALSE)
 #'
-#' @return list of allele mat, code mat, binary mat and corresponding parsed annotations.
-#' output will depend on arguments to the function.
+#' @return list of allele mat, code mat, binary mat and corresponding parsed
+#'   annotations. output will depend on arguments to the function.
 #' @export
-#'
-#' @examples
+parse_indels <- function(varmat_code,
+                         varmat_allele,
+                         tree = NULL,
+                         og = NULL,
+                         remove_multi_annots = FALSE,
+                         return_binary_matrix = FALSE,
+                         ref_to_anc = TRUE){
 
-parse_indels <- function(indelmat_code, indelmat_allele, tree=NULL, og = NULL, remove_multi_annots = FALSE, return_binary_matrix = FALSE, ref_to_anc = T){
-
-  if(is.null(tree) & return_binary_matrix){
+  if (is.null(tree) & return_binary_matrix) {
     stop('Tree file required when returning a binary matrix.')
   }
 
-  #-----------------------------------------------------------------------------
-  # READ IN indelmat CODE AND indelmat ALLELE
-  #-----------------------------------------------------------------------------
-
-  indelmat_code <- load_if_path(indelmat_code)
-
-  indelmat_allele <- load_if_path(indelmat_allele)
+  # READ IN varmat CODE AND varmat ALLELE
+  varmat_code <- load_if_path(varmat_code)
+  varmat_allele <- load_if_path(varmat_allele)
 
   # add semicolons to the end of the row names that don't have semicolons
-  row.names(indelmat_code)[!grepl(';$', row.names(indelmat_code))] = paste0(row.names(indelmat_code)[!grepl(';$', row.names(indelmat_code))], ';')
-  row.names(indelmat_allele)[!grepl(';$', row.names(indelmat_allele))] = paste0(row.names(indelmat_allele)[!grepl(';$', row.names(indelmat_allele))], ';')
+  row.names(varmat_code)[!grepl(';$', row.names(varmat_code))] <-
+    paste0(row.names(varmat_code)[!grepl(';$', row.names(varmat_code))], ';')
+  row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))] <-
+    paste0(row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))], ';')
 
-
-
-  #-----------------------------------------------------------------------------
   # REMOVE BUGS
-  #-----------------------------------------------------------------------------
-  indelmat_code = remove_rows_with_bugs(indelmat_code)
-  indelmat_allele = remove_rows_with_bugs(indelmat_allele)
+  varmat_code = remove_rows_with_bugs(varmat_code)
+  varmat_allele = remove_rows_with_bugs(varmat_allele)
 
-  #-----------------------------------------------------------------------------
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
-  #-----------------------------------------------------------------------------
-  indelmats = remove_rows_with_no_variants_or_completely_masked(indelmat_code, indelmat_allele)
-  indelmat_code = indelmats[[1]]
-  indelmat_allele = indelmats[[2]]
+  varmats = remove_rows_with_no_variants_or_completely_masked(varmat_code,
+                                                              varmat_allele)
+  varmat_code = varmats[[1]]
+  varmat_allele = varmats[[2]]
 
-  #-----------------------------------------------------------------------------
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
-  #-----------------------------------------------------------------------------
-  if(remove_multi_annots){
+  if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
-    indelmat_code = remove_rows_with_multiple_annots(indelmat_code)
-    indelmat_allele = remove_rows_with_multiple_annots(indelmat_allele)
+    varmat_code = remove_rows_with_multiple_annots(varmat_code)
+    varmat_allele = remove_rows_with_multiple_annots(varmat_allele)
 
-    #-----------------------------------------------------------------------------
     # FIND ANCESTRAL STATE OF EACH ALLELE
-    #-----------------------------------------------------------------------------
-
-    if(return_binary_matrix){
+    if (return_binary_matrix) {
       # REROOT TREE
       tree = root_tree_og(tree)
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
-      if(ref_to_anc){
-        alleles = get_anc_alleles(tree, indelmat_allele)
-      }else{
+      if (ref_to_anc) {
+        alleles = get_anc_alleles(tree, varmat_allele)
+      } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles = get_major_alleles(data.matrix(indelmat_allele))
+        alleles = get_major_alleles(data.matrix(varmat_allele))
       }
-
     }
 
-
-    split_rows_flag = 1:nrow(indelmat_allele)
-
-    rows_with_multiple_annots_log = rep(FALSE, nrow(indelmat_allele))
-    rows_with_mult_var_allele_log = rep(FALSE, nrow(indelmat_allele))
-    rows_with_overlapping_genes_log = rep(FALSE, nrow(indelmat_allele))
+    split_rows_flag = 1:nrow(varmat_allele)
+    rows_with_multiple_annots_log = rep(FALSE, nrow(varmat_allele))
+    rows_with_mult_var_allele_log = rep(FALSE, nrow(varmat_allele))
+    rows_with_overlapping_genes_log = rep(FALSE, nrow(varmat_allele))
 
     # GET ANNOTATIONS
-    annots = cbind(get_indel_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
-                   rows_with_mult_var_allele_log, rows_with_overlapping_genes_log,
+    annots = cbind(get_indel_info_from_annotations(varmat_code),
+                   rows_with_multiple_annots_log,
+                   rows_with_mult_var_allele_log,
+                   rows_with_overlapping_genes_log,
                    split_rows_flag)
-
-  }else{
-
-    #-----------------------------------------------------------------------------
+  } else {
     # FIND ANCESTRAL STATE OF EACH ALLELE
-    #-----------------------------------------------------------------------------
-
-    if(return_binary_matrix){
+    if (return_binary_matrix) {
       # REROOT TREE
       tree = root_tree_og(tree)
-      if(ref_to_anc){
+      if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles = get_anc_alleles(tree, indelmat_allele)
-      }else{
+        alleles = get_anc_alleles(tree, varmat_allele)
+      } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles = get_major_alleles(indelmat_allele)
+        alleles = get_major_alleles(varmat_allele)
       }
-
     }
 
     # SPLIT MATRICES
-    indelmat_code_split_list = split_rows_with_multiple_annots(indelmat_code)
-    indelmat_allele_split_list = split_rows_with_multiple_annots(indelmat_allele)
+    varmat_code_split_list = split_rows_with_multiple_annots(varmat_code)
+    varmat_allele_split_list = split_rows_with_multiple_annots(varmat_allele)
 
-    indelmat_code = indelmat_code_split_list[[5]]
-    indelmat_allele = indelmat_allele_split_list[[5]]
+    varmat_code = varmat_code_split_list[[5]]
+    varmat_allele = varmat_allele_split_list[[5]]
 
-    rows_with_multiple_annots_log = indelmat_code_split_list[[1]]
-    rows_with_mult_var_allele_log = indelmat_code_split_list[[2]]
-    rows_with_overlapping_genes_log = indelmat_code_split_list[[3]]
-    split_rows_flag = indelmat_code_split_list[[4]]
+    rows_with_multiple_annots_log = varmat_code_split_list[[1]]
+    rows_with_mult_var_allele_log = varmat_code_split_list[[2]]
+    rows_with_overlapping_genes_log = varmat_code_split_list[[3]]
+    split_rows_flag = varmat_code_split_list[[4]]
 
-    if(return_binary_matrix){
-      alleles = alleles[split_rows_flag,]
+    if (return_binary_matrix) {
+      alleles = alleles[split_rows_flag, ]
     }
 
     # GET ANNOTATIONS
-    annots = cbind(get_indel_info_from_annotations(indelmat_code), rows_with_multiple_annots_log,
-                   rows_with_mult_var_allele_log, rows_with_overlapping_genes_log,
+    annots = cbind(get_indel_info_from_annotations(varmat_code),
+                   rows_with_multiple_annots_log,
+                   rows_with_mult_var_allele_log,
+                   rows_with_overlapping_genes_log,
                    split_rows_flag)
 
-    # CHANGE indelmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-    indelmat_code = remove_alt_allele_code_from_split_rows(indelmat_code,
-                                                         indelmat_allele,
+    # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
+    varmat_code = remove_alt_allele_code_from_split_rows(varmat_code,
+                                                         varmat_allele,
                                                          annots$ref,
                                                          annots$var,
                                                          rows_with_mult_var_allele_log)
-
   }
 
-  if(return_binary_matrix){
-    if(ref_to_anc){
+  if (return_binary_matrix) {
+    if (ref_to_anc) {
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
-      annots$anc = alleles[,1]
-      annots$anc_prob = alleles[,2]
-    }else{
+      annots$anc = alleles[, 1]
+      annots$anc_prob = alleles[, 2]
+    } else {
       annots$maj = alleles
     }
 
     # remove sites with unknown ancestor
-    if(ref_to_anc){
-      indelmats = remove_unknown_anc(indelmat_code, indelmat_allele, annots)
-      indelmat_code = indelmats$indelmat_code
-      indelmat_allele = indelmats$indelmat_allele
-      annots = indelmats$annots
+    if (ref_to_anc) {
+      varmats = remove_unknown_anc(varmat_code, varmat_allele, annots)
+      varmat_code = varmats$varmat_code
+      varmat_allele = varmats$varmat_allele
+      annots = varmats$annots
     }
 
     # MAKE BINARY MATRIX
-    indelmat_bin = indelmat_code
-    to_keep = !(rowSums(indelmat_bin ==  2) > 0 |
-                  rowSums(indelmat_bin == -2) > 0 |
-                  rowSums(indelmat_bin == -3) > 0 |
-                  rowSums(indelmat_bin == -4) > 0)
-    indelmat_bin = indelmat_bin[to_keep,]
-    indelmat_bin[indelmat_bin == 3] = 1
-    indelmat_bin[indelmat_bin == -1] = NA
+    varmat_bin = varmat_code
+    to_keep = !(rowSums(varmat_bin ==  2) > 0 |
+                  rowSums(varmat_bin == -2) > 0 |
+                  rowSums(varmat_bin == -3) > 0 |
+                  rowSums(varmat_bin == -4) > 0)
+    varmat_bin = varmat_bin[to_keep,]
+    varmat_bin[varmat_bin == 3] = 1
+    varmat_bin[varmat_bin == -1] = NA
 
     annots_bin = annots[to_keep,]
 
-    if(ref_to_anc){
-      indelmat_bin_reref = data.frame(t(sapply(1:nrow(indelmat_bin), function(x){
-        if(annots_bin$ref[x] == annots_bin$anc[x]){
-          unlist(indelmat_bin[x,])
-        }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
-          unlist(as.numeric(!indelmat_bin[x,]))
-        }else if(annots_bin$var[x] == annots_bin$anc[x]){
-          unlist(indelmat_bin[x,])
-        }else{
-          unlist(rep(NA,ncol(indelmat_bin)))
+    if (ref_to_anc) {
+      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$anc[x]) {
+          unlist(varmat_bin[x, ])
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          unlist(as.numeric(!varmat_bin[x, ]))
+        } else if (annots_bin$var[x] == annots_bin$anc[x]) {
+          unlist(varmat_bin[x, ])
+        } else {
+          unlist(rep(NA,ncol(varmat_bin)))
         }
       })))
 
-      reref = sapply(1:nrow(indelmat_bin), function(x){
-        if(annots_bin$ref[x] == annots_bin$anc[x]){
+      reref = sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$anc[x]) {
           'no'
-        }else if(!annots_bin$rows_with_mult_var_allele_log[x]){
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
           'yes'
-        }else if(annots_bin$var[x] == annots_bin$anc[x]){
+        } else if (annots_bin$var[x] == annots_bin$anc[x]) {
           'no'
-        }else{
+        } else {
           'complicated'
         }
       })
-    }else{
-      #indelmat_bin = indelmat_allele[to_keep,]
-      names_indelmat_bin = names(indelmat_bin)
-      indelmat_bin_reref = data.frame(t(sapply(1:nrow(indelmat_bin), function(x){
-        if(sum(indelmat_bin[x,]==1,na.rm=T) > sum(indelmat_bin[x,]==0,na.rm=T)){
-          return(as.numeric(indelmat_bin[x,]==0))
+    } else {
+      names_varmat_bin = names(varmat_bin)
+      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+        if (sum(varmat_bin[x, ] == 1, na.rm = TRUE) > sum(varmat_bin[x, ] == 0, na.rm = TRUE)) {
+          return(as.numeric(varmat_bin[x, ] == 0))
         }
-        return(as.numeric(indelmat_bin[x,]))
+        return(as.numeric(varmat_bin[x, ]))
       })))
-      names(indelmat_bin_reref) = names_indelmat_bin
-      reref = rep(NA,nrow(indelmat_bin))
+      names(varmat_bin_reref) = names_varmat_bin
+      reref = rep(NA,nrow(varmat_bin))
     }
 
-    return(list(code=list(mat=indelmat_code,annots=annots),
-                allele=list(mat=indelmat_allele,annots=annots),
-                bin=list(mat=indelmat_bin_reref,annots=cbind(annots_bin,reref=reref))))
+    return(list(code = list(mat = varmat_code,
+                            annots = annots),
+                allele = list(mat = varmat_allele,
+                              annots = annots),
+                bin = list(mat = varmat_bin_reref,
+                           annots = cbind(annots_bin,
+                                          reref = reref))))
   }
-
-
-  return(list(code=list(mat=indelmat_code, annots=annots),
-              allele=list(mat=indelmat_allele, annots=annots)))
-}# end parse_snps
+  return(list(code = list(mat = varmat_code, annots = annots),
+              allele = list(mat = varmat_allele, annots = annots)))
+}

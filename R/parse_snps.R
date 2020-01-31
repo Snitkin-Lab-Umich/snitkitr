@@ -1,9 +1,9 @@
 #' Grab information from each annotation
 #' @description Parse annotations from row names.
-#' @param snpmat - data.frame where the rows are variants, the columns are genomes,
+#' @param varmat - data.frame where the rows are variants, the columns are genomes,
 #' and the row.names are annotations
 #'
-#' @return data.frame of length nrow(snpmat) containing the following columns:
+#' @return data.frame of length nrow(varmat) containing the following columns:
 #' label - string indicating "Coding SNP or Non-Coding SNP"
 #' pos - position of variant in the reference genome
 #' phage -  the word NULL or the word PHAGE
@@ -29,16 +29,16 @@
 #' intergenic - logical indicating if the variant is in an intergenic region
 #'
 #' @export
-get_snp_info_from_annotations <- function(snpmat){
+get_snp_info_from_annotations <- function(varmat){
   # GET REF AND VAR ALLELE, STRAND
   label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
     strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-
     nuc_pos_in_gene <- aa_pos_in_gene <-  gene_length_in_bp <- annotation_1 <-
     annotation_2 <- strand <- ig_gene1 <- ig_gene2 <- intergenic <-
-    rep(NA, nrow(snpmat))
+    rep(NA, nrow(varmat))
 
-  for (i in 1:nrow(snpmat)) {
-    row = row.names(snpmat)[i]
+  for (i in 1:nrow(varmat)) {
+    row = row.names(varmat)[i]
     split_row = unlist(str_split(row, pattern = '[|]'))
 
     # Coding SNP, Non coding SNP - for checking
@@ -143,9 +143,9 @@ get_snp_info_from_annotations <- function(snpmat){
 #'   which contains numbers from -4 to 3 indicating different information about
 #'   the variants - to a binary matrix indicating simple presence/absence of a
 #'   SNP at that site.
-#' @param snpmat_code - loaded data.frame or path to the snpmat_code file
+#' @param varmat_code - loaded data.frame or path to the varmat_code file
 #'   generated from internal variant calling pipeline
-#' @param snpmat_allele - loaded data.frame or path to the snpmat_allele file
+#' @param varmat_allele - loaded data.frame or path to the varmat_allele file
 #'   generated from internal variant calling pipeline
 #' @param tree - optional: path to tree file or loaded in tree (class = phylo)
 #' @param og - optional: character string of the name of the outgroup (has to
@@ -159,8 +159,8 @@ get_snp_info_from_annotations <- function(snpmat){
 #' @return list of allele mat, code mat, binary mat and corresponding parsed
 #'   annotations. output will depend on arguments to the function.
 #' @export
-parse_snps <- function(snpmat_code,
-                       snpmat_allele,
+parse_snps <- function(varmat_code,
+                       varmat_allele,
                        tree = NULL,
                        og = NULL,
                        remove_multi_annots = FALSE,
@@ -171,57 +171,57 @@ parse_snps <- function(snpmat_code,
     stop('Tree file required when returning a binary matrix.')
   }
 
-  # READ IN SNPMAT CODE AND SNPMAT ALLELE
-  snpmat_code <- load_if_path(snpmat_code)
-  snpmat_allele <- load_if_path(snpmat_allele)
+  # READ IN varmat CODE AND varmat ALLELE
+  varmat_code <- load_if_path(varmat_code)
+  varmat_allele <- load_if_path(varmat_allele)
 
   # add semicolons to the end of the row names that don't have semicolons
-  row.names(snpmat_code)[!grepl(';$', row.names(snpmat_code))] <-
-    paste0(row.names(snpmat_code)[!grepl(';$', row.names(snpmat_code))], ';')
-  row.names(snpmat_allele)[!grepl(';$', row.names(snpmat_allele))] <-
-    paste0(row.names(snpmat_allele)[!grepl(';$', row.names(snpmat_allele))], ';')
+  row.names(varmat_code)[!grepl(';$', row.names(varmat_code))] <-
+    paste0(row.names(varmat_code)[!grepl(';$', row.names(varmat_code))], ';')
+  row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))] <-
+    paste0(row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))], ';')
 
   # REMOVE BUGS
-  snpmat_code = remove_rows_with_bugs(snpmat_code)
-  snpmat_allele = remove_rows_with_bugs(snpmat_allele)
+  varmat_code = remove_rows_with_bugs(varmat_code)
+  varmat_allele = remove_rows_with_bugs(varmat_allele)
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
-  snpmats <-
-    remove_rows_with_no_variants_or_completely_masked(snpmat_code,
-                                                      snpmat_allele)
-  snpmat_code = snpmats[[1]]
-  snpmat_allele = snpmats[[2]]
+  varmats <-
+    remove_rows_with_no_variants_or_completely_masked(varmat_code,
+                                                      varmat_allele)
+  varmat_code = varmats[[1]]
+  varmat_allele = varmats[[2]]
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
   if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
-    snpmat_code = remove_rows_with_multiple_annots(snpmat_code)
-    snpmat_allele = remove_rows_with_multiple_annots(snpmat_allele)
+    varmat_code = remove_rows_with_multiple_annots(varmat_code)
+    varmat_allele = remove_rows_with_multiple_annots(varmat_allele)
 
     # FIND ANCESTRAL STATE OF EACH ALLELE
-    major_alleles = get_major_alleles(data.matrix(snpmat_allele))
+    major_alleles = get_major_alleles(data.matrix(varmat_allele))
 
     if (return_binary_matrix) {
       # REROOT TREE
       tree = root_tree_og(tree)
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
       if (ref_to_anc) {
-        alleles = get_anc_alleles(tree, snpmat_allele)
+        alleles = get_anc_alleles(tree, varmat_allele)
       }else{
         # REFERENCE TO MAJOR ALLELE
         alleles = major_alleles
       }
     }
 
-    split_rows_flag = 1:nrow(snpmat_allele)
-    rows_with_multiple_annots_log = rep(FALSE, nrow(snpmat_allele))
-    rows_with_mult_var_allele_log = rep(FALSE, nrow(snpmat_allele))
-    rows_with_overlapping_genes_log = rep(FALSE, nrow(snpmat_allele))
+    split_rows_flag = 1:nrow(varmat_allele)
+    rows_with_multiple_annots_log = rep(FALSE, nrow(varmat_allele))
+    rows_with_mult_var_allele_log = rep(FALSE, nrow(varmat_allele))
+    rows_with_overlapping_genes_log = rep(FALSE, nrow(varmat_allele))
 
     # GET ANNOTATIONS
-    annots = cbind(get_snp_info_from_annotations(snpmat_code),
+    annots = cbind(get_snp_info_from_annotations(varmat_code),
                    rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log,
                    rows_with_overlapping_genes_log,
@@ -229,7 +229,7 @@ parse_snps <- function(snpmat_code,
     annots$maj = major_alleles
   } else {
     # FIND ANCESTRAL STATE OF EACH ALLELE
-    major_alleles = get_major_alleles(snpmat_allele)
+    major_alleles = get_major_alleles(varmat_allele)
 
     if (return_binary_matrix) {
       if (ref_to_anc) {
@@ -237,7 +237,7 @@ parse_snps <- function(snpmat_code,
         tree = root_tree_og(tree)
 
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles = get_anc_alleles(tree, snpmat_allele)
+        alleles = get_anc_alleles(tree, varmat_allele)
 
       } else {
         # REFERENCE TO MAJOR ALLELE
@@ -246,19 +246,19 @@ parse_snps <- function(snpmat_code,
     }
 
   # RAW ROWNAMES
-  raw_rownames = row.names(snpmat_code)
+  raw_rownames = row.names(varmat_code)
 
   # SPLIT MATRICES
-  snpmat_code_split_list = split_rows_with_multiple_annots(snpmat_code)
-  snpmat_allele_split_list = split_rows_with_multiple_annots(snpmat_allele)
+  varmat_code_split_list = split_rows_with_multiple_annots(varmat_code)
+  varmat_allele_split_list = split_rows_with_multiple_annots(varmat_allele)
 
-  snpmat_code = snpmat_code_split_list[[5]]
-  snpmat_allele = snpmat_allele_split_list[[5]]
+  varmat_code = varmat_code_split_list[[5]]
+  varmat_allele = varmat_allele_split_list[[5]]
 
-  rows_with_multiple_annots_log = snpmat_code_split_list[[1]]
-  rows_with_mult_var_allele_log = snpmat_code_split_list[[2]]
-  rows_with_overlapping_genes_log = snpmat_code_split_list[[3]]
-  split_rows_flag = snpmat_code_split_list[[4]]
+  rows_with_multiple_annots_log = varmat_code_split_list[[1]]
+  rows_with_mult_var_allele_log = varmat_code_split_list[[2]]
+  rows_with_overlapping_genes_log = varmat_code_split_list[[3]]
+  split_rows_flag = varmat_code_split_list[[4]]
 
   if (return_binary_matrix) {
     alleles = alleles[split_rows_flag, ]
@@ -270,7 +270,7 @@ parse_snps <- function(snpmat_code,
   raw_rownames = raw_rownames[split_rows_flag]
 
   # GET ANNOTATIONS
-  annots = cbind(get_snp_info_from_annotations(snpmat_code),
+  annots = cbind(get_snp_info_from_annotations(varmat_code),
                  rows_with_multiple_annots_log,
                  rows_with_mult_var_allele_log,
                  rows_with_overlapping_genes_log,
@@ -278,10 +278,10 @@ parse_snps <- function(snpmat_code,
                  maj = major_alleles,
                  raw_rownames = raw_rownames)
 
-  # CHANGE SNPMAT CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-  snpmat_code =
-    remove_alt_allele_code_from_split_rows(snpmat_code,
-                                           snpmat_allele,
+  # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
+  varmat_code =
+    remove_alt_allele_code_from_split_rows(varmat_code,
+                                           varmat_allele,
                                            annots$ref,
                                            annots$var,
                                            rows_with_mult_var_allele_log)
@@ -295,36 +295,36 @@ parse_snps <- function(snpmat_code,
       annots$anc_prob = alleles[,2]
 
       # remove sites with unknown ancestor
-      snpmats = remove_unknown_anc(snpmat_code, snpmat_allele, annots)
-      snpmat_code = snpmats$snpmat_code
-      snpmat_allele = snpmats$snpmat_allele
-      annots = snpmats$annots
+      varmats = remove_unknown_anc(varmat_code, varmat_allele, annots)
+      varmat_code = varmats$varmat_code
+      varmat_allele = varmats$varmat_allele
+      annots = varmats$annots
 
       # MAKE BINARY MATRIX
-      snpmat_bin = snpmat_code
-      to_keep = !(rowSums(snpmat_bin ==  2) > 0 |
-                    rowSums(snpmat_bin == -2) > 0 |
-                    rowSums(snpmat_bin == -3) > 0 |
-                    rowSums(snpmat_bin == -4) > 0)
-      snpmat_bin = snpmat_bin[to_keep,]
-      snpmat_bin[snpmat_bin == 3] = 1
-      snpmat_bin[snpmat_bin == -1] = 0
+      varmat_bin = varmat_code
+      to_keep = !(rowSums(varmat_bin ==  2) > 0 |
+                    rowSums(varmat_bin == -2) > 0 |
+                    rowSums(varmat_bin == -3) > 0 |
+                    rowSums(varmat_bin == -4) > 0)
+      varmat_bin = varmat_bin[to_keep,]
+      varmat_bin[varmat_bin == 3] = 1
+      varmat_bin[varmat_bin == -1] = 0
 
       annots_bin = annots[to_keep,]
 
-      snpmat_bin_reref = data.frame(t(sapply(1:nrow(snpmat_bin), function(x){
+      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
-          unlist(snpmat_bin[x, ])
+          unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          unlist(as.numeric(!snpmat_bin[x, ]))
+          unlist(as.numeric(!varmat_bin[x, ]))
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
-          unlist(snpmat_bin[x, ])
+          unlist(varmat_bin[x, ])
         } else {
-          unlist(rep(NA,ncol(snpmat_bin)))
+          unlist(rep(NA,ncol(varmat_bin)))
         }
       })))
 
-      reref = sapply(1:nrow(snpmat_bin), function(x){
+      reref = sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           'no'
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
@@ -337,30 +337,30 @@ parse_snps <- function(snpmat_code,
       })
     } else {
       # MAKE BINARY MATRIX
-      snpmat_bin = snpmat_code
-      to_keep = !(rowSums(snpmat_bin ==  2) > 0 |
-                    rowSums(snpmat_bin == -2) > 0 |
-                    rowSums(snpmat_bin == -3) > 0 |
-                    rowSums(snpmat_bin == -4) > 0)
-      snpmat_bin = snpmat_bin[to_keep,]
-      snpmat_bin[snpmat_bin == 3] = 1
-      snpmat_bin[snpmat_bin == -1] = 0
+      varmat_bin = varmat_code
+      to_keep = !(rowSums(varmat_bin ==  2) > 0 |
+                    rowSums(varmat_bin == -2) > 0 |
+                    rowSums(varmat_bin == -3) > 0 |
+                    rowSums(varmat_bin == -4) > 0)
+      varmat_bin = varmat_bin[to_keep,]
+      varmat_bin[varmat_bin == 3] = 1
+      varmat_bin[varmat_bin == -1] = 0
 
       annots_bin = annots[to_keep, ]
 
-      snpmat_bin_reref = data.frame(t(sapply(1:nrow(snpmat_bin), function(x){
+      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$maj[x]) {
-          unlist(snpmat_bin[x, ])
+          unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          unlist(as.numeric(!snpmat_bin[x, ]))
+          unlist(as.numeric(!varmat_bin[x, ]))
         } else if (annots_bin$var[x] == annots_bin$maj[x]) {
-          unlist(snpmat_bin[x, ])
+          unlist(varmat_bin[x, ])
         } else {
-          unlist(rep(NA,ncol(snpmat_bin)))
+          unlist(rep(NA,ncol(varmat_bin)))
         }
       })))
 
-      reref = sapply(1:nrow(snpmat_bin), function(x){
+      reref = sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$maj[x]) {
           'no'
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
@@ -373,18 +373,18 @@ parse_snps <- function(snpmat_code,
       })
     }
 
-    parsed = list(code = list(mat = snpmat_code,
+    parsed = list(code = list(mat = varmat_code,
                               annots = annots),
-                  allele = list(mat = snpmat_allele,
+                  allele = list(mat = varmat_allele,
                                 annots = annots),
-                  bin = list(mat = snpmat_bin_reref,
+                  bin = list(mat = varmat_bin_reref,
                              annots = cbind(annots_bin, reref = reref)))
     save(parsed, file = 'SNP_parsed.RData')
     return(parsed)
   }
 
-  parsed = list(code = list(mat = snpmat_code, annots = annots),
-                allele = list(mat = snpmat_allele, annots = annots))
+  parsed = list(code = list(mat = varmat_code, annots = annots),
+                allele = list(mat = varmat_allele, annots = annots))
   save(parsed, file = 'SNP_parsed.RData')
   return(parsed)
 }# end parse_snps
