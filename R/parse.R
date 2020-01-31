@@ -220,3 +220,34 @@ split_rows_with_multiple_annots <- function(snpmat){
               snpmat_added))
 }
 
+#' Remove any rows with multiple annotations
+#' @description - Bypass dealing with rows with multiple annotations (due to
+#' overlapping genes or multiallelic sites) by removing them from the data.frame.
+#' Useful especially as we are testing this function and the functionality to deal
+#' with sites with multiple annotations is not ready.
+#'
+#' @param snpmat - data.frame where the rows are variants, the columns are genomes,
+#' and the row.names are annotations
+#'
+#' @return Returns a snpmat (class = data.frame) with all rows with multiple annotations
+#' removed. Also writes a file called YEAR_MONTH_DATE_rows_with_multiple_annots_removed
+#' indicating which rows were removed.
+#'
+#' @export
+remove_rows_with_multiple_annots <- function(snpmat){
+  # IDENTIFY ROWS WITH MULTIPLE ANNOTATIONS
+  num_dividers <- sapply(1:nrow(snpmat), function(x) lengths(regmatches(row.names(snpmat)[x], gregexpr(";[A,C,G,T]", row.names(snpmat)[x]))))
+  rows_with_multiple_annotations <- c(1:nrow(snpmat))[num_dividers >= 2 & str_count(row.names(snpmat), '\\|') > 9]
+
+  # SAVE TO LOG FILE
+  log_file = paste0(Sys.Date(), '_rows_with_multiple_annots_removed')
+  write('The following rows with multiple annotations were removed:', log_file)
+  write(row.names(snpmat)[rows_with_multiple_annotations], log_file, append = TRUE)
+
+  # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
+  if (length(rows_with_multiple_annotations) > 0) {
+    snpmat = snpmat[-rows_with_multiple_annotations,]
+  }
+
+  return(snpmat)
+}
