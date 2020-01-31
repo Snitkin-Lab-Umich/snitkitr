@@ -8,7 +8,7 @@
 #' @param tree (\code{ape phylo}).
 #'
 #' @return tree: (\code{ape phylo}). Tree now has only positive edge lengths.
-#' @noRd
+#' @export
 make_all_tree_edges_positive <- function(tree){
   check_is_tree(tree)
   if (sum(tree$edge.length <= 0) > 0) {
