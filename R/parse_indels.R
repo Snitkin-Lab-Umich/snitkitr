@@ -194,7 +194,7 @@ parse_indels <- function(varmat_code,
         alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles <- get_major_alleles(data.matrix(varmat_allele))
+        alleles <- get_major_alleles(varmat_allele)
       }
     }
 
