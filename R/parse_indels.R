@@ -70,25 +70,26 @@ get_indel_info_from_annotations <- function(varmat){
     strand[i] <- gsub('.*=|;.*','',split_row[1])
 
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE
-    nuc_pos_in_gene[i] <- (stringr::str_split(split_row[7], '/') %>% unlist())[1]
-    gene_length_in_bp[i] <- (stringr::str_split(split_row[7], '/') %>% unlist())[2]
-    aa_pos_in_gene[i] <- (stringr::str_split(split_row[8], '/') %>% unlist())[1]
+    nuc_pos_in_gene[i] <-
+      (stringr::str_split(split_row[7], '/') %>% unlist())[1]
+    gene_length_in_bp[i] <-
+      (stringr::str_split(split_row[7], "/") %>% unlist())[2]
+    aa_pos_in_gene[i] <-
+      (stringr::str_split(split_row[8], "/") %>% unlist())[1]
 
     # ANNOTATIONS
     annotation_1[i] <- split_row[9]
     annotation_2[i] <- split_row[10]
 
     # INTERGENIC REGIONS
-    if (variant_type[i] == 'intergenic_region') {
-      ig_gene1[i] <- (stringr::str_split(split_row[4], '-') %>% unlist())[1]
-      ig_gene2[i] <- (stringr::str_split(split_row[4], '-') %>% unlist())[2]
+    ig_gene1[i] <- ""
+    ig_gene2[i] <- ""
+    intergenic[i] <- FALSE
+    if (variant_type[i] == "intergenic_region") {
+      ig_gene1[i] <- (stringr::str_split(split_row[4], "-") %>% unlist())[1]
+      ig_gene2[i] <- (stringr::str_split(split_row[4], "-") %>% unlist())[2]
       intergenic[i] <- TRUE
-    }else{
-      ig_gene1[i] <- ''
-      ig_gene2[i] <- ''
-      intergenic[i] <- FALSE
     }
-
   }
 
   annotations <- data.frame(label,
@@ -176,6 +177,11 @@ parse_indels <- function(varmat_code,
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
+  if (return_binary_matrix) {
+    # REROOT TREE
+    tree <- root_tree_og(tree)
+  }
+
   if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
@@ -183,10 +189,8 @@ parse_indels <- function(varmat_code,
 
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
-      # REROOT TREE
-      tree <- root_tree_og(tree)
-      # GET ANCESTRAL ALLELE FOR EACH VARIANT
       if (ref_to_anc) {
+        # GET ANCESTRAL ALLELE FOR EACH VARIANT
         alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
         # REFERENCE TO MAJOR ALLELE
@@ -195,21 +199,18 @@ parse_indels <- function(varmat_code,
     }
 
     split_rows_flag <- 1:nrow(varmat_allele)
-    rows_with_multiple_annots_log <- rep(FALSE, nrow(varmat_allele))
-    rows_with_mult_var_allele_log <- rep(FALSE, nrow(varmat_allele))
-    rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
+    rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
+      rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
 
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
-                   rows_with_multiple_annots_log,
-                   rows_with_mult_var_allele_log,
-                   rows_with_overlapping_genes_log,
-                   split_rows_flag)
+                    rows_with_multiple_annots_log,
+                    rows_with_mult_var_allele_log,
+                    rows_with_overlapping_genes_log,
+                    split_rows_flag)
   } else {
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
-      # REROOT TREE
-      tree <- root_tree_og(tree)
       if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
         alleles <- get_anc_alleles(tree, varmat_allele)
@@ -255,16 +256,14 @@ parse_indels <- function(varmat_code,
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
       annots$anc <- alleles[, 1]
       annots$anc_prob <- alleles[, 2]
-    } else {
-      annots$maj <- alleles
-    }
 
-    # remove sites with unknown ancestor
-    if (ref_to_anc) {
+      # REMOVE SITE WITH UNKNOWN ANCESTOR
       varmats <- remove_unknown_anc(varmat_code, varmat_allele, annots)
       varmat_code <- varmats$varmat_code
       varmat_allele <- varmats$varmat_allele
       annots <- varmats$annots
+    } else {
+      annots$maj <- alleles
     }
 
     # MAKE BINARY MATRIX
@@ -320,9 +319,9 @@ parse_indels <- function(varmat_code,
                 allele = list(mat = varmat_allele,
                               annots = annots),
                 bin = list(mat = varmat_bin_reref,
-                           annots = cbind(annots_bin,
-                                          reref = reref))))
+                           annots = cbind(annots_bin, reref = reref))))
   }
   return(list(code = list(mat = varmat_code, annots = annots),
               allele = list(mat = varmat_allele, annots = annots)))
 }
+
