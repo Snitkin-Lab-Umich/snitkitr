@@ -29,10 +29,10 @@
 get_indel_info_from_annotations <- function(varmat){
   # GET REF AND VAR ALLELE, STRAND
   label <- pos <- phage <- repeated_region <- masked <- locus_tag <-
-    strand_info <- ref <- var <- aa_change <- variant_type <- snpeff_impact <-
+    strand_info <- ref <- var <- variant_type <- snpeff_impact <-
     nuc_pos_in_gene <- aa_pos_in_gene <-  gene_length_in_bp <- annotation_1 <-
     annotation_2 <- strand <- ig_gene1 <- ig_gene2 <- intergenic <-
-    rep(NA, nrow(varmat))
+    indel_type <- indel_nuc <- rep(NA, nrow(varmat))
 
   for (i in 1:nrow(varmat)) {
     row <- row.names(varmat)[i]
@@ -43,6 +43,33 @@ get_indel_info_from_annotations <- function(varmat){
 
     # Position in genome
     pos[i] <- gsub('^.*at ','', split_row[1]) %>% gsub(' > [A,C,T,G].*$', '', .)
+
+    # INDEL TYPE
+    if (grepl("ins", split_row[5])) {
+      indel_type[i] <- "ins"
+      indel_nuc[i] <- gsub(".*ins", "", split_row[5])
+    } else if (grepl("del", split_row[5])) {
+      indel_type[i] <- "del"
+      indel_nuc[i] <- gsub(".*del", "", split_row[5])
+    } else if (grepl("dup", split_row[5])) {
+      indel_type[i] <- "dup"
+      indel_nuc[i] <- gsub(".*dup", "", split_row[5])
+    } else {
+      print(split_row[5])
+      stop("Found non-deletion, non-insertion")
+    }
+
+    # Var
+    var[i] <- gsub(".*> ", "", split_row[1]) %>% gsub(" functional=.*", "", .)
+
+    # Ref
+    if (indel_type[i] == "del") {
+      ref[i] <- paste0(var[i], indel_nuc[i])
+    } else {
+      ref[i] <- substr(var[i], 1, length(var[i]) - length(indel_nuc[i]) + 1)
+    }
+
+    print(split_row[5])
 
     # PHAGE, REPEAT, MASK
     functional_temp <- gsub('^.*functional=','',  split_row[1]) %>%
@@ -102,7 +129,6 @@ get_indel_info_from_annotations <- function(varmat){
                            strand,
                            ref,
                            var,
-                           aa_change,
                            variant_type,
                            snpeff_impact,
                            nuc_pos_in_gene,
@@ -113,7 +139,9 @@ get_indel_info_from_annotations <- function(varmat){
                            ig_gene1,
                            ig_gene2,
                            intergenic,
-                           full_annots = rownames(varmat))
+                           full_annots = rownames(varmat),
+                           indel_type,
+                           indel_nuc)
   return(annotations)
 }
 
@@ -274,7 +302,7 @@ parse_indels <- function(varmat_code,
                   rowSums(varmat_bin == -4) > 0)
     varmat_bin <- varmat_bin[to_keep,]
     varmat_bin[varmat_bin == 3] = 1
-    varmat_bin[varmat_bin == -1] = NA
+    varmat_bin[varmat_bin == -1] = 0
 
     annots_bin <- annots[to_keep,]
 
