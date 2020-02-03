@@ -30,10 +30,10 @@ remove_rows_with_bugs <- function(varmat){
 
   # 2. Remove rows with the incorrect number of pipes in the row annotation
   # number of |
-  num_pipes = str_count(row.names(varmat), '\\|')
+  num_pipes = stringr::str_count(row.names(varmat), '\\|')
   table(num_pipes) # remove not intervals of 9
 
-  num_semicolon = str_count(row.names(varmat), ';')
+  num_semicolon = stringr::str_count(row.names(varmat), ';')
   table(num_semicolon)
 
   write(row.names(varmat)[(num_pipes/(num_semicolon - 1)) %% 9 != 0], file = filename, append = TRUE)
@@ -154,7 +154,7 @@ split_rows_with_multiple_annots <- function(varmat){
 
   num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
 
-  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 1 & str_count(row.names(varmat), '\\|') > 9]
+  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 1 & stringr::str_count(row.names(varmat), '\\|') > 9]
 
   # Get rows with multallelic sites
   rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(varmat))
@@ -233,7 +233,7 @@ split_rows_with_multiple_annots <- function(varmat){
 remove_rows_with_multiple_annots <- function(varmat){
   # IDENTIFY ROWS WITH MULTIPLE ANNOTATIONS
   num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
-  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 2 & str_count(row.names(varmat), '\\|') > 9]
+  rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 2 & stringr::str_count(row.names(varmat), '\\|') > 9]
 
   # SAVE TO LOG FILE
   log_file = paste0(Sys.Date(), '_rows_with_multiple_annots_removed')
