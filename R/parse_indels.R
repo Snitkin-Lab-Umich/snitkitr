@@ -1,32 +1,29 @@
 #' Grab information from each annotation
 #' @description Parse annotations from row names.
-#' @param varmat - data.frame where the rows are variants, the columns are genomes,
-#' and the row.names are annotations
+#' @param varmat - data.frame where the rows are variants, the columns are
+#'   genomes, and the row.names are annotations
 #'
 #' @return data.frame of length nrow(varmat) containing the following columns:
-#' label - string indicating "Coding SNP or Non-Coding SNP"
-#' pos - position of variant in the reference genome
-#' phage -  the word NULL or the word PHAGE
-#' repeated_region -  the word NULL or the word REPEAT
-#' masked -  the word NULL or the word MASKED
-#' locus_tag - locus tag from gff file
-#' strand_info - returns strand information (currently incorrect until Ali fixes a bug)
-#' strand - returns + or - depending if gene is on positive or negative strand
-#' (determining this myself)
-#' ref - allele in the reference genome
-#' var - variant allele in terms of the positive strand
-#' aa_change - amino acid change in the form p.Tyr95Tyr or p.Glu75Ala
-#' variant_type - snpeff determined variant type (e.g. missense_variant, intergenic_region
-#' see snpeff manual for more info: http://snpeff.sourceforge.net/SnpEff_manual.html)
-#' snpeff_impact - snpeff determined impacted (e.g. LOW, MODERATE, MODIFIER, HIGH)
-#' nuc_pos_in_gene - variant position relative to the gene length
-#' aa_pos_in_gene - position of the codon-containing-variant relative to the gene length
-#' gene_length_in_bp - gene length in nucleotide base pairs
-#' annotation_1 - information about variant
-#' annotation_2 - information about variant
-#' ig_gene1 - if intergenic variant, first intergenic locus tag surrounding the variant
-#' ig_gene2 - if intergenic variant, second intergenic locus tag surrounding the variant
-#' intergenic - logical indicating if the variant is in an intergenic region
+#'   label - string indicating "Coding SNP or Non-Coding SNP" pos - position of
+#'   variant in the reference genome phage -  the word NULL or the word PHAGE
+#'   repeated_region -  the word NULL or the word REPEAT masked -  the word NULL
+#'   or the word MASKED locus_tag - locus tag from gff file strand_info -
+#'   returns strand information (currently incorrect until Ali fixes a bug)
+#'   strand - returns + or - depending if gene is on positive or negative strand
+#'   (determining this myself) ref - allele in the reference genome var -
+#'   variant allele in terms of the positive strand aa_change - amino acid
+#'   change in the form p.Tyr95Tyr or p.Glu75Ala variant_type - snpeff
+#'   determined variant type (e.g. missense_variant, intergenic_region see
+#'   snpeff manual for more info:
+#'   http://snpeff.sourceforge.net/SnpEff_manual.html) snpeff_impact - snpeff
+#'   determined impacted (e.g. LOW, MODERATE, MODIFIER, HIGH) nuc_pos_in_gene -
+#'   variant position relative to the gene length aa_pos_in_gene - position of
+#'   the codon-containing-variant relative to the gene length gene_length_in_bp
+#'   - gene length in nucleotide base pairs annotation_1 - information about
+#'   variant annotation_2 - information about variant ig_gene1 - if intergenic
+#'   variant, first intergenic locus tag surrounding the variant ig_gene2 - if
+#'   intergenic variant, second intergenic locus tag surrounding the variant
+#'   intergenic - logical indicating if the variant is in an intergenic region
 #'
 #' @export
 get_indel_info_from_annotations <- function(varmat){
@@ -38,63 +35,63 @@ get_indel_info_from_annotations <- function(varmat){
     rep(NA, nrow(varmat))
 
   for (i in 1:nrow(varmat)) {
-    row = row.names(varmat)[i]
-    split_row = unlist(stringr::str_split(row, pattern = '[|]'))
+    row <- row.names(varmat)[i]
+    split_row <- unlist(stringr::str_split(row, pattern = '[|]'))
 
     # Coding SNP, Non coding SNP - for checking
-    label[i] = gsub(' at [1-9].*$','', split_row[1])
+    label[i] <- gsub(' at [1-9].*$','', split_row[1])
 
     # Position in genome
-    pos[i] = gsub('^.*at ','', split_row[1]) %>% gsub(' > [A,C,T,G].*$', '', .)
+    pos[i] <- gsub('^.*at ','', split_row[1]) %>% gsub(' > [A,C,T,G].*$', '', .)
 
     # PHAGE, REPEAT, MASK
-    functional_temp = gsub('^.*functional=','',  split_row[1]) %>%
+    functional_temp <- gsub('^.*functional=','',  split_row[1]) %>%
       gsub(' locus_tag.*$','',.) %>%
       stringr::str_split(., '_') %>%
       unlist
-    phage[i] = functional_temp[1]
-    repeated_region[i] = functional_temp[2]
-    masked[i] = functional_temp[3]
+    phage[i] <- functional_temp[1]
+    repeated_region[i] <- functional_temp[2]
+    masked[i] <- functional_temp[3]
 
     # STRAND INFO
-    strand_info[i] = gsub('^.*Strand Information: ','',split_row[1]) %>%
+    strand_info[i] <- gsub('^.*Strand Information: ','',split_row[1]) %>%
       gsub(';.*$','',.)
 
     # VARIANT TYPE
-    variant_type[i] = split_row[2]
+    variant_type[i] <- split_row[2]
 
     # SNPEFF IMPACT
-    snpeff_impact[i] = split_row[3]
+    snpeff_impact[i] <- split_row[3]
 
     # LOCUS TAG (OR GENE SYMBOL UNTIL ERROR IS FIXED)
-    locus_tag[i] = split_row[4]
+    locus_tag[i] <- split_row[4]
 
     # STRAND INFORMATION
-    strand[i] = gsub('.*=|;.*','',split_row[1])
+    strand[i] <- gsub('.*=|;.*','',split_row[1])
 
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE
-    nuc_pos_in_gene[i] = (stringr::str_split(split_row[7], '/') %>% unlist())[1]
-    gene_length_in_bp[i] = (stringr::str_split(split_row[7], '/') %>% unlist())[2]
-    aa_pos_in_gene[i] = (stringr::str_split(split_row[8], '/') %>% unlist())[1]
+    nuc_pos_in_gene[i] <- (stringr::str_split(split_row[7], '/') %>% unlist())[1]
+    gene_length_in_bp[i] <- (stringr::str_split(split_row[7], '/') %>% unlist())[2]
+    aa_pos_in_gene[i] <- (stringr::str_split(split_row[8], '/') %>% unlist())[1]
 
     # ANNOTATIONS
-    annotation_1[i] = split_row[9]
-    annotation_2[i] = split_row[10]
+    annotation_1[i] <- split_row[9]
+    annotation_2[i] <- split_row[10]
 
     # INTERGENIC REGIONS
     if (variant_type[i] == 'intergenic_region') {
-      ig_gene1[i] = (stringr::str_split(split_row[4], '-') %>% unlist())[1]
-      ig_gene2[i] = (stringr::str_split(split_row[4], '-') %>% unlist())[2]
-      intergenic[i] = TRUE
+      ig_gene1[i] <- (stringr::str_split(split_row[4], '-') %>% unlist())[1]
+      ig_gene2[i] <- (stringr::str_split(split_row[4], '-') %>% unlist())[2]
+      intergenic[i] <- TRUE
     }else{
-      ig_gene1[i] = ''
-      ig_gene2[i] = ''
-      intergenic[i] = FALSE
+      ig_gene1[i] <- ''
+      ig_gene2[i] <- ''
+      intergenic[i] <- FALSE
     }
 
   }
 
-  annotations = data.frame(label,
+  annotations <- data.frame(label,
                            pos,
                            phage,
                            repeated_region,
@@ -167,43 +164,43 @@ parse_indels <- function(varmat_code,
     paste0(row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))], ';')
 
   # REMOVE BUGS
-  varmat_code = remove_rows_with_bugs(varmat_code)
-  varmat_allele = remove_rows_with_bugs(varmat_allele)
+  varmat_code <- remove_rows_with_bugs(varmat_code)
+  varmat_allele <- remove_rows_with_bugs(varmat_allele)
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
-  varmats = remove_rows_with_no_variants_or_completely_masked(varmat_code,
+  varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
                                                               varmat_allele)
-  varmat_code = varmats[[1]]
-  varmat_allele = varmats[[2]]
+  varmat_code <- varmats[[1]]
+  varmat_allele <- varmats[[2]]
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
   if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
-    varmat_code = remove_rows_with_multiple_annots(varmat_code)
-    varmat_allele = remove_rows_with_multiple_annots(varmat_allele)
+    varmat_code <- remove_rows_with_multiple_annots(varmat_code)
+    varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
 
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       # REROOT TREE
-      tree = root_tree_og(tree)
+      tree <- root_tree_og(tree)
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
       if (ref_to_anc) {
-        alleles = get_anc_alleles(tree, varmat_allele)
+        alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles = get_major_alleles(data.matrix(varmat_allele))
+        alleles <- get_major_alleles(data.matrix(varmat_allele))
       }
     }
 
-    split_rows_flag = 1:nrow(varmat_allele)
-    rows_with_multiple_annots_log = rep(FALSE, nrow(varmat_allele))
-    rows_with_mult_var_allele_log = rep(FALSE, nrow(varmat_allele))
-    rows_with_overlapping_genes_log = rep(FALSE, nrow(varmat_allele))
+    split_rows_flag <- 1:nrow(varmat_allele)
+    rows_with_multiple_annots_log <- rep(FALSE, nrow(varmat_allele))
+    rows_with_mult_var_allele_log <- rep(FALSE, nrow(varmat_allele))
+    rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
 
     # GET ANNOTATIONS
-    annots = cbind(get_indel_info_from_annotations(varmat_code),
+    annots <- cbind(get_indel_info_from_annotations(varmat_code),
                    rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log,
                    rows_with_overlapping_genes_log,
@@ -212,41 +209,41 @@ parse_indels <- function(varmat_code,
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       # REROOT TREE
-      tree = root_tree_og(tree)
+      tree <- root_tree_og(tree)
       if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles = get_anc_alleles(tree, varmat_allele)
+        alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles = get_major_alleles(varmat_allele)
+        alleles <- get_major_alleles(varmat_allele)
       }
     }
 
     # SPLIT MATRICES
-    varmat_code_split_list = split_rows_with_multiple_annots(varmat_code)
-    varmat_allele_split_list = split_rows_with_multiple_annots(varmat_allele)
+    varmat_code_split_list <- split_rows_with_multiple_annots(varmat_code)
+    varmat_allele_split_list <- split_rows_with_multiple_annots(varmat_allele)
 
-    varmat_code = varmat_code_split_list[[5]]
-    varmat_allele = varmat_allele_split_list[[5]]
+    varmat_code <- varmat_code_split_list[[5]]
+    varmat_allele <- varmat_allele_split_list[[5]]
 
-    rows_with_multiple_annots_log = varmat_code_split_list[[1]]
-    rows_with_mult_var_allele_log = varmat_code_split_list[[2]]
-    rows_with_overlapping_genes_log = varmat_code_split_list[[3]]
-    split_rows_flag = varmat_code_split_list[[4]]
+    rows_with_multiple_annots_log <- varmat_code_split_list[[1]]
+    rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
+    rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
+    split_rows_flag <- varmat_code_split_list[[4]]
 
     if (return_binary_matrix) {
-      alleles = alleles[split_rows_flag, ]
+      alleles <- alleles[split_rows_flag, ]
     }
 
     # GET ANNOTATIONS
-    annots = cbind(get_indel_info_from_annotations(varmat_code),
+    annots <- cbind(get_indel_info_from_annotations(varmat_code),
                    rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log,
                    rows_with_overlapping_genes_log,
                    split_rows_flag)
 
     # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-    varmat_code = remove_alt_allele_code_from_split_rows(varmat_code,
+    varmat_code <- remove_alt_allele_code_from_split_rows(varmat_code,
                                                          varmat_allele,
                                                          annots$ref,
                                                          annots$var,
@@ -256,34 +253,34 @@ parse_indels <- function(varmat_code,
   if (return_binary_matrix) {
     if (ref_to_anc) {
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
-      annots$anc = alleles[, 1]
-      annots$anc_prob = alleles[, 2]
+      annots$anc <- alleles[, 1]
+      annots$anc_prob <- alleles[, 2]
     } else {
-      annots$maj = alleles
+      annots$maj <- alleles
     }
 
     # remove sites with unknown ancestor
     if (ref_to_anc) {
-      varmats = remove_unknown_anc(varmat_code, varmat_allele, annots)
-      varmat_code = varmats$varmat_code
-      varmat_allele = varmats$varmat_allele
-      annots = varmats$annots
+      varmats <- remove_unknown_anc(varmat_code, varmat_allele, annots)
+      varmat_code <- varmats$varmat_code
+      varmat_allele <- varmats$varmat_allele
+      annots <- varmats$annots
     }
 
     # MAKE BINARY MATRIX
-    varmat_bin = varmat_code
-    to_keep = !(rowSums(varmat_bin ==  2) > 0 |
+    varmat_bin <- varmat_code
+    to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
                   rowSums(varmat_bin == -2) > 0 |
                   rowSums(varmat_bin == -3) > 0 |
                   rowSums(varmat_bin == -4) > 0)
-    varmat_bin = varmat_bin[to_keep,]
+    varmat_bin <- varmat_bin[to_keep,]
     varmat_bin[varmat_bin == 3] = 1
     varmat_bin[varmat_bin == -1] = NA
 
-    annots_bin = annots[to_keep,]
+    annots_bin <- annots[to_keep,]
 
     if (ref_to_anc) {
-      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+      varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
@@ -295,7 +292,7 @@ parse_indels <- function(varmat_code,
         }
       })))
 
-      reref = sapply(1:nrow(varmat_bin), function(x){
+      reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           'no'
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
@@ -307,15 +304,15 @@ parse_indels <- function(varmat_code,
         }
       })
     } else {
-      names_varmat_bin = names(varmat_bin)
-      varmat_bin_reref = data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+      names_varmat_bin <- names(varmat_bin)
+      varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (sum(varmat_bin[x, ] == 1, na.rm = TRUE) > sum(varmat_bin[x, ] == 0, na.rm = TRUE)) {
           return(as.numeric(varmat_bin[x, ] == 0))
         }
         return(as.numeric(varmat_bin[x, ]))
       })))
-      names(varmat_bin_reref) = names_varmat_bin
-      reref = rep(NA,nrow(varmat_bin))
+      names(varmat_bin_reref) <- names_varmat_bin
+      reref <- rep(NA,nrow(varmat_bin))
     }
 
     return(list(code = list(mat = varmat_code,
