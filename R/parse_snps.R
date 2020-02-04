@@ -45,7 +45,7 @@ get_snp_info_from_annotations <- function(varmat){
     pos[i] <- gsub("^.*at ", "", split_row[1]) %>% gsub(" > [A,C,T,G].*$", "", .)
 
     # PHAGE, REPEAT, MASK
-    functional_temp <- gsub("^.*functional=", "",  split_row[1]) %>%
+    functional_temp <- gsub("^.*functional=", "", split_row[1]) %>%
       gsub(" locus_tag.*$", "", .) %>%
       stringr::str_split(., "_") %>%
       unlist
@@ -245,8 +245,10 @@ parse_snps <- function(varmat_code,
   raw_rownames <- row.names(varmat_code)
 
   # SPLIT MATRICES
-  varmat_code_split_list <- split_rows_with_multiple_annots(varmat_code)
-  varmat_allele_split_list <- split_rows_with_multiple_annots(varmat_allele)
+  varmat_code_split_list <-
+    split_rows_with_multiple_annots(varmat_code, snp_parser_log = TRUE)
+  varmat_allele_split_list <-
+    split_rows_with_multiple_annots(varmat_allele, snp_parser_log = TRUE)
 
   varmat_code <- varmat_code_split_list[[5]]
   varmat_allele <- varmat_allele_split_list[[5]]

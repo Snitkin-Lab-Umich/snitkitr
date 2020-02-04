@@ -58,16 +58,6 @@ get_indel_info_from_annotations <- function(varmat){
       stop("Found non-deletion, non-insertion")
     }
 
-    # Var
-    var[i] <- gsub(".*> ", "", split_row[1]) %>% gsub(" functional=.*", "", .)
-
-    # Ref
-    if (indel_type[i] == "del") {
-      ref[i] <- paste0(var[i], indel_nuc[i])
-    } else {
-      ref[i] <- substr(var[i], 1, length(var[i]) - length(indel_nuc[i]) + 1)
-    }
-
     # PHAGE, REPEAT, MASK
     functional_temp <- gsub("^.*functional=", "", split_row[1]) %>%
       gsub(" locus_tag.*$", "", .) %>%
@@ -89,6 +79,16 @@ get_indel_info_from_annotations <- function(varmat){
 
     # LOCUS TAG (OR GENE SYMBOL UNTIL ERROR IS FIXED)
     locus_tag[i] <- split_row[4]
+
+    # Var
+    var[i] <- gsub(".*> ", "", split_row[1]) %>% gsub(" functional=.*", "", .)
+
+    # Ref
+    if (indel_type[i] == "del") {
+      ref[i] <- paste0(var[i], indel_nuc[i])
+    } else {
+      ref[i] <- substr(var[i], 1, length(var[i]) - length(indel_nuc[i]) + 1)
+    }
 
     # STRAND INFORMATION
     strand[i] <- gsub(".*=|;.*", "", split_row[1])
@@ -246,8 +246,10 @@ parse_indels <- function(varmat_code,
     }
 
     # SPLIT MATRICES
-    varmat_code_split_list <- split_rows_with_multiple_annots(varmat_code)
-    varmat_allele_split_list <- split_rows_with_multiple_annots(varmat_allele)
+    varmat_code_split_list <-
+      split_rows_with_multiple_annots(varmat_code, snp_parser_log = FALSE)
+    varmat_allele_split_list <-
+      split_rows_with_multiple_annots(varmat_allele, snp_parser_log = FALSE)
 
     varmat_code <- varmat_code_split_list[[5]]
     varmat_allele <- varmat_allele_split_list[[5]]
