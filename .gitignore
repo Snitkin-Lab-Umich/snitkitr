@@ -8,3 +8,4 @@
 *rows_removed_because_unknown_ancestral_state.txt
 *tree
 data/*tree
+*parsed.RData
