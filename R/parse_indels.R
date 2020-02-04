@@ -55,7 +55,6 @@ get_indel_info_from_annotations <- function(varmat){
       indel_type[i] <- "dup"
       indel_nuc[i] <- gsub(".*dup", "", split_row[5])
     } else {
-      print(split_row[5])
       stop("Found non-deletion, non-insertion")
     }
 
@@ -68,8 +67,6 @@ get_indel_info_from_annotations <- function(varmat){
     } else {
       ref[i] <- substr(var[i], 1, length(var[i]) - length(indel_nuc[i]) + 1)
     }
-
-    print(split_row[5])
 
     # PHAGE, REPEAT, MASK
     functional_temp <- gsub('^.*functional=','',  split_row[1]) %>%
@@ -307,6 +304,8 @@ parse_indels <- function(varmat_code,
     annots_bin <- annots[to_keep,]
 
     if (ref_to_anc) {
+      colnames_varmat_bin <-
+
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
@@ -319,6 +318,7 @@ parse_indels <- function(varmat_code,
         }
       })))
 
+      colnames(varmat_bin_reref) <- colnames(varmat_bin)
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           'no'
@@ -342,14 +342,19 @@ parse_indels <- function(varmat_code,
       reref <- rep(NA,nrow(varmat_bin))
     }
 
-    return(list(code = list(mat = varmat_code,
-                            annots = annots),
-                allele = list(mat = varmat_allele,
+    parsed = list(code = list(mat = varmat_code,
                               annots = annots),
-                bin = list(mat = varmat_bin_reref,
-                           annots = cbind(annots_bin, reref = reref))))
+                  allele = list(mat = varmat_allele,
+                                annots = annots),
+                  bin = list(mat = varmat_bin_reref,
+                             annots = cbind(annots_bin, reref = reref)))
+    save(parsed, file = 'INDEL_parsed.RData')
+    return(parsed)
   }
-  return(list(code = list(mat = varmat_code, annots = annots),
-              allele = list(mat = varmat_allele, annots = annots)))
+
+  parsed = list(code = list(mat = varmat_code, annots = annots),
+                allele = list(mat = varmat_allele, annots = annots))
+  save(parsed, file = 'INDEL_parsed.RData')
+  return(parsed)
 }
 

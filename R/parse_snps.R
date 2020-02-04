@@ -387,4 +387,4 @@ parse_snps <- function(varmat_code,
                 allele = list(mat = varmat_allele, annots = annots))
   save(parsed, file = 'SNP_parsed.RData')
   return(parsed)
-}# end parse_snps
+}
