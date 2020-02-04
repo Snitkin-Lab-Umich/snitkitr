@@ -36,13 +36,13 @@ get_indel_info_from_annotations <- function(varmat){
 
   for (i in 1:nrow(varmat)) {
     row <- row.names(varmat)[i]
-    split_row <- unlist(stringr::str_split(row, pattern = '[|]'))
+    split_row <- unlist(stringr::str_split(row, pattern = "[|]"))
 
     # Coding SNP, Non coding SNP - for checking
-    label[i] <- gsub(' at [1-9].*$','', split_row[1])
+    label[i] <- gsub(" at [1-9].*$", "", split_row[1])
 
     # Position in genome
-    pos[i] <- gsub('^.*at ','', split_row[1]) %>% gsub(' > [A,C,T,G].*$', '', .)
+    pos[i] <- gsub("^.*at ", "", split_row[1]) %>% gsub(" > [A,C,T,G].*$", "", .)
 
     # INDEL TYPE
     if (grepl("ins", split_row[5])) {
@@ -69,17 +69,17 @@ get_indel_info_from_annotations <- function(varmat){
     }
 
     # PHAGE, REPEAT, MASK
-    functional_temp <- gsub('^.*functional=','',  split_row[1]) %>%
-      gsub(' locus_tag.*$','',.) %>%
-      stringr::str_split(., '_') %>%
+    functional_temp <- gsub("^.*functional=", "", split_row[1]) %>%
+      gsub(" locus_tag.*$", "", .) %>%
+      stringr::str_split(., "_") %>%
       unlist
     phage[i] <- functional_temp[1]
     repeated_region[i] <- functional_temp[2]
     masked[i] <- functional_temp[3]
 
     # STRAND INFO
-    strand_info[i] <- gsub('^.*Strand Information: ','',split_row[1]) %>%
-      gsub(';.*$','',.)
+    strand_info[i] <- gsub("^.*Strand Information: ", "", split_row[1]) %>%
+      gsub(";.*$", "", .)
 
     # VARIANT TYPE
     variant_type[i] <- split_row[2]
@@ -91,11 +91,11 @@ get_indel_info_from_annotations <- function(varmat){
     locus_tag[i] <- split_row[4]
 
     # STRAND INFORMATION
-    strand[i] <- gsub('.*=|;.*','',split_row[1])
+    strand[i] <- gsub(".*=|;.*", "", split_row[1])
 
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE
     nuc_pos_in_gene[i] <-
-      (stringr::str_split(split_row[7], '/') %>% unlist())[1]
+      (stringr::str_split(split_row[7], "/") %>% unlist())[1]
     gene_length_in_bp[i] <-
       (stringr::str_split(split_row[7], "/") %>% unlist())[2]
     aa_pos_in_gene[i] <-
@@ -176,7 +176,7 @@ parse_indels <- function(varmat_code,
                          ref_to_anc = TRUE){
 
   if (is.null(tree) & return_binary_matrix) {
-    stop('Tree file required when returning a binary matrix.')
+    stop("Tree file required when returning a binary matrix.")
   }
 
   # READ IN varmat CODE AND varmat ALLELE
@@ -184,10 +184,10 @@ parse_indels <- function(varmat_code,
   varmat_allele <- load_if_path(varmat_allele)
 
   # add semicolons to the end of the row names that don't have semicolons
-  row.names(varmat_code)[!grepl(';$', row.names(varmat_code))] <-
-    paste0(row.names(varmat_code)[!grepl(';$', row.names(varmat_code))], ';')
-  row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))] <-
-    paste0(row.names(varmat_allele)[!grepl(';$', row.names(varmat_allele))], ';')
+  row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
+    paste0(row.names(varmat_code)[!grepl(";$", row.names(varmat_code))], ";")
+  row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))] <-
+    paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
 
   # REMOVE BUGS
   varmat_code <- remove_rows_with_bugs(varmat_code)
@@ -195,7 +195,7 @@ parse_indels <- function(varmat_code,
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
   varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
-                                                              varmat_allele)
+                                                               varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
 
@@ -269,11 +269,12 @@ parse_indels <- function(varmat_code,
                    split_rows_flag)
 
     # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-    varmat_code <- remove_alt_allele_code_from_split_rows(varmat_code,
-                                                         varmat_allele,
-                                                         annots$ref,
-                                                         annots$var,
-                                                         rows_with_mult_var_allele_log)
+    varmat_code <-
+      remove_alt_allele_code_from_split_rows(varmat_code,
+                                             varmat_allele,
+                                             annots$ref,
+                                             annots$var,
+                                             rows_with_mult_var_allele_log)
   }
 
   if (return_binary_matrix) {
@@ -298,14 +299,12 @@ parse_indels <- function(varmat_code,
                   rowSums(varmat_bin == -3) > 0 |
                   rowSums(varmat_bin == -4) > 0)
     varmat_bin <- varmat_bin[to_keep,]
-    varmat_bin[varmat_bin == 3] = 1
-    varmat_bin[varmat_bin == -1] = 0
+    varmat_bin[varmat_bin == 3] <- 1
+    varmat_bin[varmat_bin == -1] <- 0
 
     annots_bin <- annots[to_keep,]
 
     if (ref_to_anc) {
-      colnames_varmat_bin <-
-
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
@@ -321,13 +320,13 @@ parse_indels <- function(varmat_code,
       colnames(varmat_bin_reref) <- colnames(varmat_bin)
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
-          'no'
+          "no"
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          'yes'
+          "yes"
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
-          'no'
+          "no"
         } else {
-          'complicated'
+          "complicated"
         }
       })
     } else {
@@ -342,19 +341,18 @@ parse_indels <- function(varmat_code,
       reref <- rep(NA,nrow(varmat_bin))
     }
 
-    parsed = list(code = list(mat = varmat_code,
+    parsed <- list(code = list(mat = varmat_code,
                               annots = annots),
                   allele = list(mat = varmat_allele,
                                 annots = annots),
                   bin = list(mat = varmat_bin_reref,
                              annots = cbind(annots_bin, reref = reref)))
-    save(parsed, file = 'INDEL_parsed.RData')
+    save(parsed, file = "INDEL_parsed.RData")
     return(parsed)
   }
 
-  parsed = list(code = list(mat = varmat_code, annots = annots),
+  parsed <- list(code = list(mat = varmat_code, annots = annots),
                 allele = list(mat = varmat_allele, annots = annots))
-  save(parsed, file = 'INDEL_parsed.RData')
+  save(parsed, file = "INDEL_parsed.RData")
   return(parsed)
 }
-
