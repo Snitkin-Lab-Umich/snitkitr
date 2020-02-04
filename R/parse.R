@@ -115,49 +115,56 @@ remove_rows_with_no_variants_or_completely_masked <- function(varmat_code, varma
 }
 
 #' Split rows that have multiple annotations
-#' @description Rows that have X number of annotations are replicated X number of times.
-#' Multiple annotations can be due to 1) multiallelic sites which will result in an
-#' annotation for each individual allele and 2) SNPs in overlapping genes which will result in
-#' an annotation for each gene or 3) a combination of 1 and 2. The row names will be
-#' changed to have one annotation per row (that is, multiallelic SNPs are represented
-#' as biallelic sites and each snp in a gene that overlaps with another gene will
-#' be represented on a single line). The contents of the data.frame is replicated --
-#' that is, the contents of the replicated rows are NOT changed. You should run
-#' varmat_code and varmat_allele through this function separately and should expect
-#' the data.frames to have the same dimensions and same duplicated rows.
+#' @description Rows that have X number of annotations are replicated X number
+#'   of times. Multiple annotations can be due to 1) multiallelic sites which
+#'   will result in an annotation for each individual allele and 2) SNPs in
+#'   overlapping genes which will result in an annotation for each gene or 3) a
+#'   combination of 1 and 2. The row names will be changed to have one
+#'   annotation per row (that is, multiallelic SNPs are represented as biallelic
+#'   sites and each snp in a gene that overlaps with another gene will be
+#'   represented on a single line). The contents of the data.frame is replicated
+#'   -- that is, the contents of the replicated rows are NOT changed. You should
+#'   run varmat_code and varmat_allele through this function separately and
+#'   should expect the data.frames to have the same dimensions and same
+#'   duplicated rows.
 #'
-#' @param varmat - data.frame where the rows are variants, the columns are genomes,
-#' and the row.names are annotations
+#' @param varmat - data.frame where the rows are variants, the columns are
+#'   genomes, and the row.names are annotations
+#' @param snp_parser_log - logical. TRUE when handling snp information. FALSE
+#'   when handling indel information.
 #'
-#' @return Returns a list with the following elements (in order):
-#' 1. rows_with_multiple_annots_log - a logical vector with length of
-#' nrow(varmat_added) indicating which rows once had multiple annotations (that is,
-#' were split from one row into multiple rows)
-#' 2. rows_with_mult_var_allele_log -  a logical vector with length of
-#' nrow(varmat_added) indicating which rows once had multiple annotations in the
-#' form of  multiallelic sites (that is, were split from multiallelic sites to
-#' biallelic sites)
-#' 3. rows_with_overlapping_genes_log -> -  a logical vector with length of
-#' nrow(varmat_added) indicating which rows once had multiple annotations in the
-#' form of overlapping genes (that is, were split from a SNP in multiple genes
-#' to each gene being represented on a single line)
-#' 4. split_rows_flag - an integer vector indicating which rows were split from
-#' from a row with multiple annotations (For example if varmat had 4 rows: 1, 2, 3, 4
-#' with row 2 having 3 annotations and row 4 having 2 annotations, the vector would
-#' be 1 2 2 2 3 4 4).
-#' 5. varmat_added - a data.frame where the rows are variants, the columns are genomes,
-#' and the row.names are SPLIT annotations (each overlapping gene and multiallelic site
-#' represented as a single line).
+#' @return Returns a list with the following elements (in order): 1.
+#'   rows_with_multiple_annots_log - a logical vector with length of
+#'   nrow(varmat_added) indicating which rows once had multiple annotations
+#'   (that is, were split from one row into multiple rows) 2.
+#'   rows_with_mult_var_allele_log -  a logical vector with length of
+#'   nrow(varmat_added) indicating which rows once had multiple annotations in
+#'   the form of  multiallelic sites (that is, were split from multiallelic
+#'   sites to biallelic sites) 3. rows_with_overlapping_genes_log -> -  a
+#'   logical vector with length of nrow(varmat_added) indicating which rows once
+#'   had multiple annotations in the form of overlapping genes (that is, were
+#'   split from a SNP in multiple genes to each gene being represented on a
+#'   single line) 4. split_rows_flag - an integer vector indicating which rows
+#'   were split from from a row with multiple annotations (For example if varmat
+#'   had 4 rows: 1, 2, 3, 4 with row 2 having 3 annotations and row 4 having 2
+#'   annotations, the vector would be 1 2 2 2 3 4 4). 5. varmat_added - a
+#'   data.frame where the rows are variants, the columns are genomes, and the
+#'   row.names are SPLIT annotations (each overlapping gene and multiallelic
+#'   site represented as a single line).
 #' @export
 #'
-split_rows_with_multiple_annots <- function(varmat){
+split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
 
   num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
 
   rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 1 & stringr::str_count(row.names(varmat), '\\|') > 9]
 
   # Get rows with multallelic sites
-  rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(varmat))
+  if (snp_parser_log) {
+    rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G],[A,C,T,G]', row.names(varmat))
+  } else {
+    rows_with_multi_allelic_sites = grep('^.+> [A,C,T,G]+,[A,C,T,G]+', row.names(varmat))
+  }
 
   # Get SNVs present in overlapping genes
   split_annotations <- strsplit(row.names(varmat)[rows_with_multiple_annotations], ";")
@@ -202,12 +209,24 @@ split_rows_with_multiple_annots <- function(varmat){
   rows_with_overlapping_genes_log = split_rows_flag %in% rows_with_overlapping_genes
 
   # FIX ANNOTS OF SNP MAT ADDED - ROWS WITH MULT VAR ALLELE
-  row.names(varmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
-    if (grepl('> [A,C,T,G],[A,C,T,G].*functional=', r)) {
-      var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% substr(.,nchar(.),nchar(.))
-      gsub('> [A,C,T,G],[A,C,T,G].*functional=', paste('>', var, 'functional='), r)
-    }
-  })
+  if (snp_parser_log) {
+    row.names(varmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
+      if (grepl('> [A,C,T,G]+,[A,C,T,G]+.*functional=', r)) {
+        var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% substr(.,nchar(.),nchar(.))
+        gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r)
+      }
+    })
+  } else {
+    row.names(varmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
+      if (grepl('> [A,C,T,G]+,[A,C,T,G]+.*functional=', r)) {
+        var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% gsub(".*;", "", .)
+        gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r)
+      }
+    })
+  }
+
+
+
 
   return(list(rows_with_multiple_annots_log,
               rows_with_mult_var_allele_log,
