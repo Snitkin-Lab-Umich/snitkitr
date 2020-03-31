@@ -87,8 +87,8 @@ The `expect_error()` function tests that what is called within gives an error or
 There are other `expect_()` functions like `expect_true()`, `expect_false()`, etc... 
 
 ## Running the unit tests
-To check if all of the unit tests are working, which means all of the package functions are working as expected click: 
-Build > More > Test Package
-Wait to see if all of the tests pass. If some fail you'll need to update your function code. 
+To check if all of the unit tests are working, which means all of the package functions are working as expected click:   
+Build > More > Test Package  
+Wait to see if all of the tests pass. If some fail you'll need to update your function code.   
 
 
