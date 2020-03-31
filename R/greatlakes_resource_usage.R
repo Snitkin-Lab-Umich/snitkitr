@@ -74,21 +74,33 @@ GetResourceUsage = function( jobId )
 #' @examples
 #' ConvertTimeToHours("1-10:30:00")
 #' ConvertTimeToHours("10:30:00")
-
 ConvertTimeToHours = function(timeStr)
 {
+  # Check function input -------------------------------------------------------
+  if (!is.character(timeStr)) {
+    stop("Input must be a character string.")
+  }
+  if (!grepl("[0-9][0-9][:][0-9][0-9][:][0-9][0-9]", timeStr)) {
+    stop("Input must be of the format 10:00:00 or 1-10:00:00")
+  }
+  
+  # Function -------------------------------------------------------------------
   days <- 0
+  # When there are 1 or more days of run time 
   if (grepl("-", timeStr)) {
     days <- as.numeric(unlist(strsplit(timeStr, "-"))[1])
-    
   }
+  days_in_hours <- days * 24
+  
+  # Time ignoring days
   timeStr_without_days <- gsub(".*[-]", "", timeStr)
-  times   = as.numeric( unlist(strsplit(timeStr_without_days, ':') ) )
+  times <- as.numeric( unlist(strsplit(timeStr_without_days, ':') ) )
   expVals = c(0, 1, 2)
   hours   = sum( sapply( seq(3), function(i) times[i] / 60**expVals[i] ) )
-  days_in_hours <- days * 24
+  
+  # Add hours from days plus hours without days together
   total <- sum(hours, days_in_hours)
-  return(  round(total, 3) )
+  return(round(total, 3))
 }
 
 # ------------------------------------------------------------------------------
