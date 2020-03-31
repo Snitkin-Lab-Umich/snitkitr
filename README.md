@@ -93,4 +93,6 @@ To check if all of the unit tests are working, which means all of the package fu
 Build > More > Test Package  
 Wait to see if all of the tests pass. If some fail you'll need to update your function code.   
 
+## If you want email notifications when people add new functions
+If you want email updates for pushes to the snitkitr package go to https://github.com/Snitkin-Lab-Umich/snitkitr/settings > notifications; then add your email address. You must be a member of the github group to be added to this list. Evan is the owner of the membership list so please contact him if you wish to be added.
 
