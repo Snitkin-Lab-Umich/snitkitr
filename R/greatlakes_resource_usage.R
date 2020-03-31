@@ -11,6 +11,15 @@
 # (1) When the memory usage is basically 0MB
 # (2) When the run time is more than 1 day
 
+#' Get memory usage and run time for a Great Lakes sbatch job given the job id
+#' 
+#' @description This function needs to be run from the command line, not within 
+#'   an Rstudio session due to a call of system(). T
+#'
+#' @param jobId Character or numeric
+#'
+#' @return Numeric Vector. Memory in GB and time in hours. 
+#' @export
 GetResourceUsage = function( jobId )
 {
   # Run the system command to get the seff result for this job ID
@@ -45,9 +54,27 @@ GetResourceUsage = function( jobId )
   return( c(ConvertTimeToHours(wallTime), memoryUsage) )
 }
 
-# Take the seff time result in hours:minutes:seconds and convert the 
-# results to hours
-# KS modified to take data of the form: 1-15:04:51, where 1 == 1 day, so it's actually 24+16=39 hours. 
+#' Convert sbatch job run time into hours
+#' 
+#' @description the `$ seff <jobid>` command on Great Lakes returns a string 
+#'   that includes the run time of an sbatch job. These strings look like: 
+#'   * Job Wall-clock time: 10:30:00 
+#'   or 
+#'   * Job Wall-clock time: 1-10:30:00
+#'   and indicate 10.5 hours or 34.5 hours, respectively. Given such a string 
+#'   this function converts the number portion into just hours. The time is 
+#'   recorded as hours:minutes:seconds.
+#'   
+#' @param timeStr String of the form: 1-10:30:00 or 10:30:00. The number before
+#'   the dash indicates days. 
+#'
+#' @return Number of hours rounded to 3 digits. Numeric.
+#' @export
+#'
+#' @examples
+#' ConvertTimeToHours("1-10:30:00")
+#' ConvertTimeToHours("10:30:00")
+
 ConvertTimeToHours = function(timeStr)
 {
   days <- 0
