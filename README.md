@@ -30,7 +30,9 @@ Every time you're done writing code run:
 `$ git add <file name>`  # to add multiple files use `$ git add .`  
 `$ git commit -m "In present tense, add a ~one sentence description of the changes you made"` # This is a record to explain to yourself and others what code you wrote   
 `$ git push` # This shares your changes to github so that other users can grab them  
-  
+
+Please add your new function_name() and it's title to the Function_List.txt file so that new lab members can quickly survey all of the functions available in the package.  
+    
 ## Writing code that's easy for others to use
 When writing functions for the whole lab to use please make your code easy to read. There are several steps you can take to make the code accessible to other users:  
 1. Write informative function and variable names. 
