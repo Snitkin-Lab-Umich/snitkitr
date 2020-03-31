@@ -1,0 +1,36 @@
+greatlakes_resource_usage.R
+1. GetResourceUsage() Get memory usage and run time for a Great Lakes sbatch job given the job id
+2. ConvertTimeToHours() Convert sbatch job run time into hours
+
+parse_indels.R
+1. get_indel_info_from_annotations() Grab information from each annotation
+2. parse_indels() Parse indel variant matrix from Ali's pipeline
+
+parse_snps.R
+1. get_snp_info_from_annotations() Grab information from each annotation
+2. parse_snps() Parse SNP matrix from Ali's pipeline
+
+parse.R
+1. remove_rows_with_bugs() Remove variant matrix rows with bugs in the annotations
+2. remove_rows_with_no_variants_or_completely_masked() Remove rows with no variants or that are completely masked
+3. split_rows_with_multiple_annots() Split rows that have multiple annotations
+4. remove_rows_with_multiple_annots() Remove any rows with multiple annotations
+5. remove_alt_allele_code_from_split_rows() Update code matrix such that alternative alleles are 0s
+6. root_tree_og() Root tree on outgroup
+7. get_anc_alleles() Get ancestral state of alleles
+8. load_if_path() Load matrix from path if needed
+9. remove_unknown_anc() Remove unknown ancestral states
+
+reference_alleles.R
+1. make_all_tree_edges_positive() Make tree edges positive
+2. get_major_alleles() Get major alleles
+3. get_ancestral_alleles() Get ancestral state of alleles
+4. remove_unknown_alleles() Remove unknown ancestral states
+5. make_binary_matrix() Make binary matrix from allele matrix
+
+validate.R
+1. is_this_class() Tests if an input object has the specified class.
+2. check_is_this_class() Checks if an object is of the expected R class.
+3. check_is_tree() Check that the input tree is actually a 'phylo' object.
+4. check_tree_is_rooted() Check that the tree has a root.
+5. check_setequal_tree_mat() Confirm that the tree and variant matrix contain exactly the same samples
