@@ -143,7 +143,7 @@ get_indel_info_from_annotations <- function(varmat){
   return(annotations)
 }
 
-#' parse_indels
+#' Parse indel variant matrix from Ali's pipeline
 #' @description Input matrices generated from internal (Ali's) variant calling
 #'   pipeline. Always returns parsed annotation info. In addition, you have the
 #'   option to: 1. split rows with multiple annotations (snps in overlapping
