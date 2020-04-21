@@ -184,12 +184,14 @@ parse_indels <- function(varmat_code,
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
 
+  print("A")
   # add semicolons to the end of the row names that don't have semicolons
   row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
     paste0(row.names(varmat_code)[!grepl(";$", row.names(varmat_code))], ";")
   row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))] <-
     paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
 
+  print("B")
   # REMOVE BUGS
   varmat_code <- remove_rows_with_bugs(varmat_code)
   varmat_allele <- remove_rows_with_bugs(varmat_allele)
@@ -199,7 +201,7 @@ parse_indels <- function(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
-
+  print("C")
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
@@ -223,7 +225,7 @@ parse_indels <- function(varmat_code,
         alleles <- get_major_alleles(varmat_allele)
       }
     }
-
+    print("D")
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
@@ -245,7 +247,7 @@ parse_indels <- function(varmat_code,
         alleles <- get_major_alleles(varmat_allele)
       }
     }
-
+    print("E")
     # SPLIT MATRICES
     varmat_code_split_list <-
       split_rows_with_multiple_annots(varmat_code, snp_parser_log = FALSE)
@@ -263,7 +265,7 @@ parse_indels <- function(varmat_code,
     if (return_binary_matrix) {
       alleles <- alleles[split_rows_flag, ]
     }
-
+    print("F")
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
                    rows_with_multiple_annots_log,
@@ -279,7 +281,7 @@ parse_indels <- function(varmat_code,
                                              annots$var,
                                              rows_with_mult_var_allele_log)
   }
-
+  print("G")
   if (return_binary_matrix) {
     if (ref_to_anc) {
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
@@ -353,7 +355,7 @@ parse_indels <- function(varmat_code,
     save(parsed, file = "INDEL_parsed.RData")
     return(parsed)
   }
-
+  print("H")
   parsed <- list(code = list(mat = varmat_code, annots = annots),
                 allele = list(mat = varmat_allele, annots = annots))
   save(parsed, file = "INDEL_parsed.RData")
