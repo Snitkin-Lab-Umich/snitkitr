@@ -232,9 +232,14 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
       }
     })
   } else {
-    row.names(varmat_added)[rows_with_mult_var_allele_log] = sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
+    row.names(varmat_added)[rows_with_mult_var_allele_log] =
+      sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
       if (grepl('> [A,C,T,G]+,[A,C,T,G]+.*functional=', r)) {
         var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% gsub(".*;", "", .)
+        print("var in else statement")
+        print(var)
+        print("gsub")
+        print(gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r))
         gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r)
       }
     })
