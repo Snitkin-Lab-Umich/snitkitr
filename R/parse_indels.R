@@ -42,6 +42,13 @@ get_indel_info_from_annotations <- function(varmat){
     label[i] <- gsub(" at [1-9].*$", "", split_row[1])
 
     # Position in genome
+    print("before if/else")
+    print("split_row[1]")
+    print(split_row[1])
+    print('gsub("^.*at ", "", split_row[1])')
+    print(gsub("^.*at ", "", split_row[1]))
+    print(' gsub("^.*at ", "", split_row[1]) %>% gsub(" > [A,C,T,G].*$", "", .)')
+    print(gsub("^.*at ", "", split_row[1]) %>% gsub(" > [A,C,T,G].*$", "", .))
     pos[i] <- gsub("^.*at ", "", split_row[1]) %>% gsub(" > [A,C,T,G].*$", "", .)
 
     # INDEL TYPE
