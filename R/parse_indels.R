@@ -250,12 +250,12 @@ parse_indels <- function(varmat_code,
     print("E")
     # SPLIT MATRICES
     varmat_code_split_list <-
-      split_rows_with_multiple_annots_indels(varmat_code,
-                                             snp_parser_log = FALSE)
+      split_rows_with_multiple_annots(varmat_code,
+                                      snp_parser_log = FALSE)
     print("i")
     varmat_allele_split_list <-
-      split_rows_with_multiple_annots_indels(varmat_allele,
-                                             snp_parser_log = FALSE)
+      split_rows_with_multiple_annots(varmat_allele,
+                                      snp_parser_log = FALSE)
     print("ii")
     varmat_code <- varmat_code_split_list[[5]]
     varmat_allele <- varmat_allele_split_list[[5]]
