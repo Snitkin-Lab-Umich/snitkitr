@@ -55,6 +55,14 @@ get_indel_info_from_annotations <- function(varmat){
       indel_type[i] <- "dup"
       indel_nuc[i] <- gsub(".*dup", "", split_row[5])
     } else {
+      print("in non-del, non-ins section")
+      print("pos[i")
+      print(pos[i])
+      print("split_row[5]")
+      print(split_row[5])
+      print("split_row")
+      print(split_row)
+
       stop("Found non-deletion, non-insertion")
     }
 
