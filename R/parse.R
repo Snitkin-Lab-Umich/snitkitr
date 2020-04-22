@@ -155,8 +155,10 @@ remove_rows_with_no_variants_or_completely_masked <- function(varmat_code, varma
 #'
 split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
 
+  # Returns a vector of numbers
   num_dividers <- sapply(1:nrow(varmat), function(x) lengths(regmatches(row.names(varmat)[x], gregexpr(";[A,C,G,T]", row.names(varmat)[x]))))
 
+  # Returns a vector of numbers
   rows_with_multiple_annotations <- c(1:nrow(varmat))[num_dividers >= 1 & stringr::str_count(row.names(varmat), '\\|') > 9]
 
   # Get rows with multallelic sites
@@ -180,6 +182,9 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
   row_indices = 1:nrow(varmat)
 
   varmat_added = varmat[rep(row_indices, num_dividers),]
+
+  print("I")
+  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
 
   # When rows are duplicated .1, .2, .3, etc are added to the end
   # (depending on how many times they were duplicated)
@@ -210,6 +215,9 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
       paste(r[1], r[index + 2], sep = ';')
     }
   })
+  print("II")
+  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
+
 
   rows_with_multiple_annots_log = split_rows_flag %in% rows_with_multiple_annotations
   rows_with_mult_var_allele_log = split_rows_flag %in% rows_with_multi_allelic_sites
@@ -232,7 +240,8 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
     })
   }
 
-
+  print("III")
+  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
 
 
   return(list(rows_with_multiple_annots_log,
