@@ -245,9 +245,6 @@ parse_indels <- function(varmat_code,
       if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
         alleles <- get_anc_alleles(tree, varmat_allele)
-        print("sum(is.na(alleles[,1])) then [,2]")
-        print(sum(is.na(alleles[, 1])))
-        print(sum(is.na(alleles[, 2])))
 
       } else {
         # REFERENCE TO MAJOR ALLELE
@@ -255,17 +252,14 @@ parse_indels <- function(varmat_code,
       }
     }
     print("E")
-    print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
 
     # SPLIT MATRICES
     varmat_code_split_list <-
       split_rows_with_multiple_annots(varmat_code,
                                       snp_parser_log = FALSE)
-    print("i")
     varmat_allele_split_list <-
       split_rows_with_multiple_annots(varmat_allele,
                                       snp_parser_log = FALSE)
-    print("ii")
     varmat_code <- varmat_code_split_list[[5]]
     varmat_allele <- varmat_allele_split_list[[5]]
 
@@ -274,7 +268,6 @@ parse_indels <- function(varmat_code,
     rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
     split_rows_flag <- varmat_code_split_list[[4]]
 
-    print("iii")
     if (return_binary_matrix) {
       alleles <- alleles[split_rows_flag, ]
     }
@@ -302,8 +295,6 @@ parse_indels <- function(varmat_code,
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
       print("H")
       annots$anc <- alleles[, 1]
-      print("print(sum(is.na(annots$anc)))")
-      print(sum(is.na(annots$anc)))
       annots$anc_prob <- alleles[, 2]
 
       # REMOVE SITE WITH UNKNOWN ANCESTOR
@@ -329,20 +320,10 @@ parse_indels <- function(varmat_code,
 
     print("K")
     annots_bin <- annots[to_keep,]
-    print("dim annots_bin then varmat_bin")
-    print(dim(annots_bin))
-    print(dim(varmat_bin))
 
     if (ref_to_anc) {
       print("L")
-      print("row names 1-15")
-      print(row.names(varmat_bin)[1:15])
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
-        print("row name, then x, then ref, then anc")
-        print(row.names(varmat_bin)[x])
-        print(x)
-        print(annots_bin$ref[x])
-        print(annots_bin$anc[x])
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {

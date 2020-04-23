@@ -83,33 +83,42 @@ remove_rows_with_bugs <- function(varmat){
 
 #' Remove rows with no variants or that are completely masked
 #' @description Removes rows that have no variants (the same allele in every
-#' sample +/- N and dash) or rows that are completely masked (all Ns).
+#'   sample +/- N and dash) or rows that are completely masked (all Ns).
 #'
-#' @param varmat_code - data.frame where the rows are variants (numeric description
-#' variants: numbers ranging from -4 to 3), the columns are genomes, and the
-#' row.names are annotations
-#' @param varmat_allele - data.frame where the rows are variants (character description
-#' variants: A,C,T,G,N,-), the columns are genomes, and the row.names are annotations
+#' @param varmat_code - data.frame where the rows are variants (numeric
+#'   description variants: numbers ranging from -4 to 3), the columns are
+#'   genomes, and therow.names are annotations
+#' @param varmat_allele - data.frame where the rows are variants (character
+#'   description variants: A,C,T,G,N,-), the columns are genomes, and the
+#'   row.names are annotations
 #'
 #' @return Returns a list with the following elements (in order):
-#' 1. varmat_code (class = data.frame) with non-variant rows removed. All rows have at least
-#' one sample with a variant.
-#' 2. varmat_allele (class = data.frame) with non-variant rows removed. All rows have at least
-#' one sample with a variant.
-#' 1 and 2 should be the same dimensions and have the same row names.
-#' Also writes a file called YEAR_MONTH_DATE_rows_removed_because_no_variants
-#' logging the row names of the removed rows.
+#'   1. varmat_code
+#'   (class = data.frame) with non-variant rows removed. All rows have at least
+#'   one sample with a variant.
+#'   2. varmat_allele (class = data.frame) with
+#'   non-variant rows removed. All rows have at least one sample with a variant.
+#'   1 and 2 should be the same dimensions and have the same row names. Also
+#'   writes a file called YEAR_MONTH_DATE_rows_removed_because_no_variants
+#'   logging the row names of the removed rows.
 #' @export
-remove_rows_with_no_variants_or_completely_masked <- function(varmat_code, varmat_allele){
+remove_rows_with_no_variants_or_completely_masked <- function(varmat_code,
+                                                              varmat_allele){
+  if (!identical(dim(varmat_code), dim(varmat_allele))) {
+    stop("Dimensions need to match")
+  }
   rows_with_one_allele_or_all_Ns_or_dashes = apply(varmat_allele, 1, function(row){
     length(unique(row)) == 1
   })
 
   file = paste0(Sys.Date(), '_rows_removed_because_no_variants')
-  write(x = row.names(varmat_code)[rows_with_one_allele_or_all_Ns_or_dashes], file = file)
+  write(x = row.names(varmat_code)[rows_with_one_allele_or_all_Ns_or_dashes],
+        file = file)
 
-  varmat_code_rows_removed = varmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
-  varmat_allele_rows_removed = varmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  varmat_code_rows_removed <-
+    varmat_code[!rows_with_one_allele_or_all_Ns_or_dashes,]
+  varmat_allele_rows_removed <-
+    varmat_allele[!rows_with_one_allele_or_all_Ns_or_dashes,]
 
   return(list(varmat_code_rows_removed, varmat_allele_rows_removed))
 }
