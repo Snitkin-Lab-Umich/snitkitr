@@ -322,6 +322,14 @@ parse_snps <- function(varmat_code,
         }
       })))
 
+      # Add row and columns names to the binary matrix that gets returned
+      if (identical(dim(varmat_bin_reref), dim(varmat_bin))) {
+        colnames(varmat_bin_reref) <- colnames(varmat_bin)
+        row.names(varmat_bin_reref) <- row.names(varmat_bin)
+      } else {
+        stop("Mismatched dimensions")
+      }
+
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           "no"
@@ -370,6 +378,9 @@ parse_snps <- function(varmat_code,
         }
       })
     }
+
+    # Remove rows with NAs in them caused by "complicated" multiallelic situations
+    varmat_bin_reref <- remove_NA_rows(varmat_bin_reref)
 
     parsed <- list(code = list(mat = varmat_code,
                               annots = annots),

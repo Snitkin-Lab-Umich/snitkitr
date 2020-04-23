@@ -1,6 +1,7 @@
 .Rproj.user
 *.csv
 *.tsv
+*rows_removed_because_complicated_ancestral_state_for_multiallelic_site.txt
 *rows_removed_from_varmat_alleledue_to_bugs.txt
 *rows_removed_from_varmat_codedue_to_bugs.txt
 *_rows_removed_because_no_variants*

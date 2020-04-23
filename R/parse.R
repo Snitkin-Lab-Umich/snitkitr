@@ -496,3 +496,32 @@ remove_snps <- function(mat){
   mat <- mat[!grepl(" SNP ", row.names(mat)), , drop = FALSE]
   return(mat)
 }
+
+#' Remove any rows in the matrix that are NAs
+#'
+#' @description This situation arises in the rereferencing step when it's a
+#'   "complicated" multiallelic site. In the future we could do something more
+#'   nuanced so as to not assign NAs in the first place, but for now just giving
+#'   it NA and removing them.
+#' @param mat Referenced binary matrix
+#'
+#' @return The same or a subset of the binary matrix.
+#' @export
+#'
+remove_NA_rows <- function(mat) {
+  rows_with_NAs_logical <- is.na(mat[, 1])
+  # ^Only need to look at the first row because the previous steps assign NA for
+  # every entry in the row if it's "complicated"
+  removed_rownames <- row.names(mat)[rows_with_NAs_logical]
+  mat <- mat[!rows_with_NAs_logical, , drop = FALSE]
+  filename <-
+    paste0(Sys.Date(),
+           '_rows_removed_because_complicated_ancestral_state_for_multiallelic_site.txt')
+  write.table(removed_rownames,
+              file = filename,
+              sep = '\n',
+              quote = FALSE,
+              row.names = FALSE,
+              col.names = FALSE)
+  return(mat)
+}

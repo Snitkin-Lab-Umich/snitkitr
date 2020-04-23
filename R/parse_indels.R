@@ -316,17 +316,27 @@ parse_indels <- function(varmat_code,
     if (ref_to_anc) {
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
+          # If the reference allele equals the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          # If not a multiallelic site, switch 0's and 1's
           unlist(as.numeric(!varmat_bin[x, ]))
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
+          # If the multiallelic variant is equal to the the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
         } else {
           unlist(rep(NA,ncol(varmat_bin)))
         }
       })))
 
-      colnames(varmat_bin_reref) <- colnames(varmat_bin)
+      # Add row and columns names to the binary matrix that gets returned
+      if (identical(dim(varmat_bin_reref), dim(varmat_bin))) {
+        colnames(varmat_bin_reref) <- colnames(varmat_bin)
+        row.names(varmat_bin_reref) <- row.names(varmat_bin)
+      } else {
+        stop("Mismatched dimensions")
+      }
+
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           "no"
@@ -349,6 +359,9 @@ parse_indels <- function(varmat_code,
       names(varmat_bin_reref) <- names_varmat_bin
       reref <- rep(NA,nrow(varmat_bin))
     }
+
+    # Remove rows with NAs in them caused by "complicated" multiallelic situations
+    varmat_bin_reref <- remove_NA_rows(varmat_bin_reref)
 
     parsed <- list(code = list(mat = varmat_code,
                               annots = annots),
