@@ -196,18 +196,42 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
   dup = unique(split_rows_flag[duplicated(split_rows_flag)]) # rows that were duplicated
 
   split_annotations <- strsplit(row.names(varmat_added)[split_rows_flag %in% dup], ";")
+  print("split_annotations")
 
   # FIX ANNOTS OF SNP MAT ADDED - RELIES ON THE .1, .2, .3, ... etc flag
   row.names(varmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
     # r is the vector of each list element
+
+    # Here are two list elements.
+    # Ex:
+
+    # [[1]]
+    # [1] Coding Indel at 440983 > CTTGTGTAGAAG
+    # [2] AAAAAGCTAACA|stop_gained&disruptive_inframe_insertion|HIGH|CWR55_RS02385|c.829_830 ...
+    # [3] TTAAAGTTAATA|stop_gained&disruptive_inframe_insertion|HIGH|CWR55_RS02385|c.829_830insC...
+    # [4] TTAAAGCTAACA|frameshift_variant&stop_gained|HIGH|CWR55_RS02385|c.829_830insATGTAGAAGAA ...
+
+    # ^ r would be a vector of elements 1-4
+
+    # [[2]]
+    # [1] Coding Indel at 440983 > CTTGTGTAGAAG
+    # [2] AAAAAGCTAACA|stop_gained&disruptive_inframe_insertion|HIGH|CWR55_RS02385|c.829_830 ...
+    # [3] TTAAAGTTAATA|stop_gained&disruptive_inframe_insertion|HIGH|CWR55_RS02385|c.829_830insC...
+    # [4] TTAAAGCTAACA|frameshift_variant&stop_gained|HIGH|CWR55_RS02385|c.829_830insATGTAGAAGAA ...
+    # [5] .1
+
+    # ^ r would be a vector of elements 1-5
+
+    # etc...
+
+
     last_vector_entry <- r[length(r)]
     num_vector_entry <- length(r)
 
     if (num_vector_entry == 3) {
-      # This is the case for the first list element (No .#; .1 means the second entry)
       paste(r[1], r[2], sep = ';')
-    } else if (num_vector_entry > 3 & !grepl(pattern = "[.][0-9]+", last_vector_entry)) {
-      # Neither the first list element nor a .1, .2, .3, etc...
+    } else if (num_vector_entry > 3 & !grepl(pattern = "^[.][0-9]+", last_vector_entry)) {
+      # Neither the first list nor a .1, .2, .3, etc...
       paste(r[1], r[2], sep = ';')
     } else {
       # .1, .2, .3, etc....
