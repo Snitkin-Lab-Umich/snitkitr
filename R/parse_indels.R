@@ -34,10 +34,6 @@ get_indel_info_from_annotations <- function(varmat){
     annotation_2 <- strand <- ig_gene1 <- ig_gene2 <- intergenic <-
     indel_type <- indel_nuc <- rep(NA, nrow(varmat))
 
-  print("in get_indel_info_from_annotations")
-  print(row.names(varmat)[which(grepl("Coding Indel at 440983", row.names(varmat)))])
-
-
   for (i in 1:nrow(varmat)) {
     row <- row.names(varmat)[i]
     split_row <- unlist(stringr::str_split(row, pattern = "[|]"))
@@ -59,14 +55,6 @@ get_indel_info_from_annotations <- function(varmat){
       indel_type[i] <- "dup"
       indel_nuc[i] <- gsub(".*dup", "", split_row[5])
     } else {
-      print("in non-del, non-ins section")
-      print("pos[i")
-      print(pos[i])
-      print("split_row[5]")
-      print(split_row[5])
-      print("split_row")
-      print(split_row)
-
       stop("Found non-deletion, non-insertion")
     }
 
@@ -197,7 +185,6 @@ parse_indels <- function(varmat_code,
   varmat_allele <- load_if_path(varmat_allele)
 
   print("A")
-  print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
   # add semicolons to the end of the row names that don't have semicolons
   row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
     paste0(row.names(varmat_code)[!grepl(";$", row.names(varmat_code))], ";")
@@ -205,7 +192,6 @@ parse_indels <- function(varmat_code,
     paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
 
   print("B")
-  print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
 
   # REMOVE BUGS
   varmat_code <- remove_rows_with_bugs(varmat_code)
@@ -217,7 +203,6 @@ parse_indels <- function(varmat_code,
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
   print("C")
-  print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
@@ -243,7 +228,6 @@ parse_indels <- function(varmat_code,
       }
     }
     print("D")
-    print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -296,7 +280,6 @@ parse_indels <- function(varmat_code,
     }
 
     print("F")
-    print(row.names(varmat_code)[which(grepl("Coding Indel at 440983", row.names(varmat_code)))])
 
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
@@ -352,8 +335,11 @@ parse_indels <- function(varmat_code,
 
     if (ref_to_anc) {
       print("L")
+      print("row names 1-15")
+      print(row.names(varmat_bin)[1:15])
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
-        print("x, then ref, then anc")
+        print("row name, then x, then ref, then anc")
+        print(row.names(varmat_bin)[x])
         print(x)
         print(annots_bin$ref[x])
         print(annots_bin$anc[x])
