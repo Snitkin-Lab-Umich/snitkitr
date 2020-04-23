@@ -310,19 +310,6 @@ parse_snps <- function(varmat_code,
 
       annots_bin <- annots[to_keep, ]
 
-      print("dim annots_bin ")
-      print(dim(annots_bin))
-
-      print("dim varmat_bin")
-      print(dim(varmat_bin))
-
-      print("head(annots_bin$ref)")
-      print(head(annots_bin$ref))
-
-      print("head(annots_bin$anc)")
-      print(head(annots_bin$anc))
-
-
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])

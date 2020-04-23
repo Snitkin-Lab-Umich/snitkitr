@@ -184,14 +184,11 @@ parse_indels <- function(varmat_code,
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
 
-  print("A")
   # add semicolons to the end of the row names that don't have semicolons
   row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
     paste0(row.names(varmat_code)[!grepl(";$", row.names(varmat_code))], ";")
   row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))] <-
     paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
-
-  print("B")
 
   # REMOVE BUGS
   varmat_code <- remove_rows_with_bugs(varmat_code)
@@ -202,7 +199,6 @@ parse_indels <- function(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
-  print("C")
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
@@ -227,7 +223,6 @@ parse_indels <- function(varmat_code,
         alleles <- get_major_alleles(varmat_allele)
       }
     }
-    print("D")
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -251,7 +246,6 @@ parse_indels <- function(varmat_code,
         alleles <- get_major_alleles(varmat_allele)
       }
     }
-    print("E")
 
     # SPLIT MATRICES
     varmat_code_split_list <-
@@ -272,8 +266,6 @@ parse_indels <- function(varmat_code,
       alleles <- alleles[split_rows_flag, ]
     }
 
-    print("F")
-
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
                    rows_with_multiple_annots_log,
@@ -289,17 +281,15 @@ parse_indels <- function(varmat_code,
                                              annots$var,
                                              rows_with_mult_var_allele_log)
   }
-  print("G")
+
   if (return_binary_matrix) {
     if (ref_to_anc) {
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
-      print("H")
       annots$anc <- alleles[, 1]
       annots$anc_prob <- alleles[, 2]
 
       # REMOVE SITE WITH UNKNOWN ANCESTOR
       varmats <- remove_unknown_anc(varmat_code, varmat_allele, annots)
-      print("I")
       varmat_code <- varmats$varmat_code
       varmat_allele <- varmats$varmat_allele
       annots <- varmats$annots
@@ -307,7 +297,6 @@ parse_indels <- function(varmat_code,
       annots$maj <- alleles
     }
 
-    print("J")
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
     to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
@@ -318,11 +307,9 @@ parse_indels <- function(varmat_code,
     varmat_bin[varmat_bin == 3] <- 1
     varmat_bin[varmat_bin == -1] <- 0
 
-    print("K")
     annots_bin <- annots[to_keep,]
 
     if (ref_to_anc) {
-      print("L")
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
@@ -335,7 +322,6 @@ parse_indels <- function(varmat_code,
         }
       })))
 
-      print("M")
       colnames(varmat_bin_reref) <- colnames(varmat_bin)
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
@@ -348,9 +334,7 @@ parse_indels <- function(varmat_code,
           "complicated"
         }
       })
-      print("N")
     } else {
-      print("O")
       names_varmat_bin <- names(varmat_bin)
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (sum(varmat_bin[x, ] == 1, na.rm = TRUE) > sum(varmat_bin[x, ] == 0, na.rm = TRUE)) {
@@ -360,10 +344,8 @@ parse_indels <- function(varmat_code,
       })))
       names(varmat_bin_reref) <- names_varmat_bin
       reref <- rep(NA,nrow(varmat_bin))
-      print("P")
     }
 
-    print("Q")
     parsed <- list(code = list(mat = varmat_code,
                               annots = annots),
                   allele = list(mat = varmat_allele,
@@ -373,7 +355,6 @@ parse_indels <- function(varmat_code,
     save(parsed, file = "INDEL_parsed.RData")
     return(parsed)
   }
-  print("end")
   parsed <- list(code = list(mat = varmat_code, annots = annots),
                 allele = list(mat = varmat_allele, annots = annots))
   save(parsed, file = "INDEL_parsed.RData")
