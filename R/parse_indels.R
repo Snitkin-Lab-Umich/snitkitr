@@ -313,11 +313,13 @@ parse_indels <- function(varmat_code,
   if (return_binary_matrix) {
     if (ref_to_anc) {
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
+      print("H")
       annots$anc <- alleles[, 1]
       annots$anc_prob <- alleles[, 2]
 
       # REMOVE SITE WITH UNKNOWN ANCESTOR
       varmats <- remove_unknown_anc(varmat_code, varmat_allele, annots)
+      print("I")
       varmat_code <- varmats$varmat_code
       varmat_allele <- varmats$varmat_allele
       annots <- varmats$annots
@@ -325,6 +327,7 @@ parse_indels <- function(varmat_code,
       annots$maj <- alleles
     }
 
+    print("J")
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
     to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
@@ -335,10 +338,19 @@ parse_indels <- function(varmat_code,
     varmat_bin[varmat_bin == 3] <- 1
     varmat_bin[varmat_bin == -1] <- 0
 
+    print("K")
     annots_bin <- annots[to_keep,]
+    print("dim annots_bin then varmat_bin")
+    print(dim(annots_bin))
+    print(dim(varmat_bin))
 
     if (ref_to_anc) {
+      print("L")
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+        print("x, then ref, then anc")
+        print(x)
+        print(annots_bin$ref[x])
+        print(annots_bin$anc[x])
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
@@ -350,6 +362,7 @@ parse_indels <- function(varmat_code,
         }
       })))
 
+      print("M")
       colnames(varmat_bin_reref) <- colnames(varmat_bin)
       reref <- sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
@@ -362,7 +375,9 @@ parse_indels <- function(varmat_code,
           "complicated"
         }
       })
+      print("N")
     } else {
+      print("O")
       names_varmat_bin <- names(varmat_bin)
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (sum(varmat_bin[x, ] == 1, na.rm = TRUE) > sum(varmat_bin[x, ] == 0, na.rm = TRUE)) {
@@ -372,8 +387,10 @@ parse_indels <- function(varmat_code,
       })))
       names(varmat_bin_reref) <- names_varmat_bin
       reref <- rep(NA,nrow(varmat_bin))
+      print("P")
     }
 
+    print("Q")
     parsed <- list(code = list(mat = varmat_code,
                               annots = annots),
                   allele = list(mat = varmat_allele,
@@ -383,7 +400,7 @@ parse_indels <- function(varmat_code,
     save(parsed, file = "INDEL_parsed.RData")
     return(parsed)
   }
-  print("H")
+  print("end")
   parsed <- list(code = list(mat = varmat_code, annots = annots),
                 allele = list(mat = varmat_allele, annots = annots))
   save(parsed, file = "INDEL_parsed.RData")

@@ -183,9 +183,6 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
 
   varmat_added = varmat[rep(row_indices, num_dividers),]
 
-  print("I")
-  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
-
   # When rows are duplicated .1, .2, .3, etc are added to the end
   # (depending on how many times they were duplicated)
   # Remove to make the duplicated rows have the exact same name
@@ -196,7 +193,6 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
   dup = unique(split_rows_flag[duplicated(split_rows_flag)]) # rows that were duplicated
 
   split_annotations <- strsplit(row.names(varmat_added)[split_rows_flag %in% dup], ";")
-  print("split_annotations")
 
   # FIX ANNOTS OF SNP MAT ADDED - RELIES ON THE .1, .2, .3, ... etc flag
   row.names(varmat_added)[split_rows_flag %in% dup] =  sapply(split_annotations, function(r){
@@ -223,8 +219,6 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
     # ^ r would be a vector of elements 1-5
 
     # etc...
-
-
     last_vector_entry <- r[length(r)]
     num_vector_entry <- length(r)
 
@@ -239,9 +233,6 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
       paste(r[1], r[index + 2], sep = ';')
     }
   })
-  print("II")
-  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
-
 
   rows_with_multiple_annots_log = split_rows_flag %in% rows_with_multiple_annotations
   rows_with_mult_var_allele_log = split_rows_flag %in% rows_with_multi_allelic_sites
@@ -260,18 +251,10 @@ split_rows_with_multiple_annots <- function(varmat, snp_parser_log){
       sapply(row.names(varmat_added)[rows_with_mult_var_allele_log], function(r){
       if (grepl('> [A,C,T,G]+,[A,C,T,G]+.*functional=', r)) {
         var =  gsub('^.*Strand Information:', '', r) %>% gsub('\\|.*$', '', .) %>% gsub(".*;", "", .)
-        print("var in else statement")
-        print(var)
-        print("gsub")
-        print(gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r))
         gsub('> [A,C,T,G]+,[A,C,T,G]+.*functional=', paste('>', var, 'functional='), r)
       }
     })
   }
-
-  print("III")
-  print(row.names(varmat_added)[which(grepl("Coding Indel at 440983", row.names(varmat_added)))])
-
 
   return(list(rows_with_multiple_annots_log,
               rows_with_mult_var_allele_log,
