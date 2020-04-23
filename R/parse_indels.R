@@ -261,6 +261,10 @@ parse_indels <- function(varmat_code,
       if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
         alleles <- get_anc_alleles(tree, varmat_allele)
+        print("sum(is.na(alleles[,1])) then [,2]")
+        print(sum(is.na(alleles[, 1])))
+        print(sum(is.na(alleles[, 2])))
+
       } else {
         # REFERENCE TO MAJOR ALLELE
         alleles <- get_major_alleles(varmat_allele)
@@ -315,6 +319,8 @@ parse_indels <- function(varmat_code,
       # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
       print("H")
       annots$anc <- alleles[, 1]
+      print("print(sum(is.na(annots$anc)))")
+      print(sum(is.na(annots$anc)))
       annots$anc_prob <- alleles[, 2]
 
       # REMOVE SITE WITH UNKNOWN ANCESTOR
