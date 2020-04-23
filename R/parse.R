@@ -478,3 +478,21 @@ remove_unknown_anc = function(varmat_code, varmat_allele, annots){
               annots = annots[!unknown, ]))
 }
 
+
+#' Remove any row from an indel matrix that has the word SNP in the annotation
+#'
+#' @description I found a row in one indel matrix that called a SNP, ex:
+#' "No_protein_coding/intergenic_region_field_in_ANN SNP at 31494 > C
+#' functional=NULL_NULL_NULL locus_tag=JBHKLKBP_00048 Strand Information:
+#' JBHKLKBP_00048=+;C" - so this function will simply remove this from the indel
+#' parsing pipeline.
+#'
+#' @param mat Indel matrix. Rows = indels, columns = samples.
+#'
+#' @return Indel matrix
+#' @export
+#'
+remove_snps <- function(mat){
+  mat <- mat[!grepl(" SNP ", row.names(mat)), , drop = FALSE]
+  return(mat)
+}

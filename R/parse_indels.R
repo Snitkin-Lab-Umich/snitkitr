@@ -55,10 +55,6 @@ get_indel_info_from_annotations <- function(varmat){
       indel_type[i] <- "dup"
       indel_nuc[i] <- gsub(".*dup", "", split_row[5])
     } else {
-      print("in nondel nonins section")
-      print(pos[i]))
-      print(split_row)
-      print(split_row[5])
       stop("Found non-deletion, non-insertion")
     }
 
@@ -203,6 +199,10 @@ parse_indels <- function(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
+
+  # REMOVE GENOTYPES THAT ARE "SNPS"
+  varmat_code <- remove_snps(varmat_code)
+  varmat_allele <- remove_snps(varmat_allele)
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
