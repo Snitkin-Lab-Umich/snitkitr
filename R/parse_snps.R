@@ -380,7 +380,13 @@ parse_snps <- function(varmat_code,
     }
 
     # Remove rows with NAs in them caused by "complicated" multiallelic situations
-    varmat_bin_reref <- remove_NA_rows(varmat_bin_reref)
+    no_NA <- remove_NA_rows(varmat_bin_reref,
+                            annots_bin,
+                            reref)
+
+    varmat_bin_reref <- no_NA$varmat_bin_reref
+    annots_bin <- no_NA$annots_bin
+    reref <- no_NA$reref
 
     parsed <- list(code = list(mat = varmat_code,
                               annots = annots),

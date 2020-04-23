@@ -508,12 +508,33 @@ remove_snps <- function(mat){
 #' @return The same or a subset of the binary matrix.
 #' @export
 #'
-remove_NA_rows <- function(mat) {
+remove_NA_rows <- function(mat, annot_mat, reref_vec) {
+  if (nrow(mat) != nrow(annot_mat)) {
+    stop("Dimension mismatch")
+  }
+  if (nrow(mat) != length(reref_vec)) {
+    stop("Size mismatch")
+  }
+
+
   rows_with_NAs_logical <- is.na(mat[, 1])
   # ^Only need to look at the first row because the previous steps assign NA for
   # every entry in the row if it's "complicated"
   removed_rownames <- row.names(mat)[rows_with_NAs_logical]
+
+  # Subset all three inputs
   mat <- mat[!rows_with_NAs_logical, , drop = FALSE]
+  annot_mat <- annot_mat[!rows_with_NAs_logical, , drop = FALSE]
+  reref_vec <- reref_vec[!rows_with_NAs_logical]
+
+
+  if (nrow(mat) != nrow(annot_mat)) {
+    stop("Dimension mismatch")
+  }
+  if (nrow(mat) != length(reref_vec)) {
+    stop("Size mismatch")
+  }
+
   filename <-
     paste0(Sys.Date(),
            '_rows_removed_because_complicated_ancestral_state_for_multiallelic_site.txt')
@@ -523,5 +544,8 @@ remove_NA_rows <- function(mat) {
               quote = FALSE,
               row.names = FALSE,
               col.names = FALSE)
-  return(mat)
+  results <- list("varmat_bin_reref" = mat,
+                  "annots_bin" = annot_mat,
+                  "reref" = reref_vec)
+  return(results)
 }
