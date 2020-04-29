@@ -198,7 +198,7 @@ parse_snps <- function(varmat_code,
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
 
     # FIND ANCESTRAL STATE OF EACH ALLELE
-    major_alleles <- get_major_alleles(data.matrix(varmat_allele))
+    major_alleles <- get_major_alleles(varmat_allele)
 
     if (return_binary_matrix) {
       # REROOT TREE
