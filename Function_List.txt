@@ -1,7 +1,7 @@
 check_clustering_on_tree.R
 1. reverse_list_str() Reverse the structure of a list. Modified from https://stackoverflow.com/questions/15263146/revert-list-structure
 2. get_largest_subtree() Called by check_tree_clustering to find largest pure subtrees
-3. check_tree_clustering() Checks for clustering of an epi label on the phylogeny by comparing the largest subtree size between the real tree/data combination and trees with randomly permuted epi labels.
+3. check_tree_clustering() Checks for clustering of an epi label on the phylogeny by comparing the number of isolates in a pure subtree between the real tree/data combination and trees with randomly permuted epi labels.
 
 greatlakes_resource_usage.R
 1. GetResourceUsage() Get memory usage and run time for a Great Lakes sbatch job given the job id
