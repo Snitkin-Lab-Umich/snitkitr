@@ -60,6 +60,7 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL){
 }#end get_largest_subtree
 
 #' Check for clustering on tree
+#' @description This function is used to test for clustering of a certain epi factor on a phylogenetic tree. 
 #'
 #' @param tree Tree to look for clustering on.
 #' @param isolate_labels Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.
