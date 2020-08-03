@@ -4,8 +4,13 @@
 \alias{remove_alt_allele_code_from_split_rows}
 \title{Update code matrix such that alternative alleles are 0s}
 \usage{
-remove_alt_allele_code_from_split_rows(varmat_code_split,
-  varmat_allele_split, ref, var, rows_with_mult_var_allele_log)
+remove_alt_allele_code_from_split_rows(
+  varmat_code_split,
+  varmat_allele_split,
+  ref,
+  var,
+  rows_with_mult_var_allele_log
+)
 }
 \arguments{
 \item{varmat_code_split}{- data.frame where the rows are variants (numeric

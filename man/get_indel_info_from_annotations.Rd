@@ -7,34 +7,31 @@
 get_indel_info_from_annotations(varmat)
 }
 \arguments{
-\item{varmat}{- data.frame where the rows are variants, the columns are genomes,
-and the row.names are annotations}
+\item{varmat}{- data.frame where the rows are variants, the columns are
+genomes, and the row.names are annotations}
 }
 \value{
 data.frame of length nrow(varmat) containing the following columns:
-label - string indicating "Coding SNP or Non-Coding SNP"
-pos - position of variant in the reference genome
-phage -  the word NULL or the word PHAGE
-repeated_region -  the word NULL or the word REPEAT
-masked -  the word NULL or the word MASKED
-locus_tag - locus tag from gff file
-strand_info - returns strand information (currently incorrect until Ali fixes a bug)
-strand - returns + or - depending if gene is on positive or negative strand
-(determining this myself)
-ref - allele in the reference genome
-var - variant allele in terms of the positive strand
-aa_change - amino acid change in the form p.Tyr95Tyr or p.Glu75Ala
-variant_type - snpeff determined variant type (e.g. missense_variant, intergenic_region
-see snpeff manual for more info: http://snpeff.sourceforge.net/SnpEff_manual.html)
-snpeff_impact - snpeff determined impacted (e.g. LOW, MODERATE, MODIFIER, HIGH)
-nuc_pos_in_gene - variant position relative to the gene length
-aa_pos_in_gene - position of the codon-containing-variant relative to the gene length
-gene_length_in_bp - gene length in nucleotide base pairs
-annotation_1 - information about variant
-annotation_2 - information about variant
-ig_gene1 - if intergenic variant, first intergenic locus tag surrounding the variant
-ig_gene2 - if intergenic variant, second intergenic locus tag surrounding the variant
-intergenic - logical indicating if the variant is in an intergenic region
+  label - string indicating "Coding SNP or Non-Coding SNP" pos - position of
+  variant in the reference genome phage -  the word NULL or the word PHAGE
+  repeated_region -  the word NULL or the word REPEAT masked -  the word NULL
+  or the word MASKED locus_tag - locus tag from gff file strand_info -
+  returns strand information (currently incorrect until Ali fixes a bug)
+  strand - returns + or - depending if gene is on positive or negative strand
+  (determining this myself) ref - allele in the reference genome var -
+  variant allele in terms of the positive strand aa_change - amino acid
+  change in the form p.Tyr95Tyr or p.Glu75Ala variant_type - snpeff
+  determined variant type (e.g. missense_variant, intergenic_region see
+  snpeff manual for more info:
+  http://snpeff.sourceforge.net/SnpEff_manual.html) snpeff_impact - snpeff
+  determined impacted (e.g. LOW, MODERATE, MODIFIER, HIGH) nuc_pos_in_gene -
+  variant position relative to the gene length aa_pos_in_gene - position of
+  the codon-containing-variant relative to the gene length gene_length_in_bp
+  - gene length in nucleotide base pairs annotation_1 - information about
+  variant annotation_2 - information about variant ig_gene1 - if intergenic
+  variant, first intergenic locus tag surrounding the variant ig_gene2 - if
+  intergenic variant, second intergenic locus tag surrounding the variant
+  intergenic - logical indicating if the variant is in an intergenic region
 }
 \description{
 Parse annotations from row names.

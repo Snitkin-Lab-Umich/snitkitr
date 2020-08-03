@@ -9,6 +9,9 @@ remove_unknown_anc(varmat_code, varmat_allele, annots)
 \arguments{
 \item{annots}{}
 }
+\value{
+
+}
 \description{
 Remove rows from variant matrix where the ancestral state is unknown (- or N)
 }

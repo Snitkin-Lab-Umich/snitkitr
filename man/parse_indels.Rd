@@ -2,11 +2,17 @@
 % Please edit documentation in R/parse_indels.R
 \name{parse_indels}
 \alias{parse_indels}
-\title{parse_indels}
+\title{Parse indel variant matrix from Ali's pipeline}
 \usage{
-parse_indels(varmat_code, varmat_allele, tree = NULL, og = NULL,
-  remove_multi_annots = FALSE, return_binary_matrix = FALSE,
-  ref_to_anc = TRUE)
+parse_indels(
+  varmat_code,
+  varmat_allele,
+  tree = NULL,
+  og = NULL,
+  remove_multi_annots = FALSE,
+  return_binary_matrix = FALSE,
+  ref_to_anc = TRUE
+)
 }
 \arguments{
 \item{varmat_code}{- loaded data.frame or path to the varmat_code file

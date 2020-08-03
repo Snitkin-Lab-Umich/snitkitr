@@ -2,11 +2,17 @@
 % Please edit documentation in R/parse_snps.R
 \name{parse_snps}
 \alias{parse_snps}
-\title{parse_snps}
+\title{Parse SNP matrix from Ali's pipeline}
 \usage{
-parse_snps(varmat_code, varmat_allele, tree = NULL, og = NULL,
-  remove_multi_annots = FALSE, return_binary_matrix = FALSE,
-  ref_to_anc = TRUE)
+parse_snps(
+  varmat_code,
+  varmat_allele,
+  tree = NULL,
+  og = NULL,
+  remove_multi_annots = FALSE,
+  return_binary_matrix = FALSE,
+  ref_to_anc = TRUE
+)
 }
 \arguments{
 \item{varmat_code}{- loaded data.frame or path to the varmat_code file
