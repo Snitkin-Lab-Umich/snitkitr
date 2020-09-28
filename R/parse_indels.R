@@ -163,7 +163,8 @@ get_indel_info_from_annotations <- function(varmat){
 #'   rows with multiple annotations - alternative is to split rows with mutliple
 #'   annotations (default = FALSE)
 #' @param return_binary_matrix - logical flag indicating if you want to return a
-#'   binary matrix (default = FALSE)
+#'   binary matrix (default = TRUE)
+#' @param keep_conf_only - logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)
 #'
 #' @return list of allele mat, code mat, binary mat and corresponding parsed
 #'   annotations. output will depend on arguments to the function.
@@ -173,12 +174,13 @@ parse_indels <- function(varmat_code,
                          tree = NULL,
                          og = NULL,
                          remove_multi_annots = FALSE,
-                         return_binary_matrix = FALSE,
-                         ref_to_anc = TRUE){
+                         return_binary_matrix = TRUE,
+                         ref_to_anc = TRUE,
+                         keep_conf_only = TRUE){
 
-  if (is.null(tree) & return_binary_matrix) {
-    stop("Tree file required when returning a binary matrix.")
-  }
+  # if (is.null(tree) & return_binary_matrix) {
+  #   stop("Tree file required when returning a binary matrix.")
+  # }
 
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
@@ -207,10 +209,6 @@ parse_indels <- function(varmat_code,
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
-  if (return_binary_matrix) {
-    # REROOT TREE
-    tree <- root_tree_og(tree)
-  }
 
   if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
@@ -220,6 +218,8 @@ parse_indels <- function(varmat_code,
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       if (ref_to_anc) {
+        # REROOT TREE
+        tree <- root_tree_og(tree)
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
         alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
@@ -303,13 +303,16 @@ parse_indels <- function(varmat_code,
 
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
-    to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
-                  rowSums(varmat_bin == -2) > 0 |
-                  rowSums(varmat_bin == -3) > 0 |
-                  rowSums(varmat_bin == -4) > 0)
-    varmat_bin <- varmat_bin[to_keep,]
+    if(keep_conf_only){
+      to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
+                     rowSums(varmat_bin == -2) > 0 |
+                     rowSums(varmat_bin == -3) > 0 |
+                     rowSums(varmat_bin == -4) > 0)
+      varmat_bin <- varmat_bin[to_keep, ]
+    }
     varmat_bin[varmat_bin == 3] <- 1
-    varmat_bin[varmat_bin == -1] <- 0
+    varmat_bin[varmat_bin != 1] <- 0
+    #varmat_bin[varmat_bin == -1] <- 0
 
     annots_bin <- annots[to_keep,]
 
