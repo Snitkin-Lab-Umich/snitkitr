@@ -213,10 +213,12 @@ parse_snps <- function(varmat_code,
         alleles <- major_alleles
       }
     }
-
+    
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
+    
+    major_alleles <- major_alleles[split_rows_flag]
 
     # GET ANNOTATIONS
     annots <- cbind(get_snp_info_from_annotations(varmat_code),
@@ -309,7 +311,7 @@ parse_snps <- function(varmat_code,
                        rowSums(varmat_bin == -3) > 0 |
                        rowSums(varmat_bin == -4) > 0)
         varmat_bin <- varmat_bin[to_keep, ]
-        annots_bin <- annots[to_keep, ]
+        annots_bin <- annots_bin[to_keep, ]
       }
       varmat_bin[varmat_bin == 3] <- 1
       varmat_bin[varmat_bin != 1] <- 0

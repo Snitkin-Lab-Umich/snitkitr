@@ -279,6 +279,9 @@ parse_indels <- function(varmat_code,
     rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
     rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
     split_rows_flag <- varmat_code_split_list[[4]]
+    
+    major_alleles <- major_alleles[split_rows_flag]
+    raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
       alleles <- alleles[split_rows_flag, ]
@@ -320,13 +323,15 @@ parse_indels <- function(varmat_code,
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
     annots_bin <- annots
+    print(dim(varmat_code))
+    print(dim(annots))
     if(keep_conf_only){
       to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
                      rowSums(varmat_bin == -2) > 0 |
                      rowSums(varmat_bin == -3) > 0 |
                      rowSums(varmat_bin == -4) > 0)
-      varmat_bin <- varmat_bin[to_keep, ]
-      annots_bin <- annots[to_keep,]
+      varmat_bin <- varmat_bin[to_keep,]
+      annots_bin <- annots_bin[to_keep,]
     }
     varmat_bin[varmat_bin == 3] <- 1
     varmat_bin[varmat_bin != 1] <- 0
