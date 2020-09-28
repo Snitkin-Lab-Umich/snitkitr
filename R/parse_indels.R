@@ -214,6 +214,9 @@ parse_indels <- function(varmat_code,
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
+    
+    # FIND ANCESTRAL STATE OF EACH ALLELE
+    major_alleles <- get_major_alleles(varmat_allele)
 
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
@@ -224,21 +227,29 @@ parse_indels <- function(varmat_code,
         alleles <- get_anc_alleles(tree, varmat_allele)
       } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles <- get_major_alleles(varmat_allele)
+        alleles <- major_alleles
       }
     }
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
+    
+    major_alleles <- major_alleles[split_rows_flag]
+    
+    # EXPAND RAW ROW NAMES
+    raw_rownames <- raw_rownames[split_rows_flag]
 
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
                     rows_with_multiple_annots_log,
                     rows_with_mult_var_allele_log,
                     rows_with_overlapping_genes_log,
-                    split_rows_flag)
+                    split_rows_flag,
+                    maj = major_alleles,
+                    raw_rownames = raw_rownames)
   } else {
+    major_alleles <- get_major_alleles(varmat_allele)
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       if (ref_to_anc) {
@@ -247,9 +258,12 @@ parse_indels <- function(varmat_code,
 
       } else {
         # REFERENCE TO MAJOR ALLELE
-        alleles <- get_major_alleles(varmat_allele)
+        alleles <- major_alleles
       }
     }
+    
+    # RAW ROWNAMES
+    raw_rownames <- row.names(varmat_code)
 
     # SPLIT MATRICES
     varmat_code_split_list <-
@@ -275,7 +289,9 @@ parse_indels <- function(varmat_code,
                    rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log,
                    rows_with_overlapping_genes_log,
-                   split_rows_flag)
+                   split_rows_flag,
+                   maj = major_alleles,
+                   raw_rownames = raw_rownames)
 
     # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
     varmat_code <-
