@@ -319,18 +319,19 @@ parse_indels <- function(varmat_code,
 
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
+    annots_bin <- annots
     if(keep_conf_only){
       to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
                      rowSums(varmat_bin == -2) > 0 |
                      rowSums(varmat_bin == -3) > 0 |
                      rowSums(varmat_bin == -4) > 0)
       varmat_bin <- varmat_bin[to_keep, ]
+      annots_bin <- annots[to_keep,]
     }
     varmat_bin[varmat_bin == 3] <- 1
     varmat_bin[varmat_bin != 1] <- 0
     #varmat_bin[varmat_bin == -1] <- 0
 
-    annots_bin <- annots[to_keep,]
 
     if (ref_to_anc) {
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
