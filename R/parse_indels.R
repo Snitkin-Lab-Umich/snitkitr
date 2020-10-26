@@ -325,18 +325,21 @@ parse_indels <- function(varmat_code,
     annots_bin <- annots
     print(dim(varmat_code))
     print(dim(annots))
-    if(keep_conf_only){
-      to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
-                     rowSums(varmat_bin == -2) > 0 |
-                     rowSums(varmat_bin == -3) > 0 |
-                     rowSums(varmat_bin == -4) > 0)
-      varmat_bin <- varmat_bin[to_keep,]
-      annots_bin <- annots_bin[to_keep,]
-    }
-    varmat_bin[varmat_bin == 3] <- 1
-    varmat_bin[varmat_bin != 1] <- 0
-    #varmat_bin[varmat_bin == -1] <- 0
 
+      if(keep_conf_only){
+        to_keep <- !(rowSums(varmat_bin == 2) > 0 |
+                       rowSums(varmat_bin == -2) > 0 |
+                       rowSums(varmat_bin == -3) > 0 |
+                       rowSums(varmat_bin == -4) > 0)
+      }else{
+       # keep columns with low FQ or low MQ variants
+       to_keep <- !(rowSums(varmat_bin == 2) > 0 | rowSums(varmat_bin == -2) > 0)
+      }
+      varmat_bin <- varmat_bin[to_keep, ]
+      annots_bin <- annots_bin[to_keep, ]
+      varmat_bin[varmat_bin == 3] <- 1
+      varmat_bin[varmat_bin != 1] <- 0
+      #varmat_bin[varmat_bin == -1] <- 0
 
     if (ref_to_anc) {
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
