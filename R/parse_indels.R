@@ -165,6 +165,7 @@ get_indel_info_from_annotations <- function(varmat){
 #' @param return_binary_matrix - logical flag indicating if you want to return a
 #'   binary matrix (default = TRUE)
 #' @param keep_conf_only - logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)
+#' @param mat_suffix Suffix to remove from code and allele matrices so the names match with the tree tip labels.
 #'
 #' @return list of allele mat, code mat, binary mat and corresponding parsed
 #'   annotations. output will depend on arguments to the function.
@@ -176,7 +177,8 @@ parse_indels <- function(varmat_code,
                          remove_multi_annots = FALSE,
                          return_binary_matrix = TRUE,
                          ref_to_anc = TRUE,
-                         keep_conf_only = TRUE){
+                         keep_conf_only = TRUE,
+                         mat_suffix = 'R1_001.fastq.gz|_R1.fastq.gz'){
 
   # if (is.null(tree) & return_binary_matrix) {
   #   stop("Tree file required when returning a binary matrix.")
@@ -185,6 +187,9 @@ parse_indels <- function(varmat_code,
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
+  
+  names(varmat_code) <- gsub(mat_suffix,'',names(varmat_code))
+  names(varmat_allele) <- gsub(mat_suffix,'',names(varmat_allele))
 
   # add semicolons to the end of the row names that don't have semicolons
   row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
@@ -284,7 +289,7 @@ parse_indels <- function(varmat_code,
     raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
-      alleles <- alleles[split_rows_flag, ]
+      alleles <- alleles[split_rows_flag]
     }
 
     # GET ANNOTATIONS
