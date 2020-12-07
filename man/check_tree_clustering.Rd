@@ -31,7 +31,7 @@ This function is used to test for clustering of a certain epi factor on a phylog
 }
 \examples{
 tree = ape::rtree(50)
-labs = sample(c(0,1),50,replace=T)
+labs = sample(c(0,1),50,replace=TRUE)
 names(labs) = tree$tip.label
 check_tree_clustering(tree,labs,nperm=10)
 }

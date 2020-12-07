@@ -12,29 +12,34 @@ parse_snps(
   remove_multi_annots = FALSE,
   return_binary_matrix = TRUE,
   ref_to_anc = TRUE,
-  keep_conf_only = TRUE
+  keep_conf_only = TRUE,
+  mat_suffix = "R1_001.fastq.gz|_R1.fastq.gz"
 )
 }
 \arguments{
-\item{varmat_code}{- loaded data.frame or path to the varmat_code file
+\item{varmat_code}{Loaded data.frame or path to the varmat_code file
 generated from internal variant calling pipeline}
 
-\item{varmat_allele}{- loaded data.frame or path to the varmat_allele file
+\item{varmat_allele}{Loaded data.frame or path to the varmat_allele file
 generated from internal variant calling pipeline}
 
-\item{tree}{- optional: path to tree file or loaded in tree (class = phylo)}
+\item{tree}{Optional: path to tree file or loaded in tree (class = phylo)}
 
-\item{og}{- optional: character string of the name of the outgroup (has to
+\item{og}{Optional: character string of the name of the outgroup (has to
 match what it is called in the tree)}
 
-\item{remove_multi_annots}{- logical flag indicating if you want to remove
+\item{remove_multi_annots}{Logical flag indicating if you want to remove
 rows with multiple annotations - alternative is to split rows with mutliple
 annotations (default = FALSE)}
 
-\item{return_binary_matrix}{- logical flag indicating if you want to return a
+\item{return_binary_matrix}{Logical flag indicating if you want to return a
 binary matrix (default = TRUE)}
 
-\item{keep_conf_only}{- logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)}
+\item{ref_to_anc}{Whether to reference to the ancestral allele to create the binary marix (default = TRUE)}
+
+\item{keep_conf_only}{Logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)}
+
+\item{mat_suffix}{Suffix to remove from code and allele matrices so the names match with the tree tip labels.}
 }
 \value{
 list of allele mat, code mat, binary mat and corresponding parsed

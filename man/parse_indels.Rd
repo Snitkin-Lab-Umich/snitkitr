@@ -12,7 +12,8 @@ parse_indels(
   remove_multi_annots = FALSE,
   return_binary_matrix = TRUE,
   ref_to_anc = TRUE,
-  keep_conf_only = TRUE
+  keep_conf_only = TRUE,
+  mat_suffix = "R1_001.fastq.gz|_R1.fastq.gz"
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ annotations (default = FALSE)}
 binary matrix (default = TRUE)}
 
 \item{keep_conf_only}{- logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)}
+
+\item{mat_suffix}{Suffix to remove from code and allele matrices so the names match with the tree tip labels.}
 }
 \value{
 list of allele mat, code mat, binary mat and corresponding parsed

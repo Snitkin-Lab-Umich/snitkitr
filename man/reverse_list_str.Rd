@@ -16,5 +16,5 @@ reversed list
 Reverse list structure
 }
 \examples{
-Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
+#Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
 }
