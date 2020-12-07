@@ -10,8 +10,9 @@ parse_indels(
   tree = NULL,
   og = NULL,
   remove_multi_annots = FALSE,
-  return_binary_matrix = FALSE,
-  ref_to_anc = TRUE
+  return_binary_matrix = TRUE,
+  ref_to_anc = TRUE,
+  keep_conf_only = TRUE
 )
 }
 \arguments{
@@ -31,7 +32,9 @@ rows with multiple annotations - alternative is to split rows with mutliple
 annotations (default = FALSE)}
 
 \item{return_binary_matrix}{- logical flag indicating if you want to return a
-binary matrix (default = FALSE)}
+binary matrix (default = TRUE)}
+
+\item{keep_conf_only}{- logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)}
 }
 \value{
 list of allele mat, code mat, binary mat and corresponding parsed

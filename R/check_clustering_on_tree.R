@@ -73,7 +73,7 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL){
 #'
 #' @examples
 #' tree = ape::rtree(50)
-#' labs = sample(c(0,1),50,replace=T)
+#' labs = sample(c(0,1),50,replace=TRUE)
 #' names(labs) = tree$tip.label
 #' check_tree_clustering(tree,labs,nperm=10)
 check_tree_clustering = function(tree,isolate_labels, nperm = 1000, control_labels=NULL, plot_path='cluster.pdf'){
