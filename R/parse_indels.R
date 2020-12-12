@@ -201,6 +201,10 @@ parse_indels <- function(varmat_code,
   print('Removing lines we cannnot currently handle.')
   varmat_code <- remove_rows_with_bugs(varmat_code)
   varmat_allele <- remove_rows_with_bugs(varmat_allele)
+  
+  print('Dimensions of code and allele matrices:')
+  dim(varmat_code)
+  dim(varmat_allele)
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
   print('Removing lines with no variants.')
@@ -208,6 +212,10 @@ parse_indels <- function(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
+  
+  print('Dimensions of code and allele matrices:')
+  dim(varmat_code)
+  dim(varmat_allele)
 
   # REMOVE GENOTYPES THAT ARE "SNPS"
   print('Removing genotypes that are SNPs.')
