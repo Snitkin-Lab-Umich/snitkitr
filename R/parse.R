@@ -398,7 +398,6 @@ get_anc_alleles = function(tree,mat){
   future::plan(future::multiprocess)
 
   print('Checking matches between tree and matrix.')
-  print(tree)
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
     stop('Some samples in tree are not in allele matrix.')
   }

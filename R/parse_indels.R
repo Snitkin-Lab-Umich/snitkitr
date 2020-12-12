@@ -267,6 +267,8 @@ parse_indels <- function(varmat_code,
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       if (ref_to_anc) {
+        # REROOT TREE
+        tree <- root_tree_og(tree)
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
         print('Getting ancestral allele for each variant.')
         alleles <- get_anc_alleles(tree, varmat_allele)
