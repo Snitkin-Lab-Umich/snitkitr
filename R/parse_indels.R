@@ -262,11 +262,13 @@ parse_indels <- function(varmat_code,
                     maj = major_alleles,
                     raw_rownames = raw_rownames)
   } else {
+    print('Getting major allele for each variant.')
     major_alleles <- get_major_alleles(varmat_allele)
     # FIND ANCESTRAL STATE OF EACH ALLELE
     if (return_binary_matrix) {
       if (ref_to_anc) {
         # GET ANCESTRAL ALLELE FOR EACH VARIANT
+        print('Getting ancestral allele for each variant.')
         alleles <- get_anc_alleles(tree, varmat_allele)
 
       } else {
