@@ -168,7 +168,7 @@ parse_snps <- function(varmat_code,
                        return_binary_matrix = TRUE,
                        ref_to_anc = TRUE,
                        keep_conf_only = TRUE,
-                       mat_suffix = 'R1_001.fastq.gz|_R1.fastq.gz'){
+                       mat_suffix = 'R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz'){
 
   # if (is.null(tree) & return_binary_matrix & ref_to_anc) {
   #   stop("Tree file required when returning a binary matrix.")
@@ -315,10 +315,11 @@ parse_snps <- function(varmat_code,
         to_keep <- !(rowSums(varmat_bin == 2) > 0 |
                        rowSums(varmat_bin == -2) > 0 |
                        rowSums(varmat_bin == -3) > 0 |
-                       rowSums(varmat_bin == -4) > 0)
+                       rowSums(varmat_bin == -4) > 0 |
+                       rowSums(varmat_bin == 4) > 0)
       }else{
        # keep columns with low FQ or low MQ variants
-       to_keep <- !(rowSums(varmat_bin == 2) > 0 | rowSums(varmat_bin == -2) > 0)
+       to_keep <- !(rowSums(varmat_bin == 2) > 0 | rowSums(varmat_bin == -2) > 0 | rowSums(varmat_bin == 4) > 0)
       }
       varmat_bin <- varmat_bin[to_keep, ]
       annots_bin <- annots_bin[to_keep, ]
