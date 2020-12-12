@@ -397,6 +397,7 @@ root_tree_og = function(tree, outgroup = NULL){
 get_anc_alleles = function(tree,mat){
   future::plan(future::multiprocess)
 
+  print('Checking matches between tree and matrix.')
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
     stop('Some samples in tree are not in allele matrix.')
   }
@@ -409,6 +410,7 @@ get_anc_alleles = function(tree,mat){
     stop('Tree must be rooted.')
   }
 
+  print('Ordering matrix to match tree tip labels.')
   # ORDER MATRIX TO MATCH TREE TIP LABELS
   mat = mat[ ,tree$tip.label]
 

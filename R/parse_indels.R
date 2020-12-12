@@ -273,6 +273,7 @@ parse_indels <- function(varmat_code,
 
       } else {
         # REFERENCE TO MAJOR ALLELE
+        print('Referencing to major allele.')
         alleles <- major_alleles
       }
     }
@@ -281,6 +282,7 @@ parse_indels <- function(varmat_code,
     raw_rownames <- row.names(varmat_code)
 
     # SPLIT MATRICES
+    print('Splitting matrices.')
     varmat_code_split_list <-
       split_rows_with_multiple_annots(varmat_code,
                                       snp_parser_log = FALSE)
