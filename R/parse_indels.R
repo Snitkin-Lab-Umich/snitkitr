@@ -178,7 +178,7 @@ parse_indels <- function(varmat_code,
                          return_binary_matrix = TRUE,
                          ref_to_anc = TRUE,
                          keep_conf_only = TRUE,
-                         mat_suffix = 'R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz'){
+                         mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz'){
 
   # if (is.null(tree) & return_binary_matrix) {
   #   stop("Tree file required when returning a binary matrix.")
@@ -198,18 +198,25 @@ parse_indels <- function(varmat_code,
     paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
 
   # REMOVE BUGS
+  print('Removing lines we cannnot currently handle.')
   varmat_code <- remove_rows_with_bugs(varmat_code)
   varmat_allele <- remove_rows_with_bugs(varmat_allele)
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
+  print('Removing lines with no variants.')
   varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
 
   # REMOVE GENOTYPES THAT ARE "SNPS"
+  print('Removing genotypes that are SNPs.')
   varmat_code <- remove_snps(varmat_code)
   varmat_allele <- remove_snps(varmat_allele)
+  
+  print('Dimensions of code and allele matrices:')
+  dim(varmat_code)
+  dim(varmat_allele)
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
