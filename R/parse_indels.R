@@ -303,7 +303,11 @@ parse_indels <- function(varmat_code,
     raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
-      alleles <- alleles[split_rows_flag]
+      if(ref_to_anc){
+        alleles <- alleles[split_rows_flag,]
+      }else{
+        alleles <- alleles[split_rows_flag]
+      }
     }
 
     # GET ANNOTATIONS

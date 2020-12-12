@@ -269,7 +269,11 @@ parse_snps <- function(varmat_code,
   split_rows_flag <- varmat_code_split_list[[4]]
 
   if (return_binary_matrix) {
-    alleles <- alleles[split_rows_flag]
+    if(ref_to_anc){
+      alleles <- alleles[split_rows_flag,]
+    }else{
+      alleles <- alleles[split_rows_flag]
+    }
   }
 
   major_alleles <- major_alleles[split_rows_flag]
