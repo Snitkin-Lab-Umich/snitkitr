@@ -4,7 +4,12 @@
 \alias{get_largest_subtree}
 \title{Get largest pure subtrees}
 \usage{
-get_largest_subtree(subtrs, isolate_labels, control_labels = NULL)
+get_largest_subtree(
+  subtrs,
+  isolate_labels,
+  control_labels = NULL,
+  bootstrap = 90
+)
 }
 \arguments{
 \item{subtrs}{Subtrees created using ape::subtrees to look for clustering on. Should include all isolates of interest.}
@@ -12,9 +17,11 @@ get_largest_subtree(subtrs, isolate_labels, control_labels = NULL)
 \item{isolate_labels}{Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.}
 
 \item{control_labels}{Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.}
+
+\item{bootstrap}{Bootstrap support to use to filter unconfident tree edges (keeps > bootstrap; NULL = keep all; default: 90).}
 }
 \value{
-list containing the largest pure subtree that each isolate belongs to and the index of that subtree
+list containing the largest pure subtree that each isolate belongs to, the index of that subtree, and the edges in that subtree.
 }
 \description{
 Get largest pure subtrees
