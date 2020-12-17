@@ -36,7 +36,7 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
     sts = future.apply::future_sapply(subtrs, FUN = function(st){ 
       i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
       one_label = length(unique(isolate_labels[intersect(st$tip.label, names(isolate_labels))])) == 1 # only one label in subtree
-      good_boostrap = rep(TRUE, length(st$node.label[[1]]))
+      good_bootstrap = rep(TRUE, length(st$node.label[[1]]))
       if(!is.null(bootstrap)){
         good_bootstrap = !is.na(as.numeric(st$node.label[[1]])) && as.numeric(st$node.label[[1]]) > bootstrap # bootstrap support > 90
       }
