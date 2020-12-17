@@ -35,10 +35,13 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
     # 1) HAVE ONLY A SINGLE EPI LABEL, 2) HAVE BOOTSTRAP SUPPORT GREATER THAN 90, 3) INCLUDE MORE THAN ONE CONTROL LABEL
     sts = future.apply::future_sapply(subtrs, FUN = function(st){ 
       i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
-      one_label = length(unique(isolate_labels[intersect(st$tip.label, names(isolate_labels))])) == 1 # only one label in subtree
+      st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
+      one_label = length(unique(st_labs)) == 1 # only one label in subtree
+      labs_tab <- table(st_labs)
+      labs_max <- max(labs_tab)
+      labs_max_lab <- names(labs_tab)[which.max(labs_tab)]
       if(pureness != 1){ # allow some contamination based on pureness threshold
-        st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
-        one_label <- max(table(st_labs)/length(st_labs)) > pureness
+        one_label <- labs_max/length(st_labs) > pureness
       }
       good_bootstrap = rep(TRUE, length(st$node.label[[1]]))
       if(!is.null(bootstrap)){
@@ -46,8 +49,8 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
       }
       multiple_control = ifelse(is.null(control_labels), TRUE, # always true if not controlling for another variable
                                 length(unique(control_labels[intersect(st$tip.label, names(control_labels))])) > 1) # more than one control label in subtree
-      if(i_in_subtree && one_label && good_bootstrap && multiple_control){ 
-        length(intersect(names(isolate_labels), st$tip.label))
+      if(i_in_subtree && one_label && good_bootstrap && multiple_control && isolate_labels[i] == labs_max_lab){ 
+        length(intersect(names(isolate_labels[isolate_labels == labs_max_lab]), st$tip.label))
       }else{
         0
       }
