@@ -8,7 +8,8 @@ get_largest_subtree(
   subtrs,
   isolate_labels,
   control_labels = NULL,
-  bootstrap = 90
+  bootstrap = 90,
+  pureness = 1
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ get_largest_subtree(
 \item{control_labels}{Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.}
 
 \item{bootstrap}{Bootstrap support to use to filter unconfident tree edges (keeps > bootstrap; NULL = keep all; default: 90).}
+
+\item{pureness}{How pure the subtree has to be to call it a "pure" subtree (default: 1; range 0-1).}
 }
 \value{
 list containing the largest pure subtree that each isolate belongs to, the index of that subtree, and the edges in that subtree.
