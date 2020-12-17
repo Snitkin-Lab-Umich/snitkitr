@@ -23,12 +23,12 @@ reverse_list_str <- function(ls) { # @Josh O'Brien
 #' @param isolate_labels Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.
 #' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels. 
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (keeps > bootstrap; NULL = keep all; default: 90).
+#' @param pureness How pure the subtree has to be to call it a "pure" subtree (default: 1; range 0-1).
 #'
 #' @return list containing the largest pure subtree that each isolate belongs to, the index of that subtree, and the edges in that subtree.
 #' @export
 #'
-#' @examples
-get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, bootstrap = 90){
+get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, bootstrap = 90, pureness = 1){
   largest_st_info = future.apply::future_lapply(names(isolate_labels), function(i){
     #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO. 
     #CLUSTERS ARE DEFINED AS:
@@ -36,6 +36,10 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
     sts = future.apply::future_sapply(subtrs, FUN = function(st){ 
       i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
       one_label = length(unique(isolate_labels[intersect(st$tip.label, names(isolate_labels))])) == 1 # only one label in subtree
+      if(pureness != 1){ # allow some contamination based on pureness threshold
+        st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
+        one_label <- max(table(st_labs)/length(st_labs)) > pureness
+      }
       good_bootstrap = rep(TRUE, length(st$node.label[[1]]))
       if(!is.null(bootstrap)){
         good_bootstrap = !is.na(as.numeric(st$node.label[[1]])) && as.numeric(st$node.label[[1]]) > bootstrap # bootstrap support > 90
