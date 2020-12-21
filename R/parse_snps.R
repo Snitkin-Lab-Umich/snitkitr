@@ -369,7 +369,8 @@ parse_snps <- function(varmat_code,
       to_keep <- !(rowSums(varmat_bin ==  2) > 0 |
                     rowSums(varmat_bin == -2) > 0 |
                     rowSums(varmat_bin == -3) > 0 |
-                    rowSums(varmat_bin == -4) > 0)
+                    rowSums(varmat_bin == -4) > 0 |
+                    rowSums(varmat_bin == 4) > 0)
       varmat_bin <- varmat_bin[to_keep, ]
       varmat_bin[varmat_bin == 3] <- 1
       varmat_bin[varmat_bin == -1] <- 0
