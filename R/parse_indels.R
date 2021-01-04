@@ -194,20 +194,14 @@ parse_indels <- function(varmat_code,
 
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
-  print('Removing lines with no variants.')
   varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
 
   # REMOVE GENOTYPES THAT ARE "SNPS"
-  print('Removing genotypes that are SNPs.')
   varmat_code <- remove_snps(varmat_code)
   varmat_allele <- remove_snps(varmat_allele)
-
-  print('Dimensions of code and allele matrices:')
-  print(dim(varmat_code))
-  print(dim(varmat_allele))
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
@@ -293,7 +287,7 @@ parse_indels <- function(varmat_code,
     raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
-      if (ref_to_anc){
+      if (ref_to_anc) {
         alleles <- alleles[split_rows_flag,]
       }else{
         alleles <- alleles[split_rows_flag]
