@@ -600,3 +600,19 @@ standardize_row_and_col_names <- function(mat, suffix) {
     paste0(row.names(mat)[!grepl(";$", row.names(mat))], ";")
   return(mat)
 }
+
+#' Check that reference choices makes sense
+#' Issue warning to user if they are not compatible
+#' @param ref_to_anc logical
+#' @param ref_to_maj logical
+#' @param tree phylogenetic tree
+#'
+check_ref_choice <- function(ref_to_anc, ref_to_maj, tree) {
+  if (ref_to_anc & is.null(tree)) {
+    stop("User must provide a tree to reference alleles to the ancestral allele")
+  }
+
+  if (ref_to_anc & ref_to_maj) {
+    stop("User can't set both ref_to_anc and ref_to_maj to true. Pick just one or neither.")
+  }
+}

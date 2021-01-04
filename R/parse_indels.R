@@ -178,7 +178,10 @@ parse_indels <- function(varmat_code,
                          return_binary_matrix = TRUE,
                          ref_to_anc = TRUE,
                          keep_conf_only = TRUE,
-                         mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz'){
+                         mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
+                         ref_to_maj = FALSE){
+
+  check_ref_choice(ref_to_anc, ref_to_maj, tree)
 
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
@@ -188,10 +191,8 @@ parse_indels <- function(varmat_code,
   varmat_allele <- standardize_row_and_col_names(varmat_allele, mat_suffix)
 
   # REMOVE BUGS
-  print('Removing lines we cannnot currently handle.')
   varmat_code <- remove_rows_with_bugs(varmat_code)
   varmat_allele <- remove_rows_with_bugs(varmat_allele)
-
 
   # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
   varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
