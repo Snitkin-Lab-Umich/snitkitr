@@ -575,3 +575,14 @@ keep_sites_based_on_conf_logical <- function(bin_mat, logical) {
   return(to_keep)
 }
 
+
+#' Convert the code in the code matrix to either 1s or 0s
+#'
+#' @param bin_mat Matrix
+#'
+#' @return Matrix
+convert_code_to_binary <- function(bin_mat) {
+  bin_mat[bin_mat == 3] <- 1
+  bin_mat[bin_mat != 1] <- 0
+  return(bin_mat)
+}
