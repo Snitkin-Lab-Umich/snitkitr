@@ -137,7 +137,7 @@ get_indel_info_from_annotations <- function(varmat){
                            ig_gene1,
                            ig_gene2,
                            intergenic,
-                           full_annots = rownames(varmat),
+                           raw_rownames = rownames(varmat),
                            indel_type,
                            indel_nuc)
   return(annotations)
@@ -303,7 +303,7 @@ parse_indels <- function(varmat_code,
     raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
-      if(ref_to_anc){
+      if (ref_to_anc){
         alleles <- alleles[split_rows_flag,]
       }else{
         alleles <- alleles[split_rows_flag]
@@ -348,9 +348,7 @@ parse_indels <- function(varmat_code,
     annots_bin <- annots
     print(dim(varmat_code))
     print(dim(annots))
-
     to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
-
     varmat_bin <- varmat_bin[to_keep, ]
     annots_bin <- annots_bin[to_keep, ]
     varmat_bin <- convert_code_to_binary(varmat_bin)

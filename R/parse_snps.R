@@ -316,8 +316,6 @@ parse_snps <- function(varmat_code,
       varmat_bin <- varmat_code
       annots_bin <- annots
       to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
-
-
       varmat_bin <- varmat_bin[to_keep, ]
       annots_bin <- annots_bin[to_keep, ]
       varmat_bin <- convert_code_to_binary(varmat_bin)
