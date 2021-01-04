@@ -187,7 +187,7 @@ parse_indels <- function(varmat_code,
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
-  
+
   names(varmat_code) <- gsub(mat_suffix,'',names(varmat_code))
   names(varmat_allele) <- gsub(mat_suffix,'',names(varmat_allele))
 
@@ -214,7 +214,7 @@ parse_indels <- function(varmat_code,
   print('Removing genotypes that are SNPs.')
   varmat_code <- remove_snps(varmat_code)
   varmat_allele <- remove_snps(varmat_allele)
-  
+
   print('Dimensions of code and allele matrices:')
   print(dim(varmat_code))
   print(dim(varmat_allele))
@@ -227,7 +227,7 @@ parse_indels <- function(varmat_code,
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
-    
+
     # FIND ANCESTRAL STATE OF EACH ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
 
@@ -247,9 +247,9 @@ parse_indels <- function(varmat_code,
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
-    
+
     major_alleles <- major_alleles[split_rows_flag]
-    
+
     # EXPAND RAW ROW NAMES
     raw_rownames <- raw_rownames[split_rows_flag]
 
@@ -279,7 +279,7 @@ parse_indels <- function(varmat_code,
         alleles <- major_alleles
       }
     }
-    
+
     # RAW ROWNAMES
     raw_rownames <- row.names(varmat_code)
 
@@ -298,7 +298,7 @@ parse_indels <- function(varmat_code,
     rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
     rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
     split_rows_flag <- varmat_code_split_list[[4]]
-    
+
     major_alleles <- major_alleles[split_rows_flag]
     raw_rownames <- raw_rownames[split_rows_flag]
 
@@ -349,21 +349,12 @@ parse_indels <- function(varmat_code,
     print(dim(varmat_code))
     print(dim(annots))
 
-      if(keep_conf_only){
-        to_keep <- !(rowSums(varmat_bin == 2) > 0 |
-                       rowSums(varmat_bin == -2) > 0 |
-                       rowSums(varmat_bin == -3) > 0 |
-                       rowSums(varmat_bin == -4) > 0 |
-                       rowSums(varmat_bin == 4) > 0)
-      }else{
-       # keep columns with low FQ or low MQ variants
-       to_keep <- !(rowSums(varmat_bin == 2) > 0 | rowSums(varmat_bin == -2) > 0 | rowSums(varmat_bin == 4) > 0)
-      }
-      varmat_bin <- varmat_bin[to_keep, ]
-      annots_bin <- annots_bin[to_keep, ]
-      varmat_bin[varmat_bin == 3] <- 1
-      varmat_bin[varmat_bin != 1] <- 0
-      #varmat_bin[varmat_bin == -1] <- 0
+    to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
+
+    varmat_bin <- varmat_bin[to_keep, ]
+    annots_bin <- annots_bin[to_keep, ]
+    varmat_bin[varmat_bin == 3] <- 1
+    varmat_bin[varmat_bin != 1] <- 0
 
     if (ref_to_anc) {
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){

@@ -551,3 +551,27 @@ remove_NA_rows <- function(mat, annot_mat, reref_vec) {
                   "reref" = reref_vec)
   return(results)
 }
+
+#' Determine which variants to keep based on user input confidence logical
+#'
+#' @param bin_mat Variant binary matrix.
+#' @param logical True or false
+#'
+#' @return logical vector
+#'
+keep_sites_based_on_conf_logical <- function(bin_mat, logical) {
+  if (logical) {
+    to_keep <- !(rowSums(bin_mat == 2) > 0 |
+                   rowSums(bin_mat == -2) > 0 |
+                   rowSums(bin_mat == -3) > 0 |
+                   rowSums(bin_mat == -4) > 0 |
+                   rowSums(bin_mat == 4) > 0)
+  } else {
+    to_keep <- !(rowSums(bin_mat == 2) > 0 |
+                   rowSums(bin_mat == -2) > 0 |
+                   rowSums(bin_mat == 4) > 0)
+
+  }
+  return(to_keep)
+}
+

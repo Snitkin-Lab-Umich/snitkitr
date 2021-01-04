@@ -8,11 +8,7 @@ test_that("Parse_snps returns expected output 1", {
                                   ref_to_anc = FALSE,
                                   keep_conf_only = TRUE,
                                   mat_suffix = "_R1_001.fastq.gz")
-  expect_true(identical(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1))
   expect_identical(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1)
-  expect_equal(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1)
-
-  print(identical(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1))
 })
 
 

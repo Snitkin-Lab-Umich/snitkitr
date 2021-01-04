@@ -177,7 +177,7 @@ parse_snps <- function(varmat_code,
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
-  
+
   names(varmat_code) <- gsub(mat_suffix,'',names(varmat_code))
   names(varmat_allele) <- gsub(mat_suffix,'',names(varmat_allele))
 
@@ -219,11 +219,11 @@ parse_snps <- function(varmat_code,
         alleles <- major_alleles
       }
     }
-    
+
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
-    
+
     major_alleles <- major_alleles[split_rows_flag]
 
     # GET ANNOTATIONS
@@ -315,22 +315,12 @@ parse_snps <- function(varmat_code,
       # MAKE BINARY MATRIX
       varmat_bin <- varmat_code
       annots_bin <- annots
-      if(keep_conf_only){
-        to_keep <- !(rowSums(varmat_bin == 2) > 0 |
-                       rowSums(varmat_bin == -2) > 0 |
-                       rowSums(varmat_bin == -3) > 0 |
-                       rowSums(varmat_bin == -4) > 0 |
-                       rowSums(varmat_bin == 4) > 0)
-      }else{
-       # keep columns with low FQ or low MQ variants
-       to_keep <- !(rowSums(varmat_bin == 2) > 0 | rowSums(varmat_bin == -2) > 0 | rowSums(varmat_bin == 4) > 0)
-      }
+      to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
+
       varmat_bin <- varmat_bin[to_keep, ]
       annots_bin <- annots_bin[to_keep, ]
       varmat_bin[varmat_bin == 3] <- 1
       varmat_bin[varmat_bin != 1] <- 0
-      #varmat_bin[varmat_bin == -1] <- 0
-
 
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
