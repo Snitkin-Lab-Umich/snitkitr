@@ -180,22 +180,12 @@ parse_indels <- function(varmat_code,
                          keep_conf_only = TRUE,
                          mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz'){
 
-  # if (is.null(tree) & return_binary_matrix) {
-  #   stop("Tree file required when returning a binary matrix.")
-  # }
-
   # READ IN varmat CODE AND varmat ALLELE
   varmat_code <- load_if_path(varmat_code)
   varmat_allele <- load_if_path(varmat_allele)
 
-  names(varmat_code) <- gsub(mat_suffix,'',names(varmat_code))
-  names(varmat_allele) <- gsub(mat_suffix,'',names(varmat_allele))
-
-  # add semicolons to the end of the row names that don't have semicolons
-  row.names(varmat_code)[!grepl(";$", row.names(varmat_code))] <-
-    paste0(row.names(varmat_code)[!grepl(";$", row.names(varmat_code))], ";")
-  row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))] <-
-    paste0(row.names(varmat_allele)[!grepl(";$", row.names(varmat_allele))], ";")
+  varmat_code <- standardize_row_and_col_names(varmat_code, mat_suffix)
+  varmat_allele <- standardize_row_and_col_names(varmat_allele, mat_suffix)
 
   # REMOVE BUGS
   print('Removing lines we cannnot currently handle.')

@@ -586,3 +586,17 @@ convert_code_to_binary <- function(bin_mat) {
   bin_mat[bin_mat != 1] <- 0
   return(bin_mat)
 }
+
+#' Add names and standardize row names for input matrices
+#'
+#' @param mat Matrix
+#'
+#' @return Matrix with updated names and row.names()
+standardize_row_and_col_names <- function(mat, suffix) {
+  names(mat) <- gsub(suffix, '', names(mat))
+
+  # add semicolons to the end of the row names that don't have semicolons
+  row.names(mat)[!grepl(";$", row.names(mat))] <-
+    paste0(row.names(mat)[!grepl(";$", row.names(mat))], ";")
+  return(mat)
+}
