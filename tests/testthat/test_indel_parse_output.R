@@ -130,16 +130,6 @@ test_that("parsed_indel bin mat expected given ref_to_maj", {
                                mat_suffix = "_R1_001.fastq.gz",
                                ref_to_maj = TRUE)
 
-  check_maj_rerefencing <- function(parsed_indel, row) {
-    most_common_occurance <- unname(unlist(parsed_indel$allele$mat[row, ])) %>% table(.) %>% unname() %>% max()
-    most_common_occurance_tbl_log <-  unname(unlist(parsed_indel$allele$mat[row, ])) %>% table() == most_common_occurance
-    maj <- names(most_common_occurance_tbl_log)[most_common_occurance_tbl_log == TRUE]
-    maj_index <- which(unname(unlist(parsed_indel$allele$mat[row, ])) == maj)
-    min_index <- c(col_index)[!c(col_index) %in% maj_index]
-    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[maj_index], rep(0, length(maj_index)))
-    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[min_index], rep(1, length(min_index)))
-  }
-
   check_maj_rerefencing(parsed_indel, 1)
   check_maj_rerefencing(parsed_indel, 2)
   check_maj_rerefencing(parsed_indel, 3)
@@ -164,14 +154,6 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
                                mat_suffix = "_R1_001.fastq.gz",
                                ref_to_maj = FALSE)
 
-  check_anc_rerefencing <- function(parsed_indel, row) {
-    anc_allele <- unname(unlist(parsed_indel$bin$annots$anc))[row]
-    anc_index <- which(unname(unlist(parsed_indel$allele$mat[row, ])) == anc_allele)
-    not_anc_index <- c(1:nrow(parsed_indel$bin$mat))[!c(1:nrow(parsed_indel$bin$mat)) %in% anc_index]
-    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[anc_index], rep(0, length(anc_index)))
-    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[not_anc_index], rep(1, length(not_anc_index)))
-  }
-
   check_anc_rerefencing(parsed_indel, 1)
   check_anc_rerefencing(parsed_indel, 2)
   check_anc_rerefencing(parsed_indel, 3)
@@ -183,4 +165,30 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
   check_anc_rerefencing(parsed_indel, 9)
   check_anc_rerefencing(parsed_indel, 10)
 })
+
+
+test_that("parsed_indel bin mat expected given reference to reference genome", {
+  parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:100, ],
+                               varmat_allele = snitkitr::cdif_indel_allele_mat[1:100, ],
+                               tree = NULL,
+                               og = NULL,
+                               remove_multi_annots = TRUE,
+                               return_binary_matrix = TRUE,
+                               ref_to_anc = FALSE,
+                               keep_conf_only = TRUE,
+                               mat_suffix = "_R1_001.fastq.gz",
+                               ref_to_maj = FALSE)
+
+  check_match_ref_genome(parsed_indel, 1)
+  check_match_ref_genome(parsed_indel, 2)
+  check_match_ref_genome(parsed_indel, 3)
+  check_match_ref_genome(parsed_indel, 4)
+  check_match_ref_genome(parsed_indel, 5)
+  check_match_ref_genome(parsed_indel, 6)
+  check_match_ref_genome(parsed_indel, 7)
+  check_match_ref_genome(parsed_indel, 8)
+  check_match_ref_genome(parsed_indel, 9)
+  check_match_ref_genome(parsed_indel, 10)
+})
+
 
