@@ -91,7 +91,8 @@ get_indel_info_from_annotations <- function(varmat){
     }
 
     # STRAND INFORMATION
-    strand[i] <- gsub("[^+-/]", "", split_row[1]) # subset to just +/, +/+/, etc...
+    strand[i] <- gsub(".*[Strand Information ]", "", split_row[1]) # Strip infor prior and including "Strand Information"
+    strand[i] <- gsub("[^+-/]", "", strand[i]) # subset to just +/, +/+/, etc...
     strand[i] <- gsub("[/]$", "",  strand[i]) # remove trailing /
 
     # GENE LENGTH AND POSITION OF MUTATION IN RELATION TO THE GENE
