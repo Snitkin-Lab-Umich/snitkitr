@@ -201,17 +201,8 @@ parse_snps <- function(varmat_code,
     # FIND ANCESTRAL STATE OF EACH ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
 
-    if (return_binary_matrix) {
-      # GET ANCESTRAL ALLELE FOR EACH VARIANT
-      if (ref_to_anc) {
-        # REROOT TREE
-        tree <- root_tree_og(tree)
-        alleles <- get_anc_alleles(tree, varmat_allele)
-      } else {
-        # REFERENCE TO MAJOR ALLELE
-        alleles <- major_alleles
-      }
-    }
+    alleles <- define_alleles(return_binary_matrix, ref_to_anc, ref_to_maj,
+                              tree, varmat_allele, major_alleles)
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -230,19 +221,8 @@ parse_snps <- function(varmat_code,
     # FIND ANCESTRAL STATE OF EACH ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
 
-    if (return_binary_matrix) {
-      if (ref_to_anc) {
-        # REROOT TREE
-        tree <- root_tree_og(tree)
-
-        # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles <- get_anc_alleles(tree, varmat_allele)
-
-      } else {
-        # REFERENCE TO MAJOR ALLELE
-        alleles <- major_alleles
-      }
-    }
+    alleles <- define_alleles(return_binary_matrix, ref_to_anc, ref_to_maj,
+                              tree, varmat_allele, major_alleles)
 
   # RAW ROWNAMES
   raw_rownames <- row.names(varmat_code)
