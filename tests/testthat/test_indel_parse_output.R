@@ -119,8 +119,8 @@ test_that("parsed_indel annot are expected parsings of the row names", {
 
 test_that("parsed_indel bin mat expected given ref_to_maj", {
   col_index <- c(1:3)
-  parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:100, col_index],
-                               varmat_allele = snitkitr::cdif_indel_allele_mat[1:100, col_index],
+  parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:200, col_index],
+                               varmat_allele = snitkitr::cdif_indel_allele_mat[1:200, col_index],
                                tree = NULL,
                                og = NULL,
                                remove_multi_annots = TRUE,
@@ -144,6 +144,43 @@ test_that("parsed_indel bin mat expected given ref_to_maj", {
   check_maj_rerefencing(parsed_indel, 2)
   check_maj_rerefencing(parsed_indel, 3)
   check_maj_rerefencing(parsed_indel, 4)
-
-
+  check_maj_rerefencing(parsed_indel, 5)
+  check_maj_rerefencing(parsed_indel, 6)
+  check_maj_rerefencing(parsed_indel, 7)
+  check_maj_rerefencing(parsed_indel, 8)
+  check_maj_rerefencing(parsed_indel, 9)
+  check_maj_rerefencing(parsed_indel, 10)
 })
+
+test_that("parsed_indel bin mat expected given ref_to_anc", {
+  parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:100, ],
+                               varmat_allele = snitkitr::cdif_indel_allele_mat[1:100, ],
+                               tree = snitkitr::cdif_tree,
+                               og = NULL,
+                               remove_multi_annots = TRUE,
+                               return_binary_matrix = TRUE,
+                               ref_to_anc = TRUE,
+                               keep_conf_only = TRUE,
+                               mat_suffix = "_R1_001.fastq.gz",
+                               ref_to_maj = FALSE)
+
+  check_anc_rerefencing <- function(parsed_indel, row) {
+    anc_allele <- unname(unlist(parsed_indel$bin$annots$anc))[row]
+    anc_index <- which(unname(unlist(parsed_indel$allele$mat[row, ])) == anc_allele)
+    not_anc_index <- c(1:nrow(parsed_indel$bin$mat))[!c(1:nrow(parsed_indel$bin$mat)) %in% anc_index]
+    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[anc_index], rep(0, length(anc_index)))
+    expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[not_anc_index], rep(1, length(not_anc_index)))
+  }
+
+  check_anc_rerefencing(parsed_indel, 1)
+  check_anc_rerefencing(parsed_indel, 2)
+  check_anc_rerefencing(parsed_indel, 3)
+  check_anc_rerefencing(parsed_indel, 4)
+  check_anc_rerefencing(parsed_indel, 5)
+  check_anc_rerefencing(parsed_indel, 6)
+  check_anc_rerefencing(parsed_indel, 7)
+  check_anc_rerefencing(parsed_indel, 8)
+  check_anc_rerefencing(parsed_indel, 9)
+  check_anc_rerefencing(parsed_indel, 10)
+})
+
