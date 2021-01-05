@@ -171,6 +171,7 @@ parse_snps <- function(varmat_code,
                        mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
                        ref_to_maj = FALSE){
 
+  stop("parse_snps is no longer under development. Please instead use snitkitr::parse_snp_or_indel()")
   check_ref_choice(ref_to_anc, ref_to_maj, tree)
 
   # READ IN varmat CODE AND varmat ALLELE

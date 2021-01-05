@@ -397,7 +397,6 @@ root_tree_og = function(tree, outgroup = NULL){
 get_anc_alleles = function(tree,mat){
   future::plan(future::multiprocess)
 
-  print('Checking matches between tree and matrix.')
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
     stop('Some samples in tree are not in allele matrix.')
   }
@@ -410,9 +409,8 @@ get_anc_alleles = function(tree,mat){
     stop('Tree must be rooted.')
   }
 
-  print('Ordering matrix to match tree tip labels.')
   # ORDER MATRIX TO MATCH TREE TIP LABELS
-  mat = mat[ ,tree$tip.label]
+  mat = mat[ , tree$tip.label]
 
   if (sum(tree$edge.length == 0) > 0) {
     warning('All zero branch lengths changed to small non-zero number to be able to perform ancestral reconstruction.')
@@ -812,12 +810,10 @@ parse_snp_or_indel <-  function(varmat_code,
                     split_rows_flag,
                     maj = major_alleles)
   } else {
-
     major_alleles <- get_major_alleles(varmat_allele)
     alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
                                         ref_to_maj, tree, varmat_allele,
                                         major_alleles)
-
 
     # RAW ROWNAMES
     raw_rownames <- row.names(varmat_code)
@@ -961,7 +957,9 @@ parse_snp_or_indel <-  function(varmat_code,
       annots_bin <- annots_bin[to_keep, ]
       varmat_bin <- convert_code_to_binary(varmat_bin)
       varmat_bin_reref <- varmat_bin
-      reref <- rep("no", nrow(varmat_bin)) # All are no because we're not re-referencing, it's already been referenced to the reference genome
+      reref <- rep("no", nrow(varmat_bin))
+        # All are "no" because we're not re-referencing, it's already been
+        #   referenced to the reference genome
     }
 
     # Remove rows with NAs in them caused by "complicated" multiallelic situations

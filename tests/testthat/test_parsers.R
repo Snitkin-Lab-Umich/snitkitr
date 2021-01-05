@@ -249,3 +249,63 @@ test_that("Parse_indels returns expected output 8", {
   expect_identical(parsed_indel_cdif_test8, parsed_indel_cdif8)
 })
 
+
+
+test_that("New unified parser works at all on indel mat", {
+
+  # Reference to major
+  parsed_indel_cdif_testA <-
+    parse_snp_or_indel(varmat_code = snitkitr::cdif_indel_code_mat,
+                       varmat_allele = snitkitr::cdif_indel_allele_mat,
+                       tree = NULL,
+                       og = NULL,
+                       remove_multi_annots = TRUE,
+                       return_binary_matrix = TRUE,
+                       ref_to_anc = FALSE,
+                       keep_conf_only = TRUE,
+                       mat_suffix = "_R1_001.fastq.gz",
+                       ref_to_maj = TRUE,
+                       mat_type = "INDEL")
+
+  # Reference to reference genome
+  parsed_indel_cdif_testB <-
+    parse_snp_or_indel(varmat_code = snitkitr::cdif_indel_code_mat,
+                       varmat_allele = snitkitr::cdif_indel_allele_mat,
+                       tree = NULL,
+                       og = NULL,
+                       remove_multi_annots = TRUE,
+                       return_binary_matrix = TRUE,
+                       ref_to_anc = FALSE,
+                       keep_conf_only = TRUE,
+                       mat_suffix = "_R1_001.fastq.gz",
+                       ref_to_maj = FALSE,
+                       mat_type = "INDEL")
+
+  # Reference to ancestral allele
+  parsed_indel_cdif_testC <-
+    parse_snp_or_indel(varmat_code = snitkitr::cdif_indel_code_mat,
+                       varmat_allele = snitkitr::cdif_indel_allele_mat,
+                       tree = cdif_tree,
+                       og = NULL,
+                       remove_multi_annots = TRUE,
+                       return_binary_matrix = TRUE,
+                       ref_to_anc = TRUE,
+                       keep_conf_only = TRUE,
+                       mat_suffix = "_R1_001.fastq.gz",
+                       ref_to_maj = FALSE,
+                       mat_type = "INDEL")
+
+  # Don't return a binary matrix
+  parsed_indel_cdif_testD <-
+    parse_snp_or_indel(varmat_code = snitkitr::cdif_indel_code_mat,
+                       varmat_allele = snitkitr::cdif_indel_allele_mat,
+                       tree = NULL,
+                       og = NULL,
+                       remove_multi_annots = TRUE,
+                       return_binary_matrix = FALSE,
+                       ref_to_anc = FALSE,
+                       keep_conf_only = TRUE,
+                       mat_suffix = "_R1_001.fastq.gz",
+                       ref_to_maj = FALSE,
+                       mat_type = "INDEL")
+})

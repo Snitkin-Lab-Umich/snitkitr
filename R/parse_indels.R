@@ -180,6 +180,7 @@ parse_indels <- function(varmat_code,
                          keep_conf_only = TRUE,
                          mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
                          ref_to_maj = FALSE){
+  stop("parse_indels is no longer under development. Please instead use snitkitr::parse_snp_or_indel()")
   check_ref_choice(ref_to_anc, ref_to_maj, tree)
 
   # READ IN varmat CODE AND varmat ALLELE
