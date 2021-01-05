@@ -495,7 +495,33 @@ remove_unknown_anc = function(varmat_code, varmat_allele, annots){
 #' @export
 #'
 remove_snps <- function(mat){
-  mat <- mat[!grepl(" SNP ", row.names(mat)), , drop = FALSE]
+  mat <- mat[!grepl(" Indel ", row.names(mat)), , drop = FALSE]
+  return(mat)
+}
+
+#' Remove any row from an indel matrix that has the word SNP in the annotation
+#' and remove any row from a snp matrix that has the word Indel inthe annotation
+#'
+#' @description I found a row in one indel matrix that called a SNP, ex:
+#' "No_protein_coding/intergenic_region_field_in_ANN SNP at 31494 > C
+#' functional=NULL_NULL_NULL locus_tag=JBHKLKBP_00048 Strand Information:
+#' JBHKLKBP_00048=+;C" - so this function will simply remove this from the indel
+#' parsing pipeline.
+#'
+#' @param mat matrix. Rows = variants, columns = samples.
+#'
+#' @return subset matrix
+#' @export
+#'
+remove_snps_or_indel <- function(mat_type, mat){
+  if (mat_type == "INDEL") {
+    # Example from cdif_snp_allele_mat: "No_protein_coding/intergenic_region_field_in_ANN SNP at 4296783 > A functional=NULL_NULL_NULL locus_tag=NULL Strand Information: NULL=No Strand Information found;A|intergenic_region|MODIFIER|rpmH-dnaA|||||NULL|NULL;"
+    mat <- mat[!grepl(" SNP ", row.names(mat)), , drop = FALSE]
+  }
+  if (mat_type == "SNP") {
+    # Couldn't find an example of this, but just covering our bases
+    mat <- mat[!grepl(" Indel ", row.names(mat)), , drop = FALSE]
+  }
   return(mat)
 }
 
@@ -753,6 +779,10 @@ parse_snp_or_indel <-  function(varmat_code,
                                                                varmat_allele)
   varmat_code <- varmats[[1]]
   varmat_allele <- varmats[[2]]
+
+  # REMOVE SNPs from INDEL matrix and INDELS from SNP matrix
+  varmat_code <- remove_snps_or_indel(mat_type, varmat_code)
+  varmat_allele <- remove_snps_or_indel(mat_type, varmat_allele)
 
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
