@@ -8,7 +8,29 @@ test_that("Parse_snps returns expected output 1", {
                                   ref_to_anc = FALSE,
                                   keep_conf_only = TRUE,
                                   mat_suffix = "_R1_001.fastq.gz")
-  expect_identical(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1)
+  expect_false(identical(parsed_snp_cdif_test1, snitkitr::parsed_snp_cdif1))
+  # These should no longer be identical beacuse the saved version references to major
+
+  parsed_snp_cdif_test1b <- parse_snps(varmat_code = snitkitr::cdif_snp_code_mat,
+             varmat_allele = snitkitr::cdif_snp_allele_mat,
+             tree = NULL,
+             og = NULL,
+             remove_multi_annots = FALSE,
+             return_binary_matrix = TRUE,
+             ref_to_anc = FALSE,
+             keep_conf_only = TRUE,
+             mat_suffix = "_R1_001.fastq.gz",
+             ref_to_maj = TRUE)
+
+  expect_identical(parsed_snp_cdif_test1b, snitkitr::parsed_snp_cdif1)
+  # But this should pass now because I'm setting ref_to_maj = TRUE
+
+  # the ref_to_maj=TRUE version should have no and yes in reref, while
+  # ref_to_maj=FALSE (default) shoudl have just no in reref based on how it's
+  # currently coded
+  expect_length(table(parsed_snp_cdif_test1$bin$annots$reref), 1)
+  expect_length(table(parsed_snp_cdif1$bin$annots$reref), 2)
+
 })
 
 
@@ -22,7 +44,29 @@ test_that("Parse_snps returns expected output 2", {
                              ref_to_anc = FALSE,
                              keep_conf_only = TRUE,
                              mat_suffix = "_R1_001.fastq.gz")
-  expect_identical(parsed_snp_cdif_test2, parsed_snp_cdif2)
+  expect_false(identical(parsed_snp_cdif_test2, parsed_snp_cdif2))
+  # These should no longer be identical beacuse the saved version references to major while the just run version references to reference genome allele
+
+  parsed_snp_cdif_test2b <- parse_snps(varmat_code = snitkitr::cdif_snp_code_mat,
+                                       varmat_allele = snitkitr::cdif_snp_allele_mat,
+                                       tree = NULL,
+                                       og = NULL,
+                                       remove_multi_annots = TRUE,
+                                       return_binary_matrix = TRUE,
+                                       ref_to_anc = FALSE,
+                                       keep_conf_only = TRUE,
+                                       mat_suffix = "_R1_001.fastq.gz",
+                                       ref_to_maj = TRUE)
+
+  expect_identical(parsed_snp_cdif_test2b, snitkitr::parsed_snp_cdif2)
+  # But this should pass now because I'm setting ref_to_maj = TRUE
+
+  # the ref_to_maj=TRUE version should have no and yes in reref, while
+  # ref_to_maj=FALSE (default) shoudl have just no in reref based on how it's
+  # currently coded
+  expect_length(table(parsed_snp_cdif_test2$bin$annots$reref), 1)
+  expect_length(table(parsed_snp_cdif2$bin$annots$reref), 2)
+
 })
 
 test_that("Parse_snps returns expected output 3", {
@@ -86,7 +130,29 @@ test_that("Parse_snps returns expected output 7", {
                              ref_to_anc = FALSE,
                              keep_conf_only = TRUE,
                              mat_suffix = "_R1_001.fastq.gz")
-  expect_identical(parsed_snp_cdif_test7, parsed_snp_cdif7)
+  expect_false(identical(parsed_snp_cdif_test7, parsed_snp_cdif7))
+
+  parsed_snp_cdif_test7b <- parse_snps(varmat_code = snitkitr::cdif_snp_code_mat,
+                                       varmat_allele = snitkitr::cdif_snp_allele_mat,
+                                       tree = cdif_tree,
+                                       og = NULL,
+                                       remove_multi_annots = TRUE,
+                                       return_binary_matrix = TRUE,
+                                       ref_to_anc = FALSE,
+                                       keep_conf_only = TRUE,
+                                       mat_suffix = "_R1_001.fastq.gz",
+                                       ref_to_maj = TRUE)
+
+  expect_identical(parsed_snp_cdif_test7b, snitkitr::parsed_snp_cdif7)
+  # But this should pass now because I'm setting ref_to_maj = TRUE
+
+  # the ref_to_maj=TRUE version should have no and yes in reref, while
+  # ref_to_maj=FALSE (default) shoudl have just no in reref based on how it's
+  # currently coded
+  expect_length(table(parsed_snp_cdif_test7$bin$annots$reref), 1)
+  expect_length(table(parsed_snp_cdif7$bin$annots$reref), 2)
+
+
 })
 
 test_that("Parse_snps returns expected output 8", {

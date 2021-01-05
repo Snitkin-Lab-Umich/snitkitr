@@ -618,11 +618,10 @@ check_ref_choice <- function(ref_to_anc, ref_to_maj, tree) {
 }
 
 
-#' Define alleles
+#' Define reference alleles
 #' If you're planning to return a binary matrix you need to pick a reference
-#' allele for each variant. You can choose either the ancestral allele or the
-#' major allele. If you don't want to reference to either of those, then you
-#' need to keep the matrix non-binary (reflect the true alleles).
+#' allele for each variant. You can choose the ancestral allele, major allele,
+#' or reference allele.
 #'
 #' @param return_binary_matrix logical
 #' @param ref_to_anc logical
@@ -635,24 +634,23 @@ check_ref_choice <- function(ref_to_anc, ref_to_maj, tree) {
 #'         ref_to_maj==TRUE or ref_to_maj==FALSE & ref_to_anc==FALSE.
 #'         alleles = matrix. Dim = nrow(varmat_allele) x 2 if ref_to_anc==TRUE.
 #'         alleles = NULL if return_binary_matrix==FALSE.
-define_alleles <- function(return_binary_matrix,
-                           ref_to_anc,
-                           ref_to_maj,
-                           tree,
-                           varmat_allele,
-                           major_alleles) {
+define_reference_alleles <- function(return_binary_matrix,
+                                     ref_to_anc,
+                                     ref_to_maj,
+                                     tree,
+                                     varmat_allele,
+                                     major_alleles){
   alleles <- NULL
   if (return_binary_matrix) {
-    # GET ANCESTRAL ALLELE FOR EACH VARIANT
     if (ref_to_anc) {
-      # REROOT TREE
+      # GET ANCESTRAL ALLELE FOR EACH VARIANT
       tree <- root_tree_og(tree)
       alleles <- get_anc_alleles(tree, varmat_allele)
     } else if (ref_to_maj) {
       # REFERENCE TO MAJOR ALLELE
       alleles <- major_alleles
     } else {
-      # Don't generate a reference allele
+      # REFERENCE TO REFERENCE GENOME ALLELE
       alleles <- rep("", nrow(varmat_allele))
     }
   }
