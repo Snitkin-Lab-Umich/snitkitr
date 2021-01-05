@@ -30,7 +30,22 @@ test_that("Parse_snps returns expected output 1", {
   # currently coded
   expect_length(table(parsed_snp_cdif_test1$bin$annots$reref), 1)
   expect_length(table(parsed_snp_cdif1$bin$annots$reref), 2)
+})
 
+test_that("New unified parser gives expected results for snp mat", {
+  parsed_snp_cdif_test1c <-
+    parse_snp_or_indel(varmat_code = snitkitr::cdif_snp_code_mat,
+                       varmat_allele = snitkitr::cdif_snp_allele_mat,
+                       tree = NULL,
+                       og = NULL,
+                       remove_multi_annots = FALSE,
+                       return_binary_matrix = TRUE,
+                       ref_to_anc = FALSE,
+                       keep_conf_only = TRUE,
+                       mat_suffix = "_R1_001.fastq.gz",
+                       ref_to_maj = TRUE,
+                       mat_type = "SNP")
+  expect_identical(parsed_snp_cdif_test1c, snitkitr::parsed_snp_cdif1)
 })
 
 

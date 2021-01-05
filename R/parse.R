@@ -656,3 +656,305 @@ define_reference_alleles <- function(return_binary_matrix,
   }
   return(alleles)
 }
+
+
+#' Standardize matrix type input character to all upper case
+#'
+#' @param matrix_type Character ("SNP" or "INDEL")
+#'
+#' @return matrix type Character ("SNP" or "INDEL")
+report_mat_type <- function(matrix_type){
+  check_is_this_class(matrix_type, "character")
+  matrix_type <- toupper(matrix_type)
+  if (!matrix_type %in% c("SNP", "INDEL")) {
+    stop("User must choose either SNP or INDEL as the input matrix type")
+  }
+  return(matrix_type)
+}
+
+#' Get SNP or INDEL variant information from matrix row annotations
+#'
+#' @param mat_type Character. Either "SNP" or "INDEL"
+#' @param mat Varmat code.
+#'
+#' @return annot_info (list?)
+get_annotation_info <- function(mat_type, mat){
+  if (mat_type == "SNP") {
+    annot_info <- get_snp_info_from_annotations(mat)
+  } else if (mat_type == "INDEL") {
+    annot_info <- get_indel_info_from_annotations(mat)
+  }
+  return(annot_info)
+}
+
+#' Parse either the SNP matrix or Indel matrix from Ali's pipeline
+#' @description Input matrices generated from internal (Ali's) variant calling
+#'   pipeline. Always returns parsed annotation info. In addition, you have the
+#'   option to: 1. split rows with multiple annotations (snps in overlapping
+#'   genes, multiallelic snps) 2. Re-reference to the ancestral allele or major
+#'   allele at that position (instead of to the reference genome) 3. Simplify
+#'   the code matrix - which contains numbers from -4 to 3 indicating different
+#'   information about the variants - to a binary matrix indicating simple
+#'   presence/absence of a variant at that site.
+#' @param varmat_code Loaded data.frame or path to the varmat_code file
+#'   generated from internal variant calling pipeline
+#' @param varmat_allele Loaded data.frame or path to the varmat_allele file
+#'   generated from internal variant calling pipeline
+#' @param mat_type Character to indicate if input matrices are snp or indel
+#'   matrices. Acceptable inputs: SNP, Snp, snp, INDEL, Indel, or indel.
+#' @param tree Optional: path to tree file or loaded in tree (class = phylo)
+#' @param og Optional: character string of the name of the outgroup (has to
+#'   match what it is called in the tree)
+#' @param remove_multi_annots Logical flag indicating if you want to remove
+#'   rows with multiple annotations - alternative is to split rows with mutliple
+#'   annotations (default = FALSE)
+#' @param return_binary_matrix Logical flag indicating if you want to return a
+#'   binary matrix (default = TRUE)
+#' @param ref_to_anc Whether to reference to the ancestral allele to create the
+#'   binary marix (default = TRUE)
+#' @param keep_conf_only Logical flag indicating if only confident variants
+#'   should be kept (1's in Ali's pipeline, otherwise 3's are also kept)
+#'   (default = TRUE)
+#' @param mat_suffix Suffix to remove from code and allele matrices so the names
+#'   match with the tree tip labels.
+#'
+#' @return list of allele mat, code mat, binary mat and corresponding parsed
+#'   annotations. output will depend on arguments to the function.
+#' @export
+parse_snp_or_indel <-  function(varmat_code,
+                                varmat_allele,
+                                mat_type = "SNP",
+                                tree = NULL,
+                                og = NULL,
+                                remove_multi_annots = FALSE,
+                                return_binary_matrix = TRUE,
+                                ref_to_anc = TRUE,
+                                keep_conf_only = TRUE,
+                                mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
+                                ref_to_maj = FALSE){
+
+  mat_type <- report_mat_type(mat_type)
+  snp_log <- mat_type == "SNP"
+  check_ref_choice(ref_to_anc, ref_to_maj, tree)
+
+  # READ IN varmat CODE AND varmat ALLELE
+  varmat_code <- load_if_path(varmat_code)
+  varmat_allele <- load_if_path(varmat_allele)
+
+  varmat_code <- standardize_row_and_col_names(varmat_code, mat_suffix)
+  varmat_allele <- standardize_row_and_col_names(varmat_allele, mat_suffix)
+
+  # REMOVE BUGS
+  varmat_code <- remove_rows_with_bugs(varmat_code)
+  varmat_allele <- remove_rows_with_bugs(varmat_allele)
+
+  # REMOVE LINES WITH NO VARIANTS - NO VARIANT OR ALL MASKED
+  varmats <- remove_rows_with_no_variants_or_completely_masked(varmat_code,
+                                                               varmat_allele)
+  varmat_code <- varmats[[1]]
+  varmat_allele <- varmats[[2]]
+
+  # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
+  # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
+  # (TRUE/FALSE)
+  if (remove_multi_annots) {
+    # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
+    varmat_code <- remove_rows_with_multiple_annots(varmat_code)
+    varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
+
+    # FIND EACH REFERENCE ALLELE
+    major_alleles <- get_major_alleles(varmat_allele)
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj, tree, varmat_allele,
+                                        major_alleles)
+
+    split_rows_flag <- 1:nrow(varmat_allele)
+    rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
+      rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
+
+    major_alleles <- major_alleles[split_rows_flag]
+
+    # GET ANNOTATIONS
+    annots <- cbind(get_annotation_info(mat_type, varmat_code),
+                    rows_with_multiple_annots_log,
+                    rows_with_mult_var_allele_log,
+                    rows_with_overlapping_genes_log,
+                    split_rows_flag,
+                    maj = major_alleles)
+  } else {
+
+    major_alleles <- get_major_alleles(varmat_allele)
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj, tree, varmat_allele,
+                                        major_alleles)
+
+
+    # RAW ROWNAMES
+    raw_rownames <- row.names(varmat_code)
+
+    # SPLIT MATRICES
+    varmat_code_split_list <-
+      split_rows_with_multiple_annots(varmat_code, snp_parser_log = snp_log)
+    varmat_allele_split_list <-
+      split_rows_with_multiple_annots(varmat_allele, snp_parser_log = snp_log)
+    varmat_code <- varmat_code_split_list[[5]]
+    varmat_allele <- varmat_allele_split_list[[5]]
+
+    rows_with_multiple_annots_log <- varmat_code_split_list[[1]]
+    rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
+    rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
+    split_rows_flag <- varmat_code_split_list[[4]]
+
+    if (return_binary_matrix) {
+      if (ref_to_anc) {
+        alleles <- alleles[split_rows_flag,]
+      } else {
+        alleles <- alleles[split_rows_flag]
+      }
+    }
+
+    major_alleles <- major_alleles[split_rows_flag]
+    raw_rownames <- raw_rownames[split_rows_flag]
+
+    # GET ANNOTATIONS
+    annots <- cbind(get_annotation_info(mat_type, varmat_code),
+                    rows_with_multiple_annots_log,
+                    rows_with_mult_var_allele_log,
+                    rows_with_overlapping_genes_log,
+                    split_rows_flag,
+                    maj = major_alleles,
+                    raw_rownames = raw_rownames)
+
+    # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
+    varmat_code <-
+      remove_alt_allele_code_from_split_rows(varmat_code,
+                                             varmat_allele,
+                                             annots$ref,
+                                             annots$var,
+                                             rows_with_mult_var_allele_log)
+  }
+
+  if (return_binary_matrix) {
+    if (ref_to_anc) {
+      # ADD ANCESTRAL ALLELE INFO TO ANNOTATIONS
+      annots$anc <- alleles[, 1]
+      annots$anc_prob <- alleles[, 2]
+
+      # REMOVE SITE WITH UNKNOWN ANCESTOR
+      varmats <- remove_unknown_anc(varmat_code, varmat_allele, annots)
+      varmat_code <- varmats$varmat_code
+      varmat_allele <- varmats$varmat_allele
+      annots <- varmats$annots
+
+      # MAKE BINARY MATRIX
+      varmat_bin <- varmat_code
+      annots_bin <- annots
+      to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
+      varmat_bin <- varmat_bin[to_keep, ]
+      annots_bin <- annots_bin[to_keep, ]
+      varmat_bin <- convert_code_to_binary(varmat_bin)
+
+
+      varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$anc[x]) {
+          # If the reference allele equals the ancestral allele, keep it the same
+          unlist(varmat_bin[x, ])
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          # If not a multiallelic site, switch 0's and 1's
+          unlist(as.numeric(!varmat_bin[x, ]))
+        } else if (annots_bin$var[x] == annots_bin$anc[x]) {
+          # If the multiallelic variant is equal to the the ancestral allele, keep it the same
+          unlist(varmat_bin[x, ])
+        } else {
+          unlist(rep(NA, ncol(varmat_bin)))
+        }
+      })))
+
+      # Add row and columns names to the binary matrix that gets returned
+      if (identical(dim(varmat_bin_reref), dim(varmat_bin))) {
+        colnames(varmat_bin_reref) <- colnames(varmat_bin)
+        row.names(varmat_bin_reref) <- row.names(varmat_bin)
+      } else {
+        stop("Mismatched dimensions")
+      }
+
+      reref <- sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$anc[x]) {
+          "no"
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          "yes"
+        } else if (annots_bin$var[x] == annots_bin$anc[x]) {
+          "no"
+        } else {
+          "complicated"
+        }
+      })
+    } else if (ref_to_maj) {
+      # MAKE BINARY MATRIX
+      varmat_bin <- varmat_code
+      annots_bin <- annots
+      to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
+      varmat_bin <- varmat_bin[to_keep, ]
+      annots_bin <- annots_bin[to_keep, ]
+      varmat_bin <- convert_code_to_binary(varmat_bin)
+
+      varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$maj[x]) {
+          unlist(varmat_bin[x, ])
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          unlist(as.numeric(!varmat_bin[x, ]))
+        } else if (annots_bin$var[x] == annots_bin$maj[x]) {
+          unlist(varmat_bin[x, ])
+        } else {
+          unlist(rep(NA, ncol(varmat_bin)))
+        }
+      })))
+
+      reref <- sapply(1:nrow(varmat_bin), function(x){
+        if (annots_bin$ref[x] == annots_bin$maj[x]) {
+          "no"
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          "yes"
+        } else if (annots_bin$var[x] == annots_bin$maj[x]) {
+          "no"
+        } else {
+          "complicated"
+        }
+      })
+    } else {
+      # Reference to reference genome. A 1 will mean an alternate allele and a 0
+      #    will mean the reference allele.
+      varmat_bin <- varmat_code
+      annots_bin <- annots
+      to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
+      varmat_bin <- varmat_bin[to_keep, ]
+      annots_bin <- annots_bin[to_keep, ]
+      varmat_bin <- convert_code_to_binary(varmat_bin)
+      varmat_bin_reref <- varmat_bin
+      reref <- rep("no", nrow(varmat_bin)) # All are no because we're not re-referencing, it's already been referenced to the reference genome
+    }
+
+    # Remove rows with NAs in them caused by "complicated" multiallelic situations
+    no_NA <- remove_NA_rows(varmat_bin_reref,
+                            annots_bin,
+                            reref)
+
+    varmat_bin_reref <- no_NA$varmat_bin_reref
+    annots_bin <- no_NA$annots_bin
+    reref <- no_NA$reref
+
+    parsed <- list(code = list(mat = varmat_code,
+                               annots = annots),
+                   allele = list(mat = varmat_allele,
+                                 annots = annots),
+                   bin = list(mat = varmat_bin_reref,
+                              annots = cbind(annots_bin, reref = reref)))
+    save(parsed, file = paste0(mat_type, "_parsed.RData"))
+    return(parsed)
+  }
+
+  parsed <- list(code = list(mat = varmat_code, annots = annots),
+                 allele = list(mat = varmat_allele, annots = annots))
+  save(parsed, file = paste0(mat_type, "_parsed.RData"))
+  return(parsed)
+}

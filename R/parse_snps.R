@@ -218,57 +218,56 @@ parse_snps <- function(varmat_code,
                    split_rows_flag,
                    maj = major_alleles)
   } else {
-    # FIND ANCESTRAL STATE OF EACH ALLELE
-    major_alleles <- get_major_alleles(varmat_allele)
 
+    major_alleles <- get_major_alleles(varmat_allele)
     alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
                                         ref_to_maj, tree, varmat_allele,
                                         major_alleles)
 
-  # RAW ROWNAMES
-  raw_rownames <- row.names(varmat_code)
 
-  # SPLIT MATRICES
-  varmat_code_split_list <-
-    split_rows_with_multiple_annots(varmat_code, snp_parser_log = TRUE)
-  varmat_allele_split_list <-
-    split_rows_with_multiple_annots(varmat_allele, snp_parser_log = TRUE)
-  varmat_code <- varmat_code_split_list[[5]]
-  varmat_allele <- varmat_allele_split_list[[5]]
+    # RAW ROWNAMES
+    raw_rownames <- row.names(varmat_code)
 
-  rows_with_multiple_annots_log <- varmat_code_split_list[[1]]
-  rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
-  rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
-  split_rows_flag <- varmat_code_split_list[[4]]
+    # SPLIT MATRICES
+    varmat_code_split_list <-
+      split_rows_with_multiple_annots(varmat_code, snp_parser_log = TRUE)
+    varmat_allele_split_list <-
+      split_rows_with_multiple_annots(varmat_allele, snp_parser_log = TRUE)
+    varmat_code <- varmat_code_split_list[[5]]
+    varmat_allele <- varmat_allele_split_list[[5]]
 
-  if (return_binary_matrix) {
-    if (ref_to_anc) {
-      alleles <- alleles[split_rows_flag,]
-    } else {
-      alleles <- alleles[split_rows_flag]
+    rows_with_multiple_annots_log <- varmat_code_split_list[[1]]
+    rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
+    rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
+    split_rows_flag <- varmat_code_split_list[[4]]
+
+    if (return_binary_matrix) {
+      if (ref_to_anc) {
+        alleles <- alleles[split_rows_flag,]
+      } else {
+        alleles <- alleles[split_rows_flag]
+      }
     }
-  }
 
-  major_alleles <- major_alleles[split_rows_flag]
-  raw_rownames <- raw_rownames[split_rows_flag]
+    major_alleles <- major_alleles[split_rows_flag]
+    raw_rownames <- raw_rownames[split_rows_flag]
 
-  # GET ANNOTATIONS
-  annots <- cbind(get_snp_info_from_annotations(varmat_code),
-                 rows_with_multiple_annots_log,
-                 rows_with_mult_var_allele_log,
-                 rows_with_overlapping_genes_log,
-                 split_rows_flag,
-                 maj = major_alleles,
-                 raw_rownames = raw_rownames)
+    # GET ANNOTATIONS
+    annots <- cbind(get_snp_info_from_annotations(varmat_code),
+                   rows_with_multiple_annots_log,
+                   rows_with_mult_var_allele_log,
+                   rows_with_overlapping_genes_log,
+                   split_rows_flag,
+                   maj = major_alleles,
+                   raw_rownames = raw_rownames)
 
-  # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
-  varmat_code <-
-    remove_alt_allele_code_from_split_rows(varmat_code,
-                                           varmat_allele,
-                                           annots$ref,
-                                           annots$var,
-                                           rows_with_mult_var_allele_log)
-
+    # CHANGE varmat CODE TO REFLECT BIALLELIC REPRESENTATION OF A MULTIALLELIC SITE
+    varmat_code <-
+      remove_alt_allele_code_from_split_rows(varmat_code,
+                                             varmat_allele,
+                                             annots$ref,
+                                             annots$var,
+                                             rows_with_mult_var_allele_log)
   }
 
   if (return_binary_matrix) {
@@ -294,10 +293,13 @@ parse_snps <- function(varmat_code,
 
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
+          # If the reference allele equals the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
+          # If not a multiallelic site, switch 0's and 1's
           unlist(as.numeric(!varmat_bin[x, ]))
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
+          # If the multiallelic variant is equal to the the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
         } else {
           unlist(rep(NA, ncol(varmat_bin)))

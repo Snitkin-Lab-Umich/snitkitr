@@ -180,7 +180,6 @@ parse_indels <- function(varmat_code,
                          keep_conf_only = TRUE,
                          mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
                          ref_to_maj = FALSE){
-
   check_ref_choice(ref_to_anc, ref_to_maj, tree)
 
   # READ IN varmat CODE AND varmat ALLELE
@@ -207,7 +206,6 @@ parse_indels <- function(varmat_code,
   # EITHER (1) REMOVE ROWS WITH MULTIPLE ANNOTATIONS OR (2) SPLIT ROWS WITH
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
-
   if (remove_multi_annots) {
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
@@ -237,6 +235,7 @@ parse_indels <- function(varmat_code,
                     maj = major_alleles,
                     raw_rownames = raw_rownames)
   } else {
+
     major_alleles <- get_major_alleles(varmat_allele)
     alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
                                         ref_to_maj,	tree, varmat_allele,
@@ -257,7 +256,6 @@ parse_indels <- function(varmat_code,
     rows_with_mult_var_allele_log <- varmat_code_split_list[[2]]
     rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
     split_rows_flag <- varmat_code_split_list[[4]]
-
 
     if (return_binary_matrix) {
       if (ref_to_anc) {
@@ -323,7 +321,7 @@ parse_indels <- function(varmat_code,
           # If the multiallelic variant is equal to the the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
         } else {
-          unlist(rep(NA,ncol(varmat_bin)))
+          unlist(rep(NA, ncol(varmat_bin)))
         }
       })))
 
