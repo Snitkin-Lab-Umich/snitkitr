@@ -198,11 +198,11 @@ parse_snps <- function(varmat_code,
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
 
-    # FIND ANCESTRAL STATE OF EACH ALLELE
+    # FIND EACH REFERENCE ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
-
-    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc, ref_to_maj,
-                              tree, varmat_allele, major_alleles)
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj, tree, varmat_allele,
+                                        major_alleles)
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -215,14 +215,15 @@ parse_snps <- function(varmat_code,
                    rows_with_multiple_annots_log,
                    rows_with_mult_var_allele_log,
                    rows_with_overlapping_genes_log,
-                   split_rows_flag)
-    annots$maj <- major_alleles
+                   split_rows_flag,
+                   maj = major_alleles)
   } else {
     # FIND ANCESTRAL STATE OF EACH ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
 
-    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc, ref_to_maj,
-                              tree, varmat_allele, major_alleles)
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj, tree, varmat_allele,
+                                        major_alleles)
 
   # RAW ROWNAMES
   raw_rownames <- row.names(varmat_code)
@@ -232,7 +233,6 @@ parse_snps <- function(varmat_code,
     split_rows_with_multiple_annots(varmat_code, snp_parser_log = TRUE)
   varmat_allele_split_list <-
     split_rows_with_multiple_annots(varmat_allele, snp_parser_log = TRUE)
-
   varmat_code <- varmat_code_split_list[[5]]
   varmat_allele <- varmat_allele_split_list[[5]]
 
@@ -242,16 +242,14 @@ parse_snps <- function(varmat_code,
   split_rows_flag <- varmat_code_split_list[[4]]
 
   if (return_binary_matrix) {
-    if(ref_to_anc){
+    if (ref_to_anc) {
       alleles <- alleles[split_rows_flag,]
-    }else{
+    } else {
       alleles <- alleles[split_rows_flag]
     }
   }
 
   major_alleles <- major_alleles[split_rows_flag]
-
-  # EXPAND RAW ROW NAMES
   raw_rownames <- raw_rownames[split_rows_flag]
 
   # GET ANNOTATIONS

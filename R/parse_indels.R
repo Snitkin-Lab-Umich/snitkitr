@@ -213,21 +213,11 @@ parse_indels <- function(varmat_code,
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
 
-    # FIND ANCESTRAL STATE OF EACH ALLELE
+    # FIND EACH REFERENCE ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
-
-    # FIND ANCESTRAL STATE OF EACH ALLELE
-    if (return_binary_matrix) {
-      if (ref_to_anc) {
-        # REROOT TREE
-        tree <- root_tree_og(tree)
-        # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        alleles <- get_anc_alleles(tree, varmat_allele)
-      } else {
-        # REFERENCE TO MAJOR ALLELE
-        alleles <- major_alleles
-      }
-    }
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj, tree, varmat_allele,
+                                        major_alleles)
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -247,35 +237,19 @@ parse_indels <- function(varmat_code,
                     maj = major_alleles,
                     raw_rownames = raw_rownames)
   } else {
-    print('Getting major allele for each variant.')
     major_alleles <- get_major_alleles(varmat_allele)
-    # FIND ANCESTRAL STATE OF EACH ALLELE
-    if (return_binary_matrix) {
-      if (ref_to_anc) {
-        # REROOT TREE
-        tree <- root_tree_og(tree)
-        # GET ANCESTRAL ALLELE FOR EACH VARIANT
-        print('Getting ancestral allele for each variant.')
-        alleles <- get_anc_alleles(tree, varmat_allele)
-
-      } else {
-        # REFERENCE TO MAJOR ALLELE
-        print('Referencing to major allele.')
-        alleles <- major_alleles
-      }
-    }
+    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
+                                        ref_to_maj,	tree, varmat_allele,
+                                        major_alleles)
 
     # RAW ROWNAMES
     raw_rownames <- row.names(varmat_code)
 
     # SPLIT MATRICES
-    print('Splitting matrices.')
     varmat_code_split_list <-
-      split_rows_with_multiple_annots(varmat_code,
-                                      snp_parser_log = FALSE)
+      split_rows_with_multiple_annots(varmat_code, snp_parser_log = FALSE)
     varmat_allele_split_list <-
-      split_rows_with_multiple_annots(varmat_allele,
-                                      snp_parser_log = FALSE)
+      split_rows_with_multiple_annots(varmat_allele, snp_parser_log = FALSE)
     varmat_code <- varmat_code_split_list[[5]]
     varmat_allele <- varmat_allele_split_list[[5]]
 
@@ -284,16 +258,17 @@ parse_indels <- function(varmat_code,
     rows_with_overlapping_genes_log <- varmat_code_split_list[[3]]
     split_rows_flag <- varmat_code_split_list[[4]]
 
-    major_alleles <- major_alleles[split_rows_flag]
-    raw_rownames <- raw_rownames[split_rows_flag]
 
     if (return_binary_matrix) {
       if (ref_to_anc) {
         alleles <- alleles[split_rows_flag,]
-      }else{
+      } else {
         alleles <- alleles[split_rows_flag]
       }
     }
+
+    major_alleles <- major_alleles[split_rows_flag]
+    raw_rownames <- raw_rownames[split_rows_flag]
 
     # GET ANNOTATIONS
     annots <- cbind(get_indel_info_from_annotations(varmat_code),
@@ -331,8 +306,6 @@ parse_indels <- function(varmat_code,
     # MAKE BINARY MATRIX
     varmat_bin <- varmat_code
     annots_bin <- annots
-    print(dim(varmat_code))
-    print(dim(annots))
     to_keep <- keep_sites_based_on_conf_logical(varmat_bin, keep_conf_only)
     varmat_bin <- varmat_bin[to_keep, ]
     annots_bin <- annots_bin[to_keep, ]
