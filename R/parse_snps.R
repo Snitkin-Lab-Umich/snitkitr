@@ -366,6 +366,7 @@ parse_snps <- function(varmat_code,
     } else {
       # MAKE BINARY MATRIX
       varmat_bin <- varmat_code
+      annots_bin <- annots
       if(keep_conf_only){
         to_keep <- !(rowSums(varmat_bin == 2) > 0 |
                        rowSums(varmat_bin == -2) > 0 |
