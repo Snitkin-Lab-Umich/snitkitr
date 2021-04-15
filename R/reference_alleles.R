@@ -42,59 +42,6 @@ get_major_alleles <- function(allele_mat){
   return(major_allele)
 }
 
-#' Get ancestral state of alleles
-#'
-#' Finds the most likely ancestral allele for each variant position in an allele
-#' matrix using \code{\link[ape]{ace}}, given a rooted tree. Returns the most
-#' likely ancestral allele, its probability, and the tree used to perform
-#' ancestral reconstruction.
-#'
-#' @param tree (\code{ape phylo}). Rooted tree.
-#' @param mat Matrix. Allele matrix. Rows are variants, columns are samples.
-#' @param seed_int Number to use as seed for future.apply(). Default = 1.
-#'
-#' @return list of two elements:
-#'   \describe{
-#'     \item{ar_results}{Data.frame. Data.frame of most likely ancestral allele
-#'     for each row in allele matrix and probability that that is the ancestral
-#'     state. Rows are variants. First column is the allele. Second column is
-#'     the probability.}
-#'     \item{tree}{phylo. Tree used for ancestral state reconstruction.}
-#'   }
-#' @noRd
-#' @export
-get_ancestral_alleles <- function(tree, mat, seed_int = 1){
-  check_is_tree(tree)
-  check_is_this_class(mat, "matrix")
-  check_setequal_tree_mat(tree$tip.label, colnames(mat))
-  check_tree_is_rooted(tree)
-
-  future::plan(future::multiprocess)
-
-  # ORDER MATRIX TO MATCH TREE TIP LABELS
-  mat <- mat[, tree$tip.label, drop = FALSE]
-
-  tree <- make_all_tree_edges_positive(tree)
-
-  # Get ancestral state of root
-  ar_all <- t(future.apply::future_apply(future.seed = seed_int, mat, 1, function(tip_states) {
-    tip_state <- unique(tip_states)
-    if (length(tip_state) > 1) {
-      ar <- ape::ace(x = tip_states, phy = tree, type = "discrete")
-      states <- ar$lik.anc[1, ]
-      tip_state <- names(states)[which.max(states)]
-      prob <- states[which.max(states)]
-      c(tip_state, prob)
-    } else {
-      c(tip_states, 1)
-    }
-  }))
-  ar_all <- data.frame(ar_all)
-  colnames(ar_all) <- c("ancestral_allele", "probability")
-
-  return(list(ar_results = ar_all, tree = tree))
-}
-
 #' Remove unknown ancestral states
 #'
 #' Removes rows from variant matrix where the reference allele (ancestral allele
