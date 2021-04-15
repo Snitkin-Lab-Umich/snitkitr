@@ -11,16 +11,16 @@ test_that("parsed_snp bin mat expected given ref_to_maj", {
                                mat_suffix = "_R1_001.fastq.gz",
                                ref_to_maj = TRUE)
 
-  check_maj_rerefencing(parsed_snp, 1)
-  check_maj_rerefencing(parsed_snp, 2)
-  check_maj_rerefencing(parsed_snp, 3)
-  check_maj_rerefencing(parsed_snp, 4)
-  check_maj_rerefencing(parsed_snp, 5)
-  check_maj_rerefencing(parsed_snp, 6)
-  check_maj_rerefencing(parsed_snp, 7)
-  check_maj_rerefencing(parsed_snp, 8)
-  check_maj_rerefencing(parsed_snp, 9)
-  check_maj_rerefencing(parsed_snp, 10)
+  check_maj_rerefencing(parsed_snp, 1, col_index)
+  check_maj_rerefencing(parsed_snp, 2, col_index)
+  check_maj_rerefencing(parsed_snp, 3, col_index)
+  check_maj_rerefencing(parsed_snp, 4, col_index)
+  check_maj_rerefencing(parsed_snp, 5, col_index)
+  check_maj_rerefencing(parsed_snp, 6, col_index)
+  check_maj_rerefencing(parsed_snp, 7, col_index)
+  check_maj_rerefencing(parsed_snp, 8, col_index)
+  check_maj_rerefencing(parsed_snp, 9, col_index)
+  check_maj_rerefencing(parsed_snp, 10, col_index)
 })
 
 test_that("parsed_snp bin mat expected given ref_to_anc", {

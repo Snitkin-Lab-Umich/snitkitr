@@ -7,7 +7,7 @@ check_anc_rerefencing <- function(parsed_indel, row) {
   expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[not_anc_index], rep(1, length(not_anc_index)))
 }
 
-check_maj_rerefencing <- function(parsed_indel, row) {
+check_maj_rerefencing <- function(parsed_indel, row, col_index) {
   # grab the major allele and then check that in the bin mat the positions that correspond to that allele are 0s
   most_common_occurance <- unname(unlist(parsed_indel$allele$mat[row, ])) %>% table(.) %>% unname() %>% max()
   most_common_occurance_tbl_log <-  unname(unlist(parsed_indel$allele$mat[row, ])) %>% table() == most_common_occurance

@@ -133,16 +133,16 @@ test_that("parsed_indel bin mat expected given ref_to_maj", {
                                ref_to_maj = TRUE,
                                parallelization = "multisession")
 
-  check_maj_rerefencing(parsed_indel, 1)
-  check_maj_rerefencing(parsed_indel, 2)
-  check_maj_rerefencing(parsed_indel, 3)
-  check_maj_rerefencing(parsed_indel, 4)
-  check_maj_rerefencing(parsed_indel, 5)
-  check_maj_rerefencing(parsed_indel, 6)
-  check_maj_rerefencing(parsed_indel, 7)
-  check_maj_rerefencing(parsed_indel, 8)
-  check_maj_rerefencing(parsed_indel, 9)
-  check_maj_rerefencing(parsed_indel, 10)
+  check_maj_rerefencing(parsed_indel, 1, col_index)
+  check_maj_rerefencing(parsed_indel, 2, col_index)
+  check_maj_rerefencing(parsed_indel, 3, col_index)
+  check_maj_rerefencing(parsed_indel, 4, col_index)
+  check_maj_rerefencing(parsed_indel, 5, col_index)
+  check_maj_rerefencing(parsed_indel, 6, col_index)
+  check_maj_rerefencing(parsed_indel, 7, col_index)
+  check_maj_rerefencing(parsed_indel, 8, col_index)
+  check_maj_rerefencing(parsed_indel, 9, col_index)
+  check_maj_rerefencing(parsed_indel, 10, col_index)
 })
 
 test_that("parsed_indel bin mat expected given ref_to_anc", {
