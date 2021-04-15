@@ -864,8 +864,6 @@ parse_snp_or_indel <-  function(varmat_code,
                                              annots$ref,
                                              annots$var,
                                              rows_with_mult_var_allele_log)
-    print("annots$raw_rownames")
-    print(annots$raw_rownames)
   }
 
   if (return_binary_matrix) {
@@ -971,18 +969,14 @@ parse_snp_or_indel <-  function(varmat_code,
     }
 
     # Remove rows with NAs in them caused by "complicated" multiallelic situations
-    print(dim(varmat_bin_reref))
     no_NA <- remove_NA_rows(varmat_bin_reref,
                             annots_bin,
                             reref)
 
     varmat_bin_reref <- no_NA$varmat_bin_reref
-    print(dim(varmat_bin_reref))
     annots_bin <- no_NA$annots_bin
     reref <- no_NA$reref
     row.names(varmat_bin_reref) <- annots_bin$raw_rownames
-    print("annots_bin$raw_rownames")
-    print(annots_bin$raw_rownames)
 
     parsed <- list(code = list(mat = varmat_code,
                                annots = annots),
