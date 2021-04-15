@@ -13,7 +13,9 @@ parse_indels(
   return_binary_matrix = TRUE,
   ref_to_anc = TRUE,
   keep_conf_only = TRUE,
-  mat_suffix = "_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz"
+  mat_suffix = "_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz",
+  ref_to_maj = FALSE,
+  parallelization = "multisession"
 )
 }
 \arguments{

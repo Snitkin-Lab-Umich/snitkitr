@@ -4,10 +4,12 @@
 \alias{reverse_list_str}
 \title{Reverse list structure}
 \usage{
-reverse_list_str(ls)
+reverse_list_str(ls, seed_int = 1)
 }
 \arguments{
 \item{ls}{list you want to reverse}
+
+\item{seed_int}{Number to use as seed for future.apply(). Default = 1.}
 }
 \value{
 reversed list
