@@ -786,6 +786,8 @@ parse_snp_or_indel <-  function(varmat_code,
   # MULTIPLE ANNOTATIONS - DEPENDING ON VALUE OF REMOVE_MULTI_ANNOTS FLAG
   # (TRUE/FALSE)
   if (remove_multi_annots) {
+
+
     # REMOVE ROWS WITH MULTIPLE ANNOTATIONS
     varmat_code <- remove_rows_with_multiple_annots(varmat_code)
     varmat_allele <- remove_rows_with_multiple_annots(varmat_allele)
@@ -801,6 +803,9 @@ parse_snp_or_indel <-  function(varmat_code,
       rows_with_overlapping_genes_log <- rep(FALSE, nrow(varmat_allele))
 
     major_alleles <- major_alleles[split_rows_flag]
+    raw_rownames <- row.names(varmat_code)
+    raw_rownames <- raw_rownames[split_rows_flag]
+
 
     # GET ANNOTATIONS
     annots <- cbind(get_annotation_info(mat_type, varmat_code),
@@ -808,7 +813,8 @@ parse_snp_or_indel <-  function(varmat_code,
                     rows_with_mult_var_allele_log,
                     rows_with_overlapping_genes_log,
                     split_rows_flag,
-                    maj = major_alleles)
+                    maj = major_alleles,
+                    raw_rownames = raw_rownames)
   } else {
     major_alleles <- get_major_alleles(varmat_allele)
     alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
@@ -858,6 +864,8 @@ parse_snp_or_indel <-  function(varmat_code,
                                              annots$ref,
                                              annots$var,
                                              rows_with_mult_var_allele_log)
+    print("annots$raw_rownames")
+    print(annots$raw_rownames)
   }
 
   if (return_binary_matrix) {
@@ -963,14 +971,18 @@ parse_snp_or_indel <-  function(varmat_code,
     }
 
     # Remove rows with NAs in them caused by "complicated" multiallelic situations
+    print(dim(varmat_bin_reref))
     no_NA <- remove_NA_rows(varmat_bin_reref,
                             annots_bin,
                             reref)
 
     varmat_bin_reref <- no_NA$varmat_bin_reref
+    print(dim(varmat_bin_reref))
     annots_bin <- no_NA$annots_bin
     reref <- no_NA$reref
     row.names(varmat_bin_reref) <- annots_bin$raw_rownames
+    print("annots_bin$raw_rownames")
+    print(annots_bin$raw_rownames)
 
     parsed <- list(code = list(mat = varmat_code,
                                annots = annots),
