@@ -389,12 +389,13 @@ root_tree_og = function(tree, outgroup = NULL){
 #'
 #' @param tree rooted tree
 #' @param mat allele matrix (rows are variants, columns are samples)
+#' @param seed_int Number to use as seed for future.apply(). Default = 1.
 #'
 #' @return matrix of most likely ancestral allele for each row in allele matrix and probability that that is the ancestral state
 #' @export
 #'
 #' @examples
-get_anc_alleles = function(tree,mat){
+get_anc_alleles = function(tree, mat, seed_int = 1){
   future::plan(future::multiprocess)
 
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
@@ -419,7 +420,7 @@ get_anc_alleles = function(tree,mat){
   }
 
   # Get ancestral state of root; 1st column = var absent (0), 2nd column = var present (1)
-  ar_all = t(future.apply::future_apply(mat, 1, function(tip_states){
+  ar_all = t(future.apply::future_apply(future.seed = seed_int, mat, 1, function(tip_states){
     tip_state = unique(tip_states)
     if (length(tip_state) > 1) {
       ar = ape::ace(x = tip_states,phy = tree, type = 'discrete')

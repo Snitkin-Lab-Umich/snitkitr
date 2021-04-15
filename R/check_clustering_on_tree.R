@@ -3,17 +3,18 @@
 #' Reverse list structure
 #'
 #' @param ls list you want to reverse
+#' @param seed_int Number to use as seed for future.apply(). Default = 1.
 #'
 #' @return reversed list
 #' @export
 #'
 #' @examples
 #' #Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
-reverse_list_str <- function(ls) { # @Josh O'Brien
+reverse_list_str <- function(ls, seed_int = 1) { # @Josh O'Brien
   # get sub-elements in same order
   x <- future.apply::future_lapply(ls, `[`, names(ls[[1]]))
   # stack and reslice
-  future.apply::future_apply(do.call(rbind, x), 2, as.list) 
+  future.apply::future_apply(future.seed = seed_int, do.call(rbind, x), 2, as.list)
 }
 
 
@@ -21,7 +22,7 @@ reverse_list_str <- function(ls) { # @Josh O'Brien
 #'
 #' @param subtrs Subtrees created using ape::subtrees to look for clustering on. Should include all isolates of interest.
 #' @param isolate_labels Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.
-#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels. 
+#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (keeps > bootstrap; NULL = keep all; default: 90).
 #' @param pureness How pure the subtree has to be to call it a "pure" subtree (default: 1; range 0-1).
 #'
@@ -30,10 +31,10 @@ reverse_list_str <- function(ls) { # @Josh O'Brien
 #'
 get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, bootstrap = 90, pureness = 1){
   largest_st_info = future.apply::future_lapply(names(isolate_labels), function(i){
-    #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO. 
+    #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO.
     #CLUSTERS ARE DEFINED AS:
     # 1) HAVE ONLY A SINGLE EPI LABEL, 2) HAVE BOOTSTRAP SUPPORT GREATER THAN 90, 3) INCLUDE MORE THAN ONE CONTROL LABEL
-    sts = future.apply::future_sapply(subtrs, FUN = function(st){ 
+    sts = future.apply::future_sapply(subtrs, FUN = function(st){
       i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
       st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
       one_label = length(unique(st_labs)) == 1 # only one label in subtree
@@ -49,7 +50,7 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
       }
       multiple_control = ifelse(is.null(control_labels), TRUE, # always true if not controlling for another variable
                                 length(unique(control_labels[intersect(st$tip.label, names(control_labels))])) > 1) # more than one control label in subtree
-      if(i_in_subtree && one_label && good_bootstrap && multiple_control && isolate_labels[i] == labs_max_lab){ 
+      if(i_in_subtree && one_label && good_bootstrap && multiple_control && isolate_labels[i] == labs_max_lab){
         length(intersect(names(isolate_labels[isolate_labels == labs_max_lab]), st$tip.label))
       }else{
         0
@@ -71,13 +72,13 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
 }#end get_largest_subtree
 
 #' Check for clustering on tree
-#' @description This function is used to test for clustering of a certain epi factor on a phylogenetic tree. 
+#' @description This function is used to test for clustering of a certain epi factor on a phylogenetic tree.
 #'
 #' @param tree Tree to look for clustering on.
 #' @param isolate_labels Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.
 #' @param nperm Number of permutations to perform.
-#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels. 
-#' @param plot_path Path to output histogram. No plot created if NA. 
+#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
+#' @param plot_path Path to output histogram. No plot created if NA.
 #'
 #' @return Vector of real (1st element) and permuted (all other elements) pure cluster sizes.
 #' @export
@@ -106,27 +107,27 @@ check_tree_clustering = function(tree,isolate_labels, nperm = 1000, control_labe
     }else{
       largest_st_rand_list <- get_largest_subtree_loc(subtrs, rand_labels, control_labels=control_labels)
     }
-    sum(largest_st_rand_list[[2]] > 1 & largest_st_rand_list[[1]] > 1)    
+    sum(largest_st_rand_list[[2]] > 1 & largest_st_rand_list[[1]] > 1)
   })
-  
+
   in_cluster[2:(nperm+1)] = in_cluster_perm
-  
+
   if(!is.na(plot_path)){
-    
+
     # get p value
     p = (1 + sum(in_cluster[2: length(in_cluster)] >= in_cluster[1]))/ (1 + length(in_cluster)-1)
-    
+
     # plot histogram
     pdf(plot_path, height = 8 , width = 8)
-    h = hist(in_cluster[2:length(in_cluster)], 20, xlim = c(0, max(in_cluster + 2)), 
-             main = paste('Null distribution of number of isolates in pure clusters ', '\n', "(p = ", round(p,3), ")", sep = ""), 
+    h = hist(in_cluster[2:length(in_cluster)], 20, xlim = c(0, max(in_cluster + 2)),
+             main = paste('Null distribution of number of isolates in pure clusters ', '\n', "(p = ", round(p,3), ")", sep = ""),
              xlab = "Number of isolates in a pure cluster", col = "lightgray")
     par(new = TRUE)
-    points(in_cluster[1],0, col = "black", bg = "red", cex = 2, pch = 23, 
+    points(in_cluster[1],0, col = "black", bg = "red", cex = 2, pch = 23,
            xlim = c(0, max(in_cluster + 2)), ylim = c(0,max(h$counts) + 5))
     dev.off()
   }
-  
+
   return(in_cluster)
 }
 

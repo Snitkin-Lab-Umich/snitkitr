@@ -51,6 +51,7 @@ get_major_alleles <- function(allele_mat){
 #'
 #' @param tree (\code{ape phylo}). Rooted tree.
 #' @param mat Matrix. Allele matrix. Rows are variants, columns are samples.
+#' @param seed_int Number to use as seed for future.apply(). Default = 1.
 #'
 #' @return list of two elements:
 #'   \describe{
@@ -62,7 +63,7 @@ get_major_alleles <- function(allele_mat){
 #'   }
 #' @noRd
 #' @export
-get_ancestral_alleles <- function(tree, mat){
+get_ancestral_alleles <- function(tree, mat, seed_int = 1){
   check_is_tree(tree)
   check_is_this_class(mat, "matrix")
   check_setequal_tree_mat(tree$tip.label, colnames(mat))
@@ -76,7 +77,7 @@ get_ancestral_alleles <- function(tree, mat){
   tree <- make_all_tree_edges_positive(tree)
 
   # Get ancestral state of root
-  ar_all <- t(future.apply::future_apply(mat, 1, function(tip_states) {
+  ar_all <- t(future.apply::future_apply(future.seed = seed_int, mat, 1, function(tip_states) {
     tip_state <- unique(tip_states)
     if (length(tip_state) > 1) {
       ar <- ape::ace(x = tip_states, phy = tree, type = "discrete")
