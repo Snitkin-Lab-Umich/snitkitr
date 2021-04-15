@@ -167,7 +167,8 @@ get_indel_info_from_annotations <- function(varmat){
 #'   binary matrix (default = TRUE)
 #' @param keep_conf_only - logical flag indicating if only confident variants should be kept (1's in Ali's pipeline, otherwise 3's are also kept) (default = TRUE)
 #' @param mat_suffix Suffix to remove from code and allele matrices so the names match with the tree tip labels.
-#'
+#' @param parallelization Input to future::plan; either "multisession" (default)
+#'   or "multicore" (always sets to 2 cores aka "workers")
 #' @return list of allele mat, code mat, binary mat and corresponding parsed
 #'   annotations. output will depend on arguments to the function.
 #' @export
@@ -180,7 +181,8 @@ parse_indels <- function(varmat_code,
                          ref_to_anc = TRUE,
                          keep_conf_only = TRUE,
                          mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
-                         ref_to_maj = FALSE){
+                         ref_to_maj = FALSE,
+                         parallelization = "multisession"){
   parse_snp_or_indel(varmat_code = varmat_code,
                      varmat_allele = varmat_allele,
                      mat_type = "INDEL",
@@ -191,5 +193,6 @@ parse_indels <- function(varmat_code,
                      ref_to_anc = ref_to_anc,
                      keep_conf_only = keep_conf_only,
                      mat_suffix = mat_suffix,
-                     ref_to_maj = ref_to_maj)
+                     ref_to_maj = ref_to_maj,
+                     parallelization = parallelization)
 }

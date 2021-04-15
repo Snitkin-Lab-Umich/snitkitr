@@ -8,7 +8,8 @@ test_that("parsed_indel matrices are all the same size & have the same row names
                                ref_to_anc = FALSE,
                                keep_conf_only = TRUE,
                                mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = TRUE)
+                               ref_to_maj = TRUE,
+                               parallelization = "multisession")
   # dimensions
   expect_identical(dim(parsed_indel$bin$mat), dim(parsed_indel$code$mat))
   expect_identical(dim(parsed_indel$bin$mat), dim(parsed_indel$allele$mat))
@@ -36,7 +37,8 @@ test_that("parsed_indel annot are expected parsings of the row names", {
                                ref_to_anc = FALSE,
                                keep_conf_only = TRUE,
                                mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = TRUE)
+                               ref_to_maj = TRUE,
+                               parallelization = "multisession")
   expect_identical(parsed_indel$allele$annots, parsed_indel$code$annots)
   expect_false(identical(parsed_indel$bin$annots, parsed_indel$code$annots))
 
@@ -128,7 +130,8 @@ test_that("parsed_indel bin mat expected given ref_to_maj", {
                                ref_to_anc = FALSE,
                                keep_conf_only = TRUE,
                                mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = TRUE)
+                               ref_to_maj = TRUE,
+                               parallelization = "multisession")
 
   check_maj_rerefencing(parsed_indel, 1)
   check_maj_rerefencing(parsed_indel, 2)
@@ -152,7 +155,8 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
                                ref_to_anc = TRUE,
                                keep_conf_only = TRUE,
                                mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = FALSE)
+                               ref_to_maj = FALSE,
+                               parallelization = "multisession")
 
   check_anc_rerefencing(parsed_indel, 1)
   check_anc_rerefencing(parsed_indel, 2)
@@ -177,7 +181,8 @@ test_that("parsed_indel bin mat expected given reference to reference genome", {
                                ref_to_anc = FALSE,
                                keep_conf_only = TRUE,
                                mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = FALSE)
+                               ref_to_maj = FALSE,
+                               parallelization = "multisession")
 
   check_match_ref_genome(parsed_indel, 1)
   check_match_ref_genome(parsed_indel, 2)

@@ -390,13 +390,22 @@ root_tree_og = function(tree, outgroup = NULL){
 #' @param tree rooted tree
 #' @param mat allele matrix (rows are variants, columns are samples)
 #' @param seed_int Number to use as seed for future.apply(). Default = 1.
+#' @param parallelization Input to future::plan; either "multisession" (default)
+#'   or "multicore" (always sets to 2 cores aka "workers")
 #'
 #' @return matrix of most likely ancestral allele for each row in allele matrix and probability that that is the ancestral state
 #' @export
 #'
 #' @examples
-get_anc_alleles = function(tree, mat, seed_int = 1){
-  future::plan(future::multiprocess)
+get_anc_alleles = function(tree,
+                           mat,
+                           seed_int = 1,
+                           parallelization = "multisession"){
+  if (parallelization == "multisession") {
+    future::plan(future::multisession)
+  } else if (parallelization == "multicore") {
+    future::plan(future::multicore, workers = 2)
+  }
 
   if (sum(!(tree$tip.label %in% colnames(mat))) > 0) {
     stop('Some samples in tree are not in allele matrix.')
@@ -664,13 +673,16 @@ define_reference_alleles <- function(return_binary_matrix,
                                      ref_to_maj,
                                      tree,
                                      varmat_allele,
-                                     major_alleles){
+                                     major_alleles,
+                                     parallelization){
   alleles <- NULL
   if (return_binary_matrix) {
     if (ref_to_anc) {
       # GET ANCESTRAL ALLELE FOR EACH VARIANT
       tree <- root_tree_og(tree)
-      alleles <- get_anc_alleles(tree, varmat_allele)
+      alleles <- get_anc_alleles(tree = tree,
+                                 mat = varmat_allele,
+                                 parallelization = parallelization)
     } else if (ref_to_maj) {
       # REFERENCE TO MAJOR ALLELE
       alleles <- major_alleles
@@ -742,6 +754,8 @@ get_annotation_info <- function(mat_type, mat){
 #'   (default = TRUE)
 #' @param mat_suffix Suffix to remove from code and allele matrices so the names
 #'   match with the tree tip labels.
+#' @param parallelization Input to future::plan; either "multisession" (default)
+#'   or "multicore" (always sets to 2 cores aka "workers")
 #'
 #' @return list of allele mat, code mat, binary mat and corresponding parsed
 #'   annotations. output will depend on arguments to the function.
@@ -756,7 +770,8 @@ parse_snp_or_indel <-  function(varmat_code,
                                 ref_to_anc = TRUE,
                                 keep_conf_only = TRUE,
                                 mat_suffix = '_R1_001.fastq.gz|_R1.fastq.gz|_1.fastq.gz',
-                                ref_to_maj = FALSE){
+                                ref_to_maj = FALSE,
+                                parallelization = "multisession"){
 
   mat_type <- report_mat_type(mat_type)
   snp_log <- mat_type == "SNP"
@@ -795,9 +810,12 @@ parse_snp_or_indel <-  function(varmat_code,
 
     # FIND EACH REFERENCE ALLELE
     major_alleles <- get_major_alleles(varmat_allele)
-    alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
-                                        ref_to_maj, tree, varmat_allele,
-                                        major_alleles)
+    alleles <- define_reference_alleles(return_binary_matrix,
+                                        ref_to_anc,
+                                        ref_to_maj, tree,
+                                        varmat_allele,
+                                        major_alleles,
+                                        parallelization = parallelization)
 
     split_rows_flag <- 1:nrow(varmat_allele)
     rows_with_multiple_annots_log <- rows_with_mult_var_allele_log <-
@@ -820,7 +838,8 @@ parse_snp_or_indel <-  function(varmat_code,
     major_alleles <- get_major_alleles(varmat_allele)
     alleles <- define_reference_alleles(return_binary_matrix, ref_to_anc,
                                         ref_to_maj, tree, varmat_allele,
-                                        major_alleles)
+                                        major_alleles,
+                                        parallelization = parallelization)
 
     # RAW ROWNAMES
     raw_rownames <- row.names(varmat_code)
