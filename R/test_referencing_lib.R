@@ -14,7 +14,7 @@ check_anc_rerefencing <- function(parsed_indel, row) {
   anc_allele <- unname(unlist(parsed_indel$bin$annots$anc))[row]
   ref_allele <- as.character((parsed_indel$bin$annots$ref[row]))
   anc_index <- which(unname(unlist(parsed_indel$allele$mat[allele_mat_equiv_row, ])) == anc_allele)
-  not_anc_index <- c(1:nrow(parsed_indel$bin$mat))[!c(1:nrow(parsed_indel$bin$mat)) %in% anc_index]
+  not_anc_index <- c(1:ncol(parsed_indel$bin$mat))[!c(1:ncol(parsed_indel$bin$mat)) %in% anc_index]
 
   expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[anc_index], rep(0, length(anc_index)))
   expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[not_anc_index], rep(1, length(not_anc_index)))
@@ -45,7 +45,7 @@ check_match_ref_genome <- function(parsed_indel, row) {
 
   ref_allele <- unname(unlist(parsed_indel$bin$annots$ref))[row]
   ref_index <- which(unname(unlist(parsed_indel$allele$mat[allele_mat_equiv_row, ])) == ref_allele)
-  not_ref_index <- c(1:nrow(parsed_indel$bin$mat))[!c(1:nrow(parsed_indel$bin$mat)) %in% ref_index]
+  not_ref_index <- c(1:ncol(parsed_indel$bin$mat))[!c(1:ncol(parsed_indel$bin$mat)) %in% ref_index]
   expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[ref_index], rep(0, length(ref_index)))
   expect_identical(unname(unlist(parsed_indel$bin$mat[row, ]))[not_ref_index], rep(1, length(not_ref_index)))
 }

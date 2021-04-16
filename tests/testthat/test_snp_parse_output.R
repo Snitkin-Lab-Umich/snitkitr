@@ -14,7 +14,7 @@ test_that("parsed_snp bin mat expected given ref_to_maj", {
   check_maj_rerefencing(parsed_snp, 1, col_index)
   check_maj_rerefencing(parsed_snp, 2, col_index)
   check_maj_rerefencing(parsed_snp, 3, col_index)
-  check_maj_rerefencing(parsed_snp, 4, col_index)
+  check_maj_rerefencing(parsed_snp, 4, col_index) # Fails because of an extra comma in one of the row names
   check_maj_rerefencing(parsed_snp, 5, col_index)
   check_maj_rerefencing(parsed_snp, 6, col_index)
   check_maj_rerefencing(parsed_snp, 7, col_index)
