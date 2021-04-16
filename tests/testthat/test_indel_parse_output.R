@@ -140,7 +140,6 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
   check_anc_rerefencing(parsed_indel, 10)
   check_anc_rerefencing(parsed_indel, 15)
   check_anc_rerefencing(parsed_indel, 23)
-
 })
 
 
@@ -164,7 +163,7 @@ test_that("parsed_indel bin mat expected given reference to reference genome", {
   check_match_ref_genome(parsed_indel, 5)
   check_match_ref_genome(parsed_indel, 6)
   check_match_ref_genome(parsed_indel, 7)
-  check_match_ref_genome(parsed_indel, 8)
+  check_match_ref_genome(parsed_indel, 8)  # test fails because we are not catching when in the binary matrix the two alleles are two variants, neither of which is the reference allele
   check_match_ref_genome(parsed_indel, 9)
   check_match_ref_genome(parsed_indel, 10)
 })

@@ -1005,6 +1005,9 @@ parse_snp_or_indel <-  function(varmat_code,
       reref <- rep("no", nrow(varmat_bin))
         # All are "no" because we're not re-referencing, it's already been
         #   referenced to the reference genome
+
+      # Note we are not catching when in the binary matrix the two alleles are
+      # two variants, neither of which is the reference allele
     }
 
     # Remove rows with NAs in them caused by "complicated" multiallelic situations
