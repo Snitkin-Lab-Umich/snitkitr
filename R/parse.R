@@ -938,13 +938,18 @@ parse_snp_or_indel <-  function(varmat_code,
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           "no"
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          "yes"
+          if (annots_bin$ref[x] == annots_bin$var[x] | annots_bin$anc[x] == annots_bin$var[x]) {
+            "yes"
+          } else {
+            "no"
+          }
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
           "no"
         } else {
           "complicated"
         }
       })
+
     } else if (ref_to_maj) {
       # MAKE BINARY MATRIX
       varmat_bin <- varmat_code
