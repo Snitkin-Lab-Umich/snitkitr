@@ -184,6 +184,8 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
       original_encoding_for_ancestral_allele <- "not in matrix"
     }
 
+    print(i)
+    print(unique(unlist(unname(parsed_indel$allele$mat[i, ]))))
 
     output_encoding_for_ancestral_allele <- NA
     if (sum(parsed_indel$allele$mat[i,] == anc_allele) > 0 ) {
@@ -230,6 +232,11 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
   simple_alelle_mat <- parsed_indel$allele$mat[1:10, ]
   row.names(simple_alelle_mat) <- 1:nrow(simple_alelle_mat)
   colnames(simple_alelle_mat) <- 1:ncol(simple_alelle_mat)
+
+  final_row_8_input_row_14_mat <- snitkitr::cdif_indel_allele_mat[14, , drop = FALSE]
+  final_row_8_input_row_14_mat <- rbind(final_row_8_input_row_14_mat, snitkitr::cdif_indel_code_mat[14, ])
+  row.names(final_row_8_input_row_14_mat) <- 1:nrow(final_row_8_input_row_14_mat)
+  colnames(final_row_8_input_row_14_mat) <- 1:ncol(final_row_8_input_row_14_mat)
 
   check_anc_rerefencing(parsed_indel, 1)
   check_anc_rerefencing(parsed_indel, 2)
