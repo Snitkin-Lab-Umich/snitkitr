@@ -963,7 +963,13 @@ parse_snp_or_indel <-  function(varmat_code,
         if (annots_bin$ref[x] == annots_bin$maj[x]) {
           unlist(varmat_bin[x, ])
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          unlist(as.numeric(!varmat_bin[x, ]))
+          # same idead as ref to anc above
+          if (annots_bin$ref[x] == annots_bin$var[x] | annots_bin$maj[x] == annots_bin$var[x]) {
+            unlist(as.numeric(!varmat_bin[x, ]))
+          } else {
+            # no need to switch in this case
+            unlist(varmat_bin[x, ])
+          }
         } else if (annots_bin$var[x] == annots_bin$maj[x]) {
           unlist(varmat_bin[x, ])
         } else {
@@ -975,7 +981,11 @@ parse_snp_or_indel <-  function(varmat_code,
         if (annots_bin$ref[x] == annots_bin$maj[x]) {
           "no"
         } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          "yes"
+          if (annots_bin$ref[x] == annots_bin$var[x] | annots_bin$maj[x] == annots_bin$var[x]) {
+            "yes"
+          } else {
+            "no"
+          }
         } else if (annots_bin$var[x] == annots_bin$maj[x]) {
           "no"
         } else {
