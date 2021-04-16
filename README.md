@@ -31,6 +31,8 @@ Every time you're done writing code run:
 `$ git commit -m "In present tense, add a ~one sentence description of the changes you made"` # This is a record to explain to yourself and others what code you wrote   
 `$ git push` # This shares your changes to github so that other users can grab them  
 
+If you fix a bug, please increment the 3rd number (#.#.#+1) in the version stored in the DESCRIPTION file. If you add a new function please increment the 2nd number in the version (#.#+1.#) and tag the release! If you make a very large change (release it on CRAN for the first time, make changes so it's no longer compatible with older versions of R, etc... please increment the first digit of the version (#+1.#.#) and tag the release. Updating the version number and taggin the release will allow you to know which version of function you've used in previous analyses (increase reproducibility) and improve the citability of the package. 
+
 Please add your new function_name() and it's title to the Function_List.txt file so that new lab members can quickly survey all of the functions available in the package.  
     
 ## Writing code that's easy for others to use

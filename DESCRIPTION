@@ -20,6 +20,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
+    testthat (>= 2.1.0)
 Imports: 
     ape,
     phytools,
@@ -27,6 +28,5 @@ Imports:
     magrittr,
     Biostrings,
     stringr,
-    future, 
-    testthat (>= 2.1.0)
+    future
 RoxygenNote: 7.1.1
