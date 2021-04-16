@@ -158,6 +158,73 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
                                ref_to_maj = FALSE,
                                parallelization = "multisession")
 
+
+  result_mat <- as.data.frame(matrix(NA, nrow = 10, ncol = 10))
+  colnames(result_mat) <- c("input_anc_code",
+                            "output_anc_code",
+                            "anc_allele",
+                            "input_ref_code",
+                            "output_ref_code",
+                            "ref_allele",
+                            "anc==ref_log",
+                            "input_zeros",
+                            "output_zeros",
+                            "output_ones")
+
+  for (i in 1:10) {
+    anc_allele <- unname(unlist(parsed_indel$bin$annots$anc))[i]
+    ref_allele <- as.character((parsed_indel$allele$annots$ref[i]))
+    anc_index <- which(unname(unlist(parsed_indel$allele$mat[i, ])) == anc_allele)
+    not_anc_index <- c(1:nrow(parsed_indel$bin$mat))[!c(1:nrow(parsed_indel$bin$mat)) %in% anc_index]
+
+    if (sum(parsed_indel$allele$mat[i,] == anc_allele) > 0 ) {
+      original_encoding_for_ancestral_allele <- unlist(unname(
+        parsed_indel$code$mat[i,][which(parsed_indel$allele$mat[i,] == anc_allele)[1]]))
+    } else {
+      original_encoding_for_ancestral_allele <- "not in matrix"
+    }
+
+
+    output_encoding_for_ancestral_allele <- NA
+    if (sum(parsed_indel$allele$mat[i,] == anc_allele) > 0 ) {
+      output_encoding_for_ancestral_allele <- unlist(unname(
+        parsed_indel$bin$mat[i,][which(parsed_indel$allele$mat[i,] == anc_allele)[1]]))
+    } else {
+      output_encoding_for_ancestral_allele <- !(unlist(unname(
+        parsed_indel$bin$mat[i,][which(parsed_indel$allele$mat[i,] != anc_allele)[1]])))
+    }
+
+
+    output_encoding_for_ref_allele <- NA
+    if (sum(parsed_indel$allele$mat[i,] == ref_allele) > 0 ) {
+      output_encoding_for_ref_allele <- unlist(unname(
+        parsed_indel$bin$mat[i,][which(parsed_indel$allele$mat[i,] == ref_allele)[1]]))
+    } else {
+      output_encoding_for_ref_allele <- !(unlist(unname(
+        parsed_indel$bin$mat[i,][which(parsed_indel$allele$mat[i,] != ref_allele)[1]])))
+    }
+
+    result_mat$anc_allele[i] <- anc_allele
+    result_mat$ref_allele[i] <- ref_allele
+    result_mat$`anc==ref_log`[i] <- anc_allele == ref_allele
+    result_mat$input_zeros[i] <- sum(unlist(parsed_indel$code$mat[i, , drop = TRUE]) == 0)
+    result_mat$output_zeros[i] <- sum(unlist(parsed_indel$bin$mat[i, , drop = TRUE]) == 0)
+    result_mat$output_ones[i] <- sum(unlist(parsed_indel$bin$mat[i, , drop = TRUE]) == 1)
+    result_mat$input_anc_code[i] <- original_encoding_for_ancestral_allele
+    result_mat$output_anc_code[i] <- output_encoding_for_ancestral_allele
+    result_mat$output_ref_code[i] <- output_encoding_for_ref_allele
+
+    if (sum(parsed_indel$allele$mat[i,] == ref_allele) > 0) {
+      input_ref_code <- unlist(unname(
+        parsed_indel$code$mat[i,][which(parsed_indel$allele$mat[i,] == ref_allele)[1]]))
+      print(input_ref_code)
+    } else {
+      input_ref_code <- "not in matrix"
+    }
+    result_mat$input_ref_code[i] <- input_ref_code
+
+  }
+
   check_anc_rerefencing(parsed_indel, 1)
   check_anc_rerefencing(parsed_indel, 2)
   check_anc_rerefencing(parsed_indel, 3)
@@ -166,8 +233,8 @@ test_that("parsed_indel bin mat expected given ref_to_anc", {
   check_anc_rerefencing(parsed_indel, 6)
   check_anc_rerefencing(parsed_indel, 7)
   check_anc_rerefencing(parsed_indel, 8)
-  check_anc_rerefencing(parsed_indel, 9)
-  check_anc_rerefencing(parsed_indel, 10)
+  check_anc_rerefencing(parsed_indel, 9) # this doesn't check out b/c of keep_conf_only=TRUE
+  check_anc_rerefencing(parsed_indel, 10) # this doesn't check out b/c of keep_conf_only=TRUE
 })
 
 

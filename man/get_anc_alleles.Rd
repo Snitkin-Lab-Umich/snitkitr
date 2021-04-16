@@ -4,7 +4,7 @@
 \alias{get_anc_alleles}
 \title{Get ancestral state of alleles}
 \usage{
-get_anc_alleles(tree, mat, seed_int = 1, parallelization)
+get_anc_alleles(tree, mat, seed_int = 1, parallelization = "multisession")
 }
 \arguments{
 \item{tree}{rooted tree}
@@ -12,6 +12,9 @@ get_anc_alleles(tree, mat, seed_int = 1, parallelization)
 \item{mat}{allele matrix (rows are variants, columns are samples)}
 
 \item{seed_int}{Number to use as seed for future.apply(). Default = 1.}
+
+\item{parallelization}{Input to future::plan; either "multisession" (default)
+or "multicore" (always sets to 2 cores aka "workers")}
 }
 \value{
 matrix of most likely ancestral allele for each row in allele matrix and probability that that is the ancestral state

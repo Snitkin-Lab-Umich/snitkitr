@@ -50,6 +50,9 @@ should be kept (1's in Ali's pipeline, otherwise 3's are also kept)
 
 \item{mat_suffix}{Suffix to remove from code and allele matrices so the names
 match with the tree tip labels.}
+
+\item{parallelization}{Input to future::plan; either "multisession" (default)
+or "multicore" (always sets to 2 cores aka "workers")}
 }
 \value{
 list of allele mat, code mat, binary mat and corresponding parsed
