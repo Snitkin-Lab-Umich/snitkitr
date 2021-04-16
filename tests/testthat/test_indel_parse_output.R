@@ -1,32 +1,3 @@
-test_that("parsed_indel matrices are all the same size & have the same row names & number of annotation entries", {
-  parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:100, 1:3],
-                               varmat_allele = snitkitr::cdif_indel_allele_mat[1:100, 1:3],
-                               tree = NULL,
-                               og = NULL,
-                               remove_multi_annots = TRUE,
-                               return_binary_matrix = TRUE,
-                               ref_to_anc = FALSE,
-                               keep_conf_only = TRUE,
-                               mat_suffix = "_R1_001.fastq.gz",
-                               ref_to_maj = TRUE,
-                               parallelization = "multisession")
-  # dimensions
-  expect_identical(dim(parsed_indel$bin$mat), dim(parsed_indel$code$mat))
-  expect_identical(dim(parsed_indel$bin$mat), dim(parsed_indel$allele$mat))
-
-  # rownames
-  expect_identical(row.names(parsed_indel$bin$mat), row.names(parsed_indel$code$mat))
-  expect_identical(row.names(parsed_indel$bin$mat), row.names(parsed_indel$allele$mat))
-
-  # nrow
-  expect_identical(nrow(parsed_indel$bin$annots), nrow(parsed_indel$code$annots))
-  expect_identical(nrow(parsed_indel$bin$annots), nrow(parsed_indel$allele$annots))
-
-  # nrow annots == nrow mat
-  expect_identical(nrow(parsed_indel$bin$annots), nrow(parsed_indel$code$mat))
-  expect_identical(nrow(parsed_indel$bin$annots), nrow(parsed_indel$allele$mat))
-})
-
 test_that("parsed_indel annot are expected parsings of the row names", {
   parsed_indel <- parse_indels(varmat_code = snitkitr::cdif_indel_code_mat[1:100, 1:3],
                                varmat_allele = snitkitr::cdif_indel_allele_mat[1:100, 1:3],
