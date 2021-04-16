@@ -906,14 +906,18 @@ parse_snp_or_indel <-  function(varmat_code,
       annots_bin <- annots_bin[to_keep, ]
       varmat_bin <- convert_code_to_binary(varmat_bin)
 
-
       varmat_bin_reref <- data.frame(t(sapply(1:nrow(varmat_bin), function(x){
         if (annots_bin$ref[x] == annots_bin$anc[x]) {
           # If the reference allele equals the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
-        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) {
-          # If not a multiallelic site, switch 0's and 1's
-          unlist(as.numeric(!varmat_bin[x, ]))
+        } else if (!annots_bin$rows_with_mult_var_allele_log[x]) { # If not a multiallelic site:
+          # switch 0's and 1's but only if the var is either the ref or the anc allele
+          if (annots_bin$ref[x] == annots_bin$var[x] | annots_bin$anc[x] == annots_bin$var[x]) {
+            unlist(as.numeric(!varmat_bin[x, ]))
+          } else {
+            # no need to switch in this case
+            unlist(varmat_bin[x, ])
+          }
         } else if (annots_bin$var[x] == annots_bin$anc[x]) {
           # If the multiallelic variant is equal to the the ancestral allele, keep it the same
           unlist(varmat_bin[x, ])
