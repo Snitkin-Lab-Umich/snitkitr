@@ -866,7 +866,7 @@ parse_snp_or_indel <-  function(varmat_code,
     }
 
     major_alleles <- major_alleles[split_rows_flag]
-    raw_rownames <- raw_rownames[split_rows_flag]
+    raw_rownames <- raw_rownames[split_rows_flag] # this can have duplicates when remove_multi_annots = FALSE
 
     # GET ANNOTATIONS
     annots <- cbind(get_annotation_info(mat_type, varmat_code),
@@ -1018,7 +1018,12 @@ parse_snp_or_indel <-  function(varmat_code,
     varmat_bin_reref <- no_NA$varmat_bin_reref
     annots_bin <- no_NA$annots_bin
     reref <- no_NA$reref
-    row.names(varmat_bin_reref) <- annots_bin$raw_rownames
+
+    if (sum(duplicated(annots_bin$raw_rownames)) > 0) {
+      row.names(varmat_bin_reref) <- paste0(annots_bin$raw_rownames, "_", 1:nrow(varmat_bin_reref))
+    } else {
+      row.names(varmat_bin_reref) <- annots_bin$raw_rownames
+    }
 
     parsed <- list(code = list(mat = varmat_code,
                                annots = annots),
